@@ -239,6 +239,7 @@ Page({
       msgs.splice(pendingIndex, 1);
     }
     this.setData({ messages: msgs });
+    this._persist();
   },
 
   _persist() {
@@ -249,6 +250,7 @@ Page({
   },
 
   _enterEnd() {
+    if (this.data.ended) return;
     const messages = this.data.messages.concat([
       { role: 'system', system: true, content: '这轮聊完了' },
     ]);
