@@ -1,4 +1,10 @@
 """身份认证测试：token 签发、401/403、微信登录与演示登录。"""
+import base64
+import hashlib
+import hmac
+import json
+import time
+
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, select
@@ -85,6 +91,37 @@ def test_delete_other_user_memory_403(client, monkeypatch):
     token_a = create_token("user_a", "elder", SECRET)
     resp = client.delete(f"/api/memories/{memory_id}", headers=_headers(token_a))
     assert resp.status_code == 403
+
+
+def test_submit_other_user_session_403(client, monkeypatch):
+    import app.api.games as games_mod
+    from app.services import game_engine
+
+    factory = _memory_factory()
+    monkeypatch.setattr(games_mod, "SessionLocal", factory)
+    with factory() as db:
+        start = game_engine.start("user_a", "memory_box", db)
+    token_b = create_token("user_b", "elder", SECRET)
+    resp = client.post(
+        "/api/game/submit",
+        json={"session_id": start["session_id"], "answers": [], "duration_sec": 1, "abandoned": False},
+        headers=_headers(token_b),
+    )
+    assert resp.status_code == 403
+
+
+def test_token_missing_user_id_401(client):
+    def b64url(data):
+        return base64.urlsafe_b64encode(data).rstrip(b"=").decode("ascii")
+
+    header = {"alg": "HS256", "typ": "JWT"}
+    payload = {"role": "elder", "exp": int(time.time()) + 3600}
+    h = b64url(json.dumps(header, separators=(",", ":")).encode("utf-8"))
+    p = b64url(json.dumps(payload, separators=(",", ":")).encode("utf-8"))
+    sig = b64url(hmac.new(SECRET.encode("utf-8"), (h + "." + p).encode("ascii"), hashlib.sha256).digest())
+    token = h + "." + p + "." + sig
+    resp = client.get("/api/records", headers=_headers(token))
+    assert resp.status_code == 401
 
 
 def test_demo_login_disabled_401(client):

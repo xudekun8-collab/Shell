@@ -59,3 +59,7 @@ node --check miniprogram/pages/chat/chat.js
 - 数据库依赖本机 MySQL 8.0，断网或数据库没起时后端返回 `db: degraded`，可临时把 `.env` 的 `DATABASE_URL` 切到 `sqlite:///./elder_care.db` 兜底。
 - 游戏会话存在内存，后端重启后未提交的局会失效。
 - 语音、家属只读账号在后续阶段接入，当前只有文字交互。
+
+## 安全提醒（演示后门）
+
+`DEMO_MODE=1` 时，`POST /api/auth/demo` 接受任意 `user_id` 并直接签发 token，等于整站鉴权对任何人放开。这只用于答辩现场演示；正式部署必须 `DEMO_MODE=0`（此时演示登录返回 401，旧版带 user_id 的接口返回 403）。
