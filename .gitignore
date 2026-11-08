@@ -7,6 +7,9 @@ __pycache__/
 backend/.env
 *.env.local
 
+# 自签证书私钥（证书公钥可提交，私钥不可）
+deploy/certs/key.pem
+
 # 本地数据库与日志
 *.db
 *.sqlite3
