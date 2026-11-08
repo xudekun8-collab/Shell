@@ -110,14 +110,28 @@
 ### 5.0 开工第一件事：存档
 
 ```
-先读 AGENTS.md。本次只做一件事：把当前工作区存档。
+先读 AGENTS.md。本次只做一件事：给"当前可演示版本"打一个不可变的存档点，
+并把它变成之后每次验收都能对比的基线。不改任何代码。
 
-1. git status 确认范围（应含 miniprogram 全量、backend 若干文件）。
-2. git add -A，commit"小程序四页 + 游戏页 + 问候接口 + 模拟实验台"，不要 --amend。
-3. 贴 git log --oneline -1，确认 git status 干净（.env 与 .db 不提交）。
-4. 不改任何代码，不 push。
+现状（已确认，不要再花步骤去查）：工作区 clean，main 指向 b5a83e2 且已推到 origin/main，
+pytest 106 passed。不需要再 commit 一次。
 
-验收：git status 干净 + commit 哈希。
+1. 打标签：git tag -a demo-v1 -m "中期可演示版本：小程序五页 + 两套游戏 + 三层记忆 + 36 条消融 + 32 条安全规则"
+   标签名固定 demo-v1，不许改名。
+2. 推到远端：git push origin demo-v1
+3. 建基线台账 backend/docs/baseline_v1.md，内容只要事实，逐项写：
+   - 提交哈希、标签名、生成时间
+   - pytest 用例数与耗时（贴实际输出的一行）
+   - 召回基线：默认 Recall@3 0.8333 / MRR 0.8077 / 命中 30/36；困难子集（17 条）Recall@3 0.8824 / MRR 0.8679 / 命中 15/17；时间配对子集（6 条）Recall@3 0.5000 / MRR 0.4375 / 命中 3/6
+   - 难度基线：strong 终档 3（first5 2.4 / last5 3.0）、normal 2（2.0 / 2.0）、weak 1（1.6 / 1.0）
+   - 题库规模：category_sort（分类）low/mid/high = 10/12/12 组，每组 1 题，一局抽 6/8/10 组；
+     memory_box（再认）三档各 6 组，每组呈现 4/6/8 个词并配 4/6/8 道再认题，一局 1 组
+   - 接口清单：auth 之前 7 个（chat、game/start、game/submit、records、memories、memories/delete、greeting）
+   - 已知短板（照实写）：无鉴权、无流式、召回是字符二元组、session 存内存、部署是本机 HTTP
+4. 不 push 代码、不改代码、不建分支（tag 足够；只有需要回归对比时才另建 archive/demo-v1 分支）。
+
+验收：贴 git tag -l、git ls-remote --tags origin 的输出、baseline_v1.md 全文。
+禁止：--amend、force push、git checkout / reset / stash / restore（工作区里是唯一成果，不许回滚）。
 ```
 
 ### 5.1 小程序适老化与视觉统一（P0）
