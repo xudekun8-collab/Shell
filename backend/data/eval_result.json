@@ -31,6 +31,32 @@
       "total": 36
     }
   },
+  "results_hard": {
+    "默认": {
+      "recall_at_3": 0.8824,
+      "mrr": 0.8679,
+      "hits": 15,
+      "total": 17
+    },
+    "去掉重要性项": {
+      "recall_at_3": 0.8235,
+      "mrr": 0.8603,
+      "hits": 14,
+      "total": 17
+    },
+    "去掉类型项": {
+      "recall_at_3": 0.8824,
+      "mrr": 0.8679,
+      "hits": 15,
+      "total": 17
+    },
+    "时间预过滤": {
+      "recall_at_3": 0.8824,
+      "mrr": 0.8679,
+      "hits": 15,
+      "total": 17
+    }
+  },
   "results_time": {
     "默认": {
       "recall_at_3": 0.5,

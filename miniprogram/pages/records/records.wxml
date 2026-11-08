@@ -19,7 +19,9 @@
   <view class="list" wx:if="{{records.length > 0}}">
     <view class="item" wx:for="{{records}}" wx:key="index">
       <view class="name">{{item.game_type}}</view>
-      <view class="meta">难度{{item.difficulty}} · 正确率{{item.accuracy}}% · 用时{{item.duration}}秒 · {{item.date}}</view>
+      <view class="meta">{{item.difficulty_text}} · 正确率{{item.accuracy}}% · 用时{{item.duration}}秒 · {{item.date}}</view>
     </view>
   </view>
+
+  <view class="disclaimer">本结果只用于调整练习难度，不作为任何健康判断。</view>
 </view>

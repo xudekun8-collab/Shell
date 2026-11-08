@@ -4,8 +4,8 @@
   </view>
 
   <view wx:if="{{phase === 'error'}}" class="center">
-    <view class="tip">网络不太顺畅，再试一次</view>
-    <button class="primary-btn" bindtap="retry">重试</button>
+    <view class="tip">我这儿信号有点弱，咱们等会儿再说。</view>
+    <button class="primary-btn" bindtap="retry">再试一次</button>
   </view>
 
   <view wx:if="{{phase === 'remember'}}" class="stage">
@@ -37,9 +37,10 @@
   </view>
 
   <view wx:if="{{phase === 'result'}}" class="stage">
-    <view class="score">答对 {{result.correct}} / 共 {{result.total}}</view>
-    <view class="summary-line" wx:for="{{summaryLines}}" wx:key="index">{{item}}</view>
-    <view class="diff">下一局难度：第 {{result.next_difficulty}} 档（{{diff_text}}）</view>
+    <view class="main-result">{{main_text}}</view>
+    <view class="sub-result" wx:if="{{sub_text}}">{{sub_text}}</view>
+    <view class="result-note">这只是练习记录，不是看病依据。</view>
+    <view class="next-diff">下一局：{{next_difficulty_text}}</view>
     <button class="primary-btn" bindtap="retry">再玩一次</button>
     <button class="secondary-btn" bindtap="backToChat">回去聊天</button>
   </view>

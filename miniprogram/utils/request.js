@@ -12,12 +12,12 @@ function request(options) {
         if (res.statusCode >= 200 && res.statusCode < 300) {
           resolve({ ok: true, data: res.data });
         } else {
-          resolve({ ok: false, msg: '请求失败' });
+          resolve({ ok: false, msg: '我这儿信号有点弱，咱们等会儿再说。' });
         }
       },
       fail(err) {
         console.error('wx.request fail:', err.errMsg);
-        resolve({ ok: false, msg: '网络不太顺畅，再试一次' });
+        resolve({ ok: false, msg: '我这儿信号有点弱，咱们等会儿再说。' });
       },
     });
   });

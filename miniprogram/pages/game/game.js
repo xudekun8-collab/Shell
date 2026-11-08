@@ -1,5 +1,7 @@
 const { request } = require('../../utils/request.js');
 
+const DIFFICULTY_TEXT = { 1: '今天轻松点', 2: '今天动动脑子', 3: '今天来点难的' };
+
 Page({
   data: {
     user_id: 'demo_user_1',
@@ -21,8 +23,9 @@ Page({
     word: '',
     options: [],
     result: null,
-    summaryLines: [],
-    diff_text: '',
+    main_text: '',
+    sub_text: '',
+    next_difficulty_text: '',
   },
 
   onLoad(query) {
@@ -48,6 +51,7 @@ Page({
     this.clearTimer();
     this._startTime = Date.now();
     this.setData({ phase: 'loading', answers: [], result: null });
+    await this.loadPrevCorrect();
     const res = await request({
       url: '/api/game/start',
       method: 'POST',
@@ -87,6 +91,16 @@ Page({
       this.scheduleRemember();
     } else {
       this.scheduleQuiz();
+    }
+  },
+
+  async loadPrevCorrect() {
+    const res = await request({ url: '/api/records/' + this.data.user_id + '?limit=50' });
+    if (res.ok && res.data && res.data.records) {
+      const prev = res.data.records.find((r) => r.game_type === this.data.game_type);
+      this._prevCorrect = prev ? prev.correct_count : null;
+    } else {
+      this._prevCorrect = null;
     }
   },
 
@@ -177,15 +191,28 @@ Page({
       this.setData({ phase: 'error' });
       return;
     }
-    const cur = this.data.difficulty;
-    const nxt = res.data.next_difficulty;
-    let diffText = '难度不变';
-    if (nxt > cur) diffText = '下一局难度会提高';
-    else if (nxt < cur) diffText = '下一局难度会降低';
+    const correct = res.data.correct;
+    let mainText = '';
+    let subText = '';
+    if (correct === 0) {
+      mainText = this.data.game_type === 'memory_box'
+        ? '今天有点累，咱们下回少记几样，慢慢来。'
+        : '今天这些不太熟，下回我挑更好认的给您。';
+    } else {
+      const verb = this.data.game_type === 'memory_box' ? '记住了' : '分对了';
+      const shortVerb = this.data.game_type === 'memory_box' ? '记了' : '分对了';
+      mainText = '今天' + verb + ' ' + correct + ' 样东西';
+      if (this._prevCorrect === null || this._prevCorrect === undefined) {
+        subText = '头一回就' + shortVerb + ' ' + correct + ' 样，挺好';
+      } else if (correct > this._prevCorrect) {
+        subText = '比上次多' + shortVerb + ' ' + (correct - this._prevCorrect) + ' 样，真不错';
+      }
+    }
     this.setData({
       result: res.data,
-      summaryLines: (res.data.summary_text || '').split('\n'),
-      diff_text: diffText,
+      main_text: mainText,
+      sub_text: subText,
+      next_difficulty_text: DIFFICULTY_TEXT[res.data.next_difficulty] || DIFFICULTY_TEXT[2],
       phase: 'result',
     });
   },
