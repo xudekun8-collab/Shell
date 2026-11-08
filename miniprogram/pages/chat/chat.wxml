@@ -2,6 +2,7 @@
   <view class="topbar">
     <view class="nickname">{{greeting}}</view>
     <view class="capsules">
+      <view class="capsule" bindtap="clearChat">清空对话</view>
       <view class="capsule" bindtap="goMemory">记忆</view>
       <view class="capsule" bindtap="goGame">游戏</view>
     </view>
@@ -15,41 +16,53 @@
     <view class="notice-btn" bindtap="dismissNotice">知道了</view>
   </view>
 
-  <scroll-view class="messages" scroll-y scroll-into-view="{{scrollInto}}" scroll-with-animation>
+  <scroll-view class="messages" style="padding-bottom: {{dockHeight}}px" scroll-y scroll-into-view="{{scrollInto}}" scroll-with-animation>
     <view class="msg-row assistant" wx:if="{{messages.length === 0}}">
       <view class="bubble">我在呢，您想说点啥，点下头的字就行。</view>
     </view>
     <view class="msg-row {{item.role}}" wx:for="{{messages}}" wx:key="index" id="msg-{{index}}">
-      <view class="bubble">{{item.content}}</view>
+      <block wx:if="{{item.system || item.role === 'system'}}">
+        <view class="system-tip">{{item.content}}</view>
+      </block>
+      <block wx:else>
+        <view class="msg-col">
+          <view class="bubble {{item.pending ? 'pending' : ''}}">{{item.content}}</view>
+          <view class="retry-hint" wx:if="{{item.failed}}" data-uid="{{item.uid}}" bindtap="retry">没发出去，点这里重试</view>
+        </view>
+      </block>
     </view>
   </scroll-view>
 
-  <view class="wall">
-    <view class="wall-collapsed" wx:if="{{!wallExpanded}}">
-      <view class="quick-grid">
-        <view class="quick-phrase {{sending ? 'disabled' : ''}}" hover-class="hover" wx:for="{{quickPhrases}}" wx:key="*this" data-text="{{item}}" bindtap="onPhrase">{{item}}</view>
+  <view class="dock">
+    <view class="wall">
+      <view class="wall-collapsed" wx:if="{{!wallExpanded}}">
+        <view class="quick-grid">
+          <view class="quick-phrase {{ended ? 'disabled' : ''}}" hover-class="hover" wx:for="{{quickPhrases}}" wx:key="*this" data-text="{{item}}" bindtap="onPhrase">{{item}}</view>
+        </view>
+        <view class="wall-toggle" bindtap="toggleWall">还有别的说法，点开看看</view>
       </view>
-      <view class="wall-toggle" bindtap="toggleWall">还有别的说法，点开看看</view>
+
+      <block wx:else>
+        <scroll-view class="wall-scroll" scroll-y>
+          <view class="phrase-group" wx:for="{{phraseGroups}}" wx:key="title" wx:for-item="group">
+            <view class="phrase-group-title">{{group.title}}</view>
+            <view class="phrase-row">
+              <view class="phrase-btn {{ended ? 'disabled' : ''}}" hover-class="hover" wx:for="{{group.items}}" wx:key="*this" data-text="{{item}}" bindtap="onPhrase">{{item}}</view>
+            </view>
+          </view>
+        </scroll-view>
+        <view class="wall-toggle" bindtap="toggleWall">收起</view>
+      </block>
     </view>
 
-    <block wx:else>
-      <scroll-view class="wall-scroll" scroll-y>
-        <view class="phrase-group" wx:for="{{phraseGroups}}" wx:key="title" wx:for-item="group">
-          <view class="phrase-group-title">{{group.title}}</view>
-          <view class="phrase-row">
-            <view class="phrase-btn {{sending ? 'disabled' : ''}}" hover-class="hover" wx:for="{{group.items}}" wx:key="*this" data-text="{{item}}" bindtap="onPhrase">{{item}}</view>
-          </view>
-        </view>
-        <view class="quick-row">
-          <view class="quick-btn {{sending ? 'disabled' : ''}}" hover-class="hover" wx:for="{{quickTexts}}" wx:key="label" data-text="{{item.text}}" bindtap="onQuick">{{item.label}}</view>
-        </view>
-      </scroll-view>
-      <view class="wall-toggle" bindtap="toggleWall">收起</view>
-    </block>
-  </view>
+    <view class="quick-row">
+      <view class="quick-btn {{ended ? 'disabled' : ''}}" hover-class="hover" wx:for="{{quickTexts}}" wx:key="label" data-text="{{item.text}}" bindtap="onQuick">{{item.label}}</view>
+    </view>
 
-  <view class="input-bar">
-    <input class="input" placeholder-class="input-placeholder" value="{{input}}" bindinput="onInput" confirm-type="send" bindconfirm="onSend" placeholder="想说点什么" />
-    <view class="send-btn {{sending ? 'disabled' : ''}}" bindtap="onSend">{{sending ? '发送中' : '发送'}}</view>
+    <view class="input-bar">
+      <input class="input" placeholder-class="input-placeholder" value="{{input}}" maxlength="60" disabled="{{ended}}" bindinput="onInput" confirm-type="send" bindconfirm="onSend" placeholder="想说点什么" />
+      <view class="send-btn" wx:if="{{!ended}}" bindtap="onSend">{{sending ? '发送中' : '发送'}}</view>
+      <view class="send-btn restart" wx:else bindtap="restart">重新开始</view>
+    </view>
   </view>
 </view>

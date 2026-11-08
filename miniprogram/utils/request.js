@@ -10,14 +10,15 @@ function request(options) {
       header: { 'Content-Type': 'application/json' },
       success(res) {
         if (res.statusCode >= 200 && res.statusCode < 300) {
-          resolve({ ok: true, data: res.data });
+          resolve({ ok: true, data: res.data, status: res.statusCode });
         } else {
-          resolve({ ok: false, msg: '我这儿信号有点弱，咱们等会儿再说。' });
+          resolve({ ok: false, msg: '我这儿信号有点弱，咱们等会儿再说。', status: res.statusCode });
         }
       },
       fail(err) {
         console.error('wx.request fail:', err.errMsg);
-        resolve({ ok: false, msg: '我这儿信号有点弱，咱们等会儿再说。' });
+        const kind = err.errMsg && err.errMsg.indexOf('timeout') >= 0 ? 'timeout' : 'network';
+        resolve({ ok: false, msg: '我这儿信号有点弱，咱们等会儿再说。', kind: kind });
       },
     });
   });

@@ -90,6 +90,20 @@
   justify-content: flex-end;
 }
 
+.msg-row.system {
+  justify-content: center;
+}
+
+.msg-col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.user .msg-col {
+  align-items: flex-end;
+}
+
 .bubble {
   padding: 28rpx;
   border-radius: 20rpx;
@@ -97,6 +111,10 @@
   overflow-wrap: anywhere;
   font-size: 34rpx;
   line-height: 1.7;
+}
+
+.bubble.pending {
+  opacity: 0.55;
 }
 
 .assistant .bubble {
@@ -111,8 +129,33 @@
   color: #ffffff;
 }
 
+.system-tip {
+  font-size: 32rpx;
+  color: var(--c-text-weak);
+  background-color: rgba(31, 58, 95, 0.06);
+  padding: 12rpx 28rpx;
+  border-radius: 32rpx;
+}
+
+.retry-hint {
+  margin-top: 8rpx;
+  font-size: 32rpx;
+  color: var(--c-text-weak);
+}
+
+.dock {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--c-bg);
+  padding-bottom: calc(16rpx + env(safe-area-inset-bottom));
+  box-shadow: 0 -4rpx 16rpx rgba(31, 58, 95, 0.06);
+  z-index: 10;
+}
+
 .wall {
-  padding: 0 28rpx;
+  padding: 12rpx 28rpx 0;
 }
 
 .quick-grid {
@@ -182,7 +225,7 @@
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
-  padding: 8rpx 0 16rpx;
+  padding: 8rpx 28rpx 0;
 }
 
 .quick-btn {
@@ -199,10 +242,7 @@
 .input-bar {
   display: flex;
   align-items: center;
-  margin-top: 16rpx;
-  padding: 16rpx 28rpx;
-  padding-bottom: calc(16rpx + env(safe-area-inset-bottom));
-  background-color: var(--c-bg);
+  padding: 16rpx 28rpx 0;
 }
 
 .input {
@@ -230,6 +270,10 @@
   color: #ffffff;
   background-color: var(--c-primary);
   border-radius: var(--r-btn);
+}
+
+.send-btn.restart {
+  width: 200rpx;
 }
 
 .disabled {
