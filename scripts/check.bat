@@ -39,7 +39,7 @@ if errorlevel 1 (
 )
 
 echo [4/5] 静态红线检查
-powershell -NoProfile -Command "if (Select-String -Path (Get-ChildItem miniprogram -Recurse -Filter *.wxss).FullName -Pattern 'font-size: 2[0-9]rpx') { Write-Output 'FAIL: 存在 font-size 小于 30rpx'; exit 1 }"
+powershell -NoProfile -Command "if (Select-String -Path (Get-ChildItem miniprogram -Recurse -Include *.wxss,*.wxml).FullName -Pattern 'font-size:\s*([0-9]|1[0-9]|2[0-9])rpx') { Write-Output 'FAIL: 存在 font-size 小于 30rpx'; exit 1 }"
 if errorlevel 1 exit /b 1
 powershell -NoProfile -Command "if (Select-String -Path (Get-ChildItem miniprogram -Recurse -Filter *.wxss).FullName -Pattern 'break-all') { Write-Output 'FAIL: 存在 break-all'; exit 1 }"
 if errorlevel 1 exit /b 1

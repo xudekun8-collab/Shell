@@ -10,6 +10,9 @@ backend/.env
 # 自签证书私钥（证书公钥可提交，私钥不可）
 deploy/certs/key.pem
 
+# compose 层本地环境变量（.env.example 入库，真实 .env 不入库）
+deploy/.env
+
 # 本地数据库与日志
 *.db
 *.sqlite3
