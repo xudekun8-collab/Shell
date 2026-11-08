@@ -252,6 +252,25 @@
   padding: 16rpx 28rpx 0;
 }
 
+.voice-btn {
+  min-height: 88rpx;
+  padding: 0 24rpx;
+  margin-right: 16rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32rpx;
+  color: var(--c-text);
+  background-color: var(--c-soft);
+  border-radius: var(--r-btn);
+  flex-shrink: 0;
+}
+
+.voice-btn.recording {
+  color: #ffffff;
+  background-color: var(--c-primary);
+}
+
 .input {
   flex: 1;
   height: 88rpx;

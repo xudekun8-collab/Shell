@@ -5,7 +5,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 
-from app.api import auth, chat, games, greeting, memory, records
+from app.api import auth, chat, games, greeting, memory, records, tts
 from app.db.session import engine
 
 logger = logging.getLogger("elder_care")
@@ -26,6 +26,7 @@ app.include_router(games.router)
 app.include_router(greeting.router)
 app.include_router(memory.router)
 app.include_router(records.router)
+app.include_router(tts.router)
 
 
 @app.get("/api/health")

@@ -20,6 +20,10 @@ WX_SECRET = os.getenv("WX_SECRET", "")
 AUTH_SECRET = os.getenv("AUTH_SECRET", "")
 DEMO_MODE = os.getenv("DEMO_MODE", "0")
 
+TTS_API_KEY = os.getenv("TTS_API_KEY", "")
+TTS_VOICE = os.getenv("TTS_VOICE", "")
+TTS_PROVIDER = os.getenv("TTS_PROVIDER", "")
+
 
 def database_url() -> str:
     """返回 SQLAlchemy 连接串。

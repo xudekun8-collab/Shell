@@ -29,6 +29,8 @@ Page({
     messages: [],
     input: '',
     sending: false,
+    recording: false,
+    voiceLabel: '按住说话',
     ended: false,
     scrollInto: '',
     showNotice: false,
@@ -59,6 +61,7 @@ Page({
       showNotice: !wx.getStorageSync('notice_read'),
     });
     this.loadGreeting();
+    this._initRecorder();
   },
 
   onReady() {
@@ -68,6 +71,52 @@ Page({
   onShow() {
     this.maybeGreet();
     this._measureDock();
+  },
+
+  _initRecorder() {
+    this._recorder = wx.getRecorderManager();
+    this._recorder.onStart(() => {
+      this.setData({ recording: true, voiceLabel: '松开结束' });
+    });
+    this._recorder.onStop((res) => {
+      this.setData({ recording: false, voiceLabel: '按住说话' });
+      const dur = res && res.duration ? res.duration : 0;
+      if (dur < 1000) {
+        wx.showToast({ title: '太短了，您多说两句', icon: 'none' });
+        return;
+      }
+      // 没有 ASR 能力：不上传、不落库，只提示
+      wx.showToast({ title: '语音还没开通，您打字，我在这儿听着', icon: 'none' });
+    });
+    this._recorder.onError((err) => {
+      this.setData({ recording: false, voiceLabel: '按住说话' });
+      const msg = (err && err.errMsg) || '';
+      if (msg.indexOf('auth') >= 0) {
+        wx.showToast({ title: '没拿到麦克风权限，您打字也行', icon: 'none' });
+      } else {
+        wx.showToast({ title: '语音还没开通，您打字，我在这儿听着', icon: 'none' });
+      }
+    });
+  },
+
+  onVoiceStart() {
+    if (this.data.ended) return;
+    if (!wx.getStorageSync('voice_notice_shown')) {
+      wx.setStorageSync('voice_notice_shown', true);
+      wx.showModal({
+        title: '提示',
+        content: '语音功能还没开通。开通后录音只在您手机上转成文字，我们不会存录音。',
+        showCancel: false,
+        confirmText: '知道了',
+      });
+    }
+    this._recorder.start({ duration: 60000, format: 'mp3' });
+  },
+
+  onVoiceEnd() {
+    if (this._recorder) {
+      this._recorder.stop();
+    }
   },
 
   _genThreadId() {
