@@ -1,4 +1,5 @@
 const { request } = require('../../utils/request.js');
+const config = require('../../utils/config.js');
 const { PHRASE_GROUPS, QUICK_PHRASES } = require('../../utils/constants.js');
 const { getUserId } = require('../../utils/user.js');
 const { shouldHidePhrase } = require('../../utils/taboo.js');
@@ -151,6 +152,178 @@ Page({
       .exec();
   },
 
+  _ab2str(buffer) {
+    const bytes = new Uint8Array(buffer);
+    let out = '';
+    let i = 0;
+    while (i < bytes.length) {
+      const b = bytes[i];
+      let len = 1;
+      let cp = 0;
+      if (b < 0x80) {
+        cp = b;
+      } else if ((b & 0xe0) === 0xc0) {
+        len = 2;
+        cp = b & 0x1f;
+      } else if ((b & 0xf0) === 0xe0) {
+        len = 3;
+        cp = b & 0x0f;
+      } else if ((b & 0xf8) === 0xf0) {
+        len = 4;
+        cp = b & 0x07;
+      } else {
+        i += 1;
+        continue;
+      }
+      if (i + len > bytes.length) {
+        return { text: out, rest: Array.from(bytes.slice(i)) };
+      }
+      for (let j = 1; j < len; j++) {
+        cp = (cp << 6) | (bytes[i + j] & 0x3f);
+      }
+      out += String.fromCodePoint(cp);
+      i += len;
+    }
+    return { text: out, rest: [] };
+  },
+
+  _parseSseBlock(block) {
+    let event = null;
+    let data = null;
+    block.split('\n').forEach((line) => {
+      if (line.indexOf('event: ') === 0) {
+        event = line.slice(7).trim();
+      } else if (line.indexOf('data: ') === 0) {
+        try {
+          data = JSON.parse(line.slice(6).trim());
+        } catch (err) {
+          data = null;
+        }
+      }
+    });
+    if (!event) return null;
+    return { event, data: data || {} };
+  },
+
+  _streamRequest(data, uid) {
+    return new Promise((resolve) => {
+      let settled = false;
+      let acc = '';
+      let action = 'reply';
+      let params = null;
+      let buf = '';
+      let task = null;
+      let noChunkTimer = null;
+      let restBytes = [];
+      let decoder = null;
+      if (typeof TextDecoder !== 'undefined') {
+        try {
+          decoder = new TextDecoder('utf-8');
+        } catch (err) {
+          decoder = null;
+        }
+      }
+
+      const processBlocks = () => {
+        let idx;
+        while ((idx = buf.indexOf('\n\n')) >= 0) {
+          const block = buf.slice(0, idx);
+          buf = buf.slice(idx + 2);
+          const parsed = this._parseSseBlock(block);
+          if (!parsed) continue;
+          if (parsed.event === 'meta') {
+            action = parsed.data.action || 'reply';
+            params = parsed.data.params || null;
+          } else if (parsed.event === 'delta') {
+            acc += parsed.data.text || '';
+            this._patchPendingByUid(uid, { content: acc || '正在回复…' });
+          } else if (parsed.event === 'done') {
+            finish({ streamed: true, action, reply_text: acc, params });
+          }
+        }
+      };
+
+      const decodeChunk = (buffer) => {
+        if (decoder) {
+          return decoder.decode(buffer, { stream: true });
+        }
+        const bytes = new Uint8Array(buffer);
+        const combined = new Uint8Array(restBytes.length + bytes.length);
+        combined.set(restBytes, 0);
+        combined.set(bytes, restBytes.length);
+        const r = this._ab2str(combined.buffer);
+        restBytes = r.rest;
+        return r.text;
+      };
+
+      const clearNoChunkTimer = () => {
+        if (noChunkTimer) {
+          clearTimeout(noChunkTimer);
+          noChunkTimer = null;
+        }
+      };
+
+      const resetNoChunkTimer = () => {
+        clearNoChunkTimer();
+        noChunkTimer = setTimeout(() => {
+          console.warn('流式 15 秒无数据，降级到非流式');
+          if (task && task.abort) task.abort();
+          finish({ fallback: true });
+        }, 15000);
+      };
+
+      const finish = (result) => {
+        if (settled) return;
+        settled = true;
+        clearNoChunkTimer();
+        if (decoder) {
+          const tail = decoder.decode();
+          if (tail) {
+            buf += tail;
+            processBlocks();
+          }
+        }
+        resolve(result);
+      };
+
+      resetNoChunkTimer();
+
+      task = wx.request({
+        url: config.base_url + '/api/chat/stream',
+        method: 'POST',
+        data: data,
+        enableChunked: true,
+        header: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + (wx.getStorageSync('token') || ''),
+        },
+        success: () => {
+          if (acc) {
+            finish({ streamed: true, action, reply_text: acc, params });
+          } else {
+            finish({ fallback: true });
+          }
+        },
+        fail: (err) => {
+          console.warn('流式请求失败，降级到非流式', err.errMsg);
+          finish({ fallback: true });
+        },
+      });
+
+      if (!task || typeof task.onChunkReceived !== 'function') {
+        console.warn('基础库不支持 enableChunked，降级到非流式');
+        finish({ fallback: true });
+        return;
+      }
+
+      task.onChunkReceived((res) => {
+        resetNoChunkTimer();
+        buf += decodeChunk(res.data);
+        processBlocks();
+      });
+    });
+  },
+
   async send(rawText) {
     const text = (rawText || '').trim();
     if (!text || this.data.ended) return;
@@ -164,38 +337,57 @@ Page({
     ]);
     this.setData({ messages, scrollInto: 'msg-' + (messages.length - 1) });
 
-    const timeoutId = setTimeout(() => {
-      this._patchPendingByUid(uid, { content: '还没等到回复，再等等' });
-    }, REPLY_TIMEOUT_MS);
+    const streamRes = await this._streamRequest({ thread_id: this.data.thread_id, text }, uid);
 
-    const res = await request({
-      url: '/api/chat',
-      method: 'POST',
-      data: { thread_id: this.data.thread_id, text },
-    });
+    let action;
+    let params = null;
+    if (streamRes.streamed) {
+      const reply = normalizeReply(streamRes.reply_text);
+      const replyIndex = this._patchPendingByUid(uid, { content: reply, pending: false, ts: Date.now() });
+      if (replyIndex >= 0) {
+        this.setData({ scrollInto: 'msg-' + replyIndex });
+      }
+      action = streamRes.action;
+      params = streamRes.params;
+    } else {
+      const timeoutId = setTimeout(() => {
+        this._patchPendingByUid(uid, { content: '还没等到回复，再等等' });
+      }, REPLY_TIMEOUT_MS);
 
-    clearTimeout(timeoutId);
+      const res = await request({
+        url: '/api/chat',
+        method: 'POST',
+        data: { thread_id: this.data.thread_id, text },
+      });
 
-    if (res.ok) {
+      clearTimeout(timeoutId);
+
+      if (!res.ok) {
+        this._markFailedByUid(uid);
+        this._active = Math.max(0, (this._active || 0) - 1);
+        this.setData({ sending: this._active > 0 });
+        return;
+      }
       const reply = normalizeReply(res.data && res.data.reply_text);
       const replyIndex = this._patchPendingByUid(uid, { content: reply, pending: false, ts: Date.now() });
       if (replyIndex >= 0) {
         this.setData({ scrollInto: 'msg-' + replyIndex });
       }
-      if (res.data.action === 'end') {
-        this._enterEnd();
-      } else if (res.data.action === 'start_game') {
-        const params = res.data.params || {};
-        setTimeout(() => {
-          wx.navigateTo({
-            url: '/pages/game/game?game_type=' + (params.game_type || 'memory_box') + '&difficulty=' + (params.difficulty || 0),
-          });
-        }, 600);
-      }
-      this._persist();
-    } else {
-      this._markFailedByUid(uid);
+      action = res.data.action;
+      params = res.data.params || null;
     }
+
+    if (action === 'end') {
+      this._enterEnd();
+    } else if (action === 'start_game') {
+      const p = params || {};
+      setTimeout(() => {
+        wx.navigateTo({
+          url: '/pages/game/game?game_type=' + (p.game_type || 'memory_box') + '&difficulty=' + (p.difficulty || 0),
+        });
+      }, 600);
+    }
+    this._persist();
 
     this._active = Math.max(0, (this._active || 0) - 1);
     this.setData({ sending: this._active > 0 });

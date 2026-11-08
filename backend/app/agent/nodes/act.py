@@ -25,7 +25,7 @@ _ACTION_REPLIES = {
 }
 
 
-def make_act(session_factory):
+def make_act(llm_client, session_factory):
     def act(state: dict) -> dict:
         plan = state.get("plan")
         if not plan or state.get("intent") == ACTION_END:
@@ -39,8 +39,17 @@ def make_act(session_factory):
                 text = "咱们把东西分一分类"
             else:
                 text = "咱们玩个记东西的小游戏，就当活动活动脑子。"
-        elif action == ACTION_REPLY and params.get("reply_text"):
-            text = params["reply_text"]
+        elif action == ACTION_REPLY:
+            if params.get("reply_text"):
+                text = params["reply_text"]
+            else:
+                try:
+                    text = llm_client.reply(state, plan) if llm_client else ""
+                except Exception as exc:
+                    logger.warning("回复生成失败，落默认句：%s", exc)
+                    text = ""
+                if not text:
+                    text = _ACTION_REPLIES[ACTION_REPLY]
         else:
             text = _ACTION_REPLIES.get(action, _ACTION_REPLIES[ACTION_REPLY])
 

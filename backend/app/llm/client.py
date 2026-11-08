@@ -1,13 +1,15 @@
 """大模型客户端抽象、假模型与 OpenAI 兼容客户端。"""
 import json
 import logging
+import time
 from abc import ABC, abstractmethod
+from typing import Iterator
 
 import httpx
 
 from app import config
 from app.agent.actions import ACTION_REPLY, ACTION_START_GAME, ACTION_SUGGEST_REST
-from app.llm.prompts import build_system_prompt
+from app.llm.prompts import build_reply_prompt, build_system_prompt
 from app.llm.schemas import PlanParseError, parse_plan
 
 logger = logging.getLogger("elder_care")
@@ -17,6 +19,14 @@ class LLMClient(ABC):
     @abstractmethod
     def plan(self, state: dict) -> dict:
         """根据状态返回 {"action", "reason", "params"}。"""
+
+    @abstractmethod
+    def reply(self, state: dict, plan: dict) -> str:
+        """根据状态与决策返回回复正文。"""
+
+    @abstractmethod
+    def reply_stream(self, state: dict, plan: dict) -> Iterator[str]:
+        """逐段产出回复正文。"""
 
     @abstractmethod
     def summarize(self, dialogue: list[str], previous_summary: str = "") -> dict:
@@ -36,22 +46,43 @@ class FakeClient(LLMClient):
         if "休息" in raw or "累" in raw:
             return {"action": ACTION_SUGGEST_REST, "reason": "用户需要休息", "params": {}}
         if recent and any(k in raw for k in ("刚才说", "刚说了", "说了什么", "上一句", "我之前说")):
-            last = recent[-1]
-            user_part = last.split("老人：", 1)[-1].split("／", 1)[0]
-            return {"action": ACTION_REPLY, "reason": "参考最近对话回答", "params": {"reply_text": f"您刚才说的是：{user_part}"}}
+            return {"action": ACTION_REPLY, "reason": "参考最近对话回答", "params": {}}
         if summary and any(k in raw for k in ("来着", "干啥", "什么来着", "几号", "几点", "安排", "去哪")):
-            first = summary.split("｜", 1)[0].strip()
-            answer = first[1:] if first.startswith("我") else first
-            return {"action": ACTION_REPLY, "reason": "参考会话摘要回答", "params": {"reply_text": f"您之前提过：{answer}"}}
+            return {"action": ACTION_REPLY, "reason": "参考会话摘要回答", "params": {}}
         if memories:
-            return {"action": ACTION_REPLY, "reason": "参考召回记忆回答", "params": {"reply_text": f"记得您之前提过：{memories[0]}"}}
+            return {"action": ACTION_REPLY, "reason": "参考召回记忆回答", "params": {}}
         if any(k in raw for k in ("来着", "干啥", "什么来着")):
-            return {"action": ACTION_REPLY, "reason": "无可用摘要", "params": {"reply_text": "这个我一时记不清了。"}}
+            return {"action": ACTION_REPLY, "reason": "无可用摘要", "params": {}}
         return {
             "action": ACTION_REPLY,
             "reason": "普通闲聊",
-            "params": {"reply_text": "我听着呢，您接着说。"},
+            "params": {},
         }
+
+    def reply(self, state: dict, plan: dict) -> str:
+        raw = state.get("raw_input", "") or ""
+        memories = state.get("memories") or []
+        recent = state.get("recent_dialogue") or []
+        summary = state.get("conversation_summary") or ""
+        if recent and any(k in raw for k in ("刚才说", "刚说了", "说了什么", "上一句", "我之前说")):
+            last = recent[-1]
+            user_part = last.split("老人：", 1)[-1].split("／", 1)[0]
+            return f"您刚才说的是：{user_part}"
+        if summary and any(k in raw for k in ("来着", "干啥", "什么来着", "几号", "几点", "安排", "去哪")):
+            first = summary.split("｜", 1)[0].strip()
+            answer = first[1:] if first.startswith("我") else first
+            return f"您之前提过：{answer}"
+        if memories:
+            return f"记得您之前提过：{memories[0]}"
+        if any(k in raw for k in ("来着", "干啥", "什么来着")):
+            return "这个我一时记不清了。"
+        return "我听着呢，您接着说。"
+
+    def reply_stream(self, state: dict, plan: dict) -> Iterator[str]:
+        text = self.reply(state, plan)
+        for i in range(0, len(text), 3):
+            yield text[i : i + 3]
+            time.sleep(0.05)
 
     def summarize(self, dialogue: list[str], previous_summary: str = "") -> dict:
         new_text = " ".join(dialogue)
@@ -103,6 +134,42 @@ class OpenAIClient(LLMClient):
             {"role": "user", "content": state.get("raw_input", "")},
         ]
         return parse_plan(_extract_json(self._complete(messages))).model_dump()
+
+    def reply(self, state: dict, plan: dict) -> str:
+        messages = [
+            {"role": "system", "content": build_reply_prompt(state)},
+            {"role": "user", "content": state.get("raw_input", "")},
+        ]
+        try:
+            return (self._chat(messages, response_format=None) or "").strip()
+        except Exception as exc:
+            logger.warning("回复生成失败：%s", exc)
+            return ""
+
+    def reply_stream(self, state: dict, plan: dict) -> Iterator[str]:
+        messages = [
+            {"role": "system", "content": build_reply_prompt(state)},
+            {"role": "user", "content": state.get("raw_input", "")},
+        ]
+        payload = {"model": self.model, "messages": messages, "temperature": 0.7, "stream": True}
+        url = _chat_url(self.base_url)
+        headers = {"Authorization": f"Bearer {self.api_key}", "Content-Type": "application/json"}
+        with httpx.Client(timeout=self.timeout) as client:
+            with client.stream("POST", url, headers=headers, json=payload) as resp:
+                resp.raise_for_status()
+                for line in resp.iter_lines():
+                    if not line or not line.startswith("data: "):
+                        continue
+                    data = line[len("data: ") :].strip()
+                    if data == "[DONE]":
+                        break
+                    try:
+                        obj = json.loads(data)
+                        delta = obj["choices"][0]["delta"].get("content") or ""
+                    except (json.JSONDecodeError, KeyError, IndexError):
+                        continue
+                    if delta:
+                        yield delta
 
     def summarize(self, dialogue: list[str], previous_summary: str = "") -> dict:
         system = "你是摘要助手。把下面的对话压缩成不超过100字的中文摘要，并列出未完成事项。只输出 JSON：{\"summary\":\"摘要\",\"open_items\":[\"未完成事项\"]}。没有未完成事项时 open_items 为空数组。"
