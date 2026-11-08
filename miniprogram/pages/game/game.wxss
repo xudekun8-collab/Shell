@@ -31,10 +31,21 @@
   margin-bottom: 32rpx;
 }
 
+.top-left {
+  display: flex;
+  align-items: center;
+}
+
 .progress {
   font-size: 34rpx;
   font-weight: bold;
   color: var(--c-primary);
+}
+
+.level-tag {
+  margin-left: 16rpx;
+  font-size: 32rpx;
+  color: var(--c-text-weak);
 }
 
 .giveup {
@@ -81,6 +92,52 @@
 
 .big-btn::after {
   border: none;
+}
+
+.big-btn.selected {
+  background-color: var(--c-accent);
+  color: #ffffff;
+}
+
+.big-btn.disabled {
+  opacity: 0.5;
+}
+
+.countdown-text {
+  font-size: 32rpx;
+  color: var(--c-text-weak);
+  text-align: center;
+  margin-bottom: 8rpx;
+}
+
+.countdown-text.urgent {
+  color: var(--c-danger);
+}
+
+.countdown-bar {
+  height: 12rpx;
+  background-color: #eef1f6;
+  border-radius: 6rpx;
+  margin: 0 0 16rpx;
+  overflow: hidden;
+}
+
+.countdown-fill {
+  height: 100%;
+  background-color: var(--c-primary);
+  border-radius: 6rpx;
+  transition: width 1s linear;
+}
+
+.countdown-fill.urgent {
+  background-color: var(--c-danger);
+}
+
+.timeout-tip {
+  font-size: 32rpx;
+  color: var(--c-text-weak);
+  text-align: center;
+  margin: 16rpx 0;
 }
 
 .main-result {

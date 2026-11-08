@@ -1,6 +1,7 @@
 const { request } = require('../../utils/request.js');
 
-const DIFFICULTY_TEXT = { 1: '今天轻松点', 2: '今天动动脑子', 3: '今天来点难的' };
+const DIFFICULTY_TEXT = { 1: '轻松一点', 2: '多动动脑', 3: '来点难的' };
+const LEVEL_TEXT = { 1: '轻松', 2: '动脑', 3: '挑战' };
 
 Page({
   data: {
@@ -9,6 +10,7 @@ Page({
     session_id: '',
     difficulty: 0,
     time_limit_sec: 10,
+    level_text: '轻松',
     phase: 'loading',
     show_items: [],
     remember_index: 0,
@@ -22,9 +24,15 @@ Page({
     questions: [],
     word: '',
     options: [],
+    selectedValue: '',
+    answering: false,
+    countdown: 0,
+    timeoutTip: false,
+    error_kind: '',
     result: null,
     main_text: '',
     sub_text: '',
+    result_note: '',
     next_difficulty_text: '',
   },
 
@@ -36,8 +44,21 @@ Page({
     this.startGame();
   },
 
+  onHide() {
+    this._remainingSec = this.data.countdown;
+    this.clearAllTimers();
+  },
+
+  onShow() {
+    if (this.data.phase === 'quiz') {
+      this.startCountdown(this._remainingSec);
+    } else if (this.data.phase === 'remember') {
+      this.scheduleRemember();
+    }
+  },
+
   onUnload() {
-    this.clearTimer();
+    this.clearAllTimers();
   },
 
   clearTimer() {
@@ -47,10 +68,46 @@ Page({
     }
   },
 
-  async startGame() {
+  clearCountdown() {
+    if (this._countdownTimer) {
+      clearInterval(this._countdownTimer);
+      this._countdownTimer = null;
+    }
+  },
+
+  clearTimeoutTimer() {
+    if (this._timeoutTimer) {
+      clearTimeout(this._timeoutTimer);
+      this._timeoutTimer = null;
+    }
+  },
+
+  clearAnswerTimer() {
+    if (this._answerTimer) {
+      clearTimeout(this._answerTimer);
+      this._answerTimer = null;
+    }
+  },
+
+  clearAllTimers() {
     this.clearTimer();
+    this.clearCountdown();
+    this.clearTimeoutTimer();
+    this.clearAnswerTimer();
+  },
+
+  async startGame() {
+    this.clearAllTimers();
     this._startTime = Date.now();
-    this.setData({ phase: 'loading', answers: [], result: null });
+    this.setData({
+      phase: 'loading',
+      answers: [],
+      result: null,
+      selectedValue: '',
+      answering: false,
+      timeoutTip: false,
+      error_kind: '',
+    });
     await this.loadPrevCorrect();
     const res = await request({
       url: '/api/game/start',
@@ -58,7 +115,7 @@ Page({
       data: { user_id: this.data.user_id, game_type: this.data.game_type },
     });
     if (!res.ok) {
-      this.setData({ phase: 'error' });
+      this.setData({ phase: 'error', error_kind: 'network' });
       return;
     }
     const d = res.data;
@@ -66,8 +123,12 @@ Page({
       session_id: d.session_id,
       difficulty: d.difficulty,
       time_limit_sec: d.time_limit_sec,
+      level_text: LEVEL_TEXT[d.difficulty] || '轻松',
       quiz_index: 0,
       quiz_total: 0,
+      selectedValue: '',
+      answering: false,
+      timeoutTip: false,
     };
     if (d.game_type === 'memory_box') {
       patch.phase = 'remember';
@@ -90,7 +151,7 @@ Page({
     if (d.game_type === 'memory_box') {
       this.scheduleRemember();
     } else {
-      this.scheduleQuiz();
+      this.startCountdown();
     }
   },
 
@@ -112,52 +173,89 @@ Page({
         this.setData({ remember_index: next, remember_text: this.data.show_items[next] });
         this.scheduleRemember();
       } else {
-        this.setData({ phase: 'quiz', quiz_index: 0, quiz_target: this.data.quizzes[0].target });
-        this.scheduleQuiz();
+        this.setData({
+          phase: 'quiz',
+          quiz_index: 0,
+          quiz_target: this.data.quizzes[0].target,
+          selectedValue: '',
+          answering: false,
+          timeoutTip: false,
+        });
+        this.startCountdown();
       }
     }, 2000);
   },
 
-  scheduleQuiz() {
-    this.clearTimer();
-    this._timer = setTimeout(() => {
-      this.nextQuiz();
-    }, this.data.time_limit_sec * 1000);
+  startCountdown(initialSec) {
+    this.clearCountdown();
+    this.clearTimeoutTimer();
+    const start = initialSec != null && initialSec > 0 ? initialSec : this.data.time_limit_sec;
+    this.setData({ countdown: start, timeoutTip: false, answering: false });
+    this._countdownTimer = setInterval(() => {
+      const next = this.data.countdown - 1;
+      if (next <= 0) {
+        this.clearCountdown();
+        this.setData({ countdown: 0, timeoutTip: true });
+        this._timeoutTimer = setTimeout(() => this.nextQuiz(), 1000);
+      } else {
+        this.setData({ countdown: next });
+      }
+    }, 1000);
   },
 
   nextQuiz() {
     this.clearTimer();
+    this.clearCountdown();
+    this.clearTimeoutTimer();
+    this.clearAnswerTimer();
     const next = this.data.quiz_index + 1;
     if (next < this.data.quiz_total) {
+      this.setData({ quiz_index: next, selectedValue: '', answering: false, timeoutTip: false });
       if (this.data.game_type === 'memory_box') {
-        this.setData({ quiz_index: next, quiz_target: this.data.quizzes[next].target });
+        this.setData({ quiz_target: this.data.quizzes[next].target });
       } else {
         this.setData({
-          quiz_index: next,
           word: this.data.questions[next].word,
           options: this.data.questions[next].options,
         });
       }
-      this.scheduleQuiz();
+      this.startCountdown();
     } else {
       this.submit(false);
     }
   },
 
   answerMemory(e) {
-    this.clearTimer();
-    const value = e.currentTarget.dataset.value === '1';
+    if (this.data.answering || this.data.timeoutTip) return;
+    this.clearAllTimers();
+    const raw = e.currentTarget.dataset.value;
+    const value = raw === '1';
     const idx = this.data.quiz_index;
-    this.setData({ answers: this.data.answers.concat([{ index: idx, value: value }]) });
-    this.nextQuiz();
+    this.setData({
+      selectedValue: raw,
+      answering: true,
+      answers: this.data.answers.concat([{ index: idx, value }]),
+    });
+    this._answerTimer = setTimeout(() => {
+      this.setData({ selectedValue: '', answering: false });
+      this.nextQuiz();
+    }, 350);
   },
 
   answerCategory(e) {
-    this.clearTimer();
-    const idx = this.data.quiz_index;
+    if (this.data.answering || this.data.timeoutTip) return;
+    this.clearAllTimers();
     const value = e.currentTarget.dataset.value;
-    this.setData({ answers: this.data.answers.concat([{ index: idx, value: value }]) });
-    this.nextQuiz();
+    const idx = this.data.quiz_index;
+    this.setData({
+      selectedValue: value,
+      answering: true,
+      answers: this.data.answers.concat([{ index: idx, value }]),
+    });
+    this._answerTimer = setTimeout(() => {
+      this.setData({ selectedValue: '', answering: false });
+      this.nextQuiz();
+    }, 350);
   },
 
   tooHard() {
@@ -168,7 +266,7 @@ Page({
       cancelText: '继续玩',
       success: (r) => {
         if (r.confirm) {
-          this.clearTimer();
+          this.clearAllTimers();
           this.submit(true);
         }
       },
@@ -176,7 +274,7 @@ Page({
   },
 
   async submit(abandoned) {
-    this.clearTimer();
+    this.clearAllTimers();
     const res = await request({
       url: '/api/game/submit',
       method: 'POST',
@@ -188,31 +286,34 @@ Page({
       },
     });
     if (!res.ok) {
-      this.setData({ phase: 'error' });
+      const kind = res.status === 404 ? 'expired' : 'network';
+      this.setData({ phase: 'error', error_kind: kind });
       return;
     }
-    const correct = res.data.correct;
-    let mainText = '';
+    const d = res.data;
+    const lines = (d.summary_text || '').split('\n');
+    const mainText = (lines[0] || '').trim();
+    const noteText = (lines[1] || '').trim();
+    const correct = d.correct;
     let subText = '';
-    if (correct === 0) {
-      mainText = this.data.game_type === 'memory_box'
-        ? '今天有点累，咱们下回少记几样，慢慢来。'
-        : '今天这些不太熟，下回我挑更好认的给您。';
-    } else {
-      const verb = this.data.game_type === 'memory_box' ? '记住了' : '分对了';
-      const shortVerb = this.data.game_type === 'memory_box' ? '记了' : '分对了';
-      mainText = '今天' + verb + ' ' + correct + ' 样东西';
+    if (correct > 0) {
       if (this._prevCorrect === null || this._prevCorrect === undefined) {
-        subText = '头一回就' + shortVerb + ' ' + correct + ' 样，挺好';
+        subText = this.data.game_type === 'memory_box'
+          ? '头一回就记 ' + correct + ' 样，挺好'
+          : '头一回就对 ' + correct + ' 题，挺好';
       } else if (correct > this._prevCorrect) {
-        subText = '比上次多' + shortVerb + ' ' + (correct - this._prevCorrect) + ' 样，真不错';
+        const diff = correct - this._prevCorrect;
+        subText = this.data.game_type === 'memory_box'
+          ? '比上次多记了 ' + diff + ' 样，真不错'
+          : '比上次多对了 ' + diff + ' 题，真不错';
       }
     }
     this.setData({
-      result: res.data,
+      result: d,
       main_text: mainText,
       sub_text: subText,
-      next_difficulty_text: DIFFICULTY_TEXT[res.data.next_difficulty] || DIFFICULTY_TEXT[2],
+      result_note: noteText,
+      next_difficulty_text: DIFFICULTY_TEXT[d.next_difficulty] || DIFFICULTY_TEXT[2],
       phase: 'result',
     });
   },
