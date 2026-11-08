@@ -1,5 +1,5 @@
 .page {
-  padding: 24rpx;
+  padding: 28rpx;
 }
 
 .group {
@@ -10,13 +10,13 @@
   margin-bottom: 16rpx;
   font-size: 36rpx;
   font-weight: bold;
-  color: #1f3a5f;
+  color: var(--c-primary);
 }
 
 .profile-card {
   padding: 24rpx;
-  background-color: #ffffff;
-  border-radius: 12rpx;
+  background-color: var(--c-surface);
+  border-radius: var(--r-card);
 }
 
 .line {
@@ -30,8 +30,8 @@
   align-items: center;
   margin-bottom: 16rpx;
   padding: 24rpx;
-  background-color: #ffffff;
-  border-radius: 12rpx;
+  background-color: var(--c-surface);
+  border-radius: var(--r-card);
 }
 
 .item-body {
@@ -41,35 +41,39 @@
 .content {
   font-size: 34rpx;
   color: #333333;
-  word-break: break-all;
+  overflow-wrap: anywhere;
 }
 
 .meta {
   margin-top: 10rpx;
-  font-size: 30rpx;
-  color: #999999;
+  font-size: 32rpx;
+  color: var(--c-text-weak);
 }
 
 .delete {
+  min-height: 88rpx;
   margin-left: 20rpx;
-  padding: 12rpx 20rpx;
+  padding: 0 28rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-size: 32rpx;
-  color: #c0392b;
+  color: var(--c-danger);
   background-color: #fdecea;
-  border-radius: 12rpx;
+  border-radius: var(--r-card);
 }
 
 .empty {
   padding: 80rpx 0;
   text-align: center;
-  color: #999999;
+  color: var(--c-text-weak);
 }
 
 .more {
   min-height: 60rpx;
   line-height: 60rpx;
-  font-size: 26rpx;
-  color: #999999;
+  font-size: 32rpx;
+  color: var(--c-text-weak);
   text-align: left;
 }
 
@@ -80,15 +84,15 @@
 .detail-toggle {
   padding: 24rpx;
   font-size: 34rpx;
-  color: #1f3a5f;
+  color: var(--c-primary);
   background-color: #eef1f6;
-  border-radius: 12rpx;
+  border-radius: var(--r-card);
 }
 
 .toggle-mark {
   float: right;
-  font-size: 30rpx;
-  color: #999999;
+  font-size: 32rpx;
+  color: var(--c-text-weak);
 }
 
 .detail-body {

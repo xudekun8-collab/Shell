@@ -1,6 +1,6 @@
 .page {
   min-height: 100vh;
-  padding: 24rpx;
+  padding: 28rpx;
   box-sizing: border-box;
 }
 
@@ -34,20 +34,24 @@
 .progress {
   font-size: 34rpx;
   font-weight: bold;
-  color: #1f3a5f;
+  color: var(--c-primary);
 }
 
 .giveup {
   font-size: 32rpx;
-  color: #999999;
+  color: var(--c-text-weak);
   padding: 8rpx 16rpx;
+  min-height: 88rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .show-item {
   font-size: 64rpx;
   font-weight: bold;
   text-align: center;
-  color: #1f3a5f;
+  color: var(--c-primary);
   padding: 160rpx 0;
 }
 
@@ -70,8 +74,8 @@
   line-height: 110rpx;
   font-size: 36rpx;
   margin-bottom: 24rpx;
-  border-radius: 12rpx;
-  background-color: #1f3a5f;
+  border-radius: var(--r-btn);
+  background-color: var(--c-primary);
   color: #ffffff;
 }
 
@@ -83,7 +87,7 @@
   font-size: 48rpx;
   font-weight: bold;
   text-align: center;
-  color: #1f3a5f;
+  color: var(--c-primary);
   margin: 40rpx 0 24rpx;
 }
 
@@ -96,15 +100,15 @@
 }
 
 .result-note {
-  font-size: 26rpx;
-  color: #999999;
+  font-size: 32rpx;
+  color: var(--c-text-weak);
   text-align: center;
   margin-top: 8rpx;
 }
 
 .next-diff {
   font-size: 34rpx;
-  color: #666666;
+  color: var(--c-text-weak);
   text-align: center;
   margin: 24rpx 0 40rpx;
 }
@@ -114,9 +118,9 @@
   height: 96rpx;
   line-height: 96rpx;
   font-size: 36rpx;
-  background-color: #1f3a5f;
+  background-color: var(--c-primary);
   color: #ffffff;
-  border-radius: 12rpx;
+  border-radius: var(--r-btn);
 }
 
 .primary-btn::after {
@@ -130,8 +134,8 @@
   font-size: 36rpx;
   margin-top: 24rpx;
   background-color: #eef1f6;
-  color: #1f3a5f;
-  border-radius: 12rpx;
+  color: var(--c-primary);
+  border-radius: var(--r-btn);
 }
 
 .secondary-btn::after {
