@@ -136,6 +136,12 @@ pytest 106 passed。不需要再 commit 一次。
 
 ### 5.1 小程序适老化与视觉统一（P0）
 
+现状（2026-11-08 实扫结果，不用再查，也不要假设前面改过）：
+全目录 12 处 `font-size` 小于 32rpx（chat 7、game 1、memory 3、records 1）；
+2 处 `word-break: break-all`（chat.wxss 的 .bubble、memory.wxss 的 .content）；
+CSS 变量 0 个；`page` 背景仍是 `#f5f6f8`；`.capsule` 高 60rpx、`.wall-toggle` padding 16rpx 0。
+这一批从零开始改。
+
 ```
 继续这个项目。本次只做"适老化 + 视觉统一"，不碰业务逻辑、不改接口、不改页面结构。
 
@@ -150,14 +156,17 @@ pytest 106 passed。不需要再 commit 一次。
    memory 页 .delete 最小高 88rpx、左右 padding 28rpx；其余可点元素 ≥88rpx。
 3. 对比度：浅底辅助文字统一 #6b6257（.notice-line、.wall-toggle、.phrase-group-title、
    .input-placeholder、.empty、.more、.result-note、.disclaimer、.toggle-mark、.meta、.giveup、.next-diff）。
-4. 底色统一：app.wxss 的 page 背景改 #fbf7f2，四页一致；卡片保持白色。
+4. 底色统一：app.wxss 的 page 背景从 #f5f6f8 改 #fbf7f2，四页一致；卡片保持白色。
 5. 色板收敛：app.wxss 的 page 定义 CSS 变量
    --c-bg/--c-surface/--c-primary/--c-accent/--c-soft/--c-text/--c-text-weak/--c-danger/--r-card/--r-btn，
-   四页重复色值尽量换变量；改完确认颜色没丢。
+   四页重复色值尽量换变量；改完确认颜色没丢（替换前后各截一图对比，主色不许变）。
 6. 排版：.bubble 与 .content 的 word-break: break-all 改 overflow-wrap: anywhere。
 7. 统一：卡片圆角 16rpx、实心按钮 44rpx、页面左右内边距 28rpx。
 
-验收：搜 font-size 无 <32rpx；四页截图底色/圆角/主色一致；逐个点可点元素都能一次点中。
+验收（逐条贴输出，不许只写"已完成"）：
+① 搜 font-size，贴结果并确认无 <32rpx；② 搜 break-all，必须 0 命中；
+③ 四页截图，底色/圆角/主色一致；④ 真机逐个点可点元素，都能一次点中；
+⑤ 变量替换前后对比图，主色未变。
 ```
 
 ### 5.2 聊天页交互闭环（P0）
