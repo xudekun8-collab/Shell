@@ -1,7 +1,6 @@
 const { request } = require('../../utils/request.js');
-
-const DIFFICULTY_TEXT = { 1: '轻松一点', 2: '多动动脑', 3: '来点难的' };
-const GAME_TYPE_TEXT = { memory_box: '记东西', category_sort: '分分类' };
+const { GAME_TYPE_TEXT, DIFFICULTY_TEXT } = require('../../utils/constants.js');
+const { getUserId } = require('../../utils/user.js');
 
 function formatDuration(totalSeconds) {
   const s = Math.max(0, Math.floor(totalSeconds || 0));
@@ -13,7 +12,7 @@ function formatDuration(totalSeconds) {
 
 Page({
   data: {
-    user_id: 'demo_user_1',
+    user_id: '',
     records: [],
     summary: {
       total: 0,
@@ -25,6 +24,10 @@ Page({
     loaded: false,
     loading: false,
     load_error: false,
+  },
+
+  onLoad() {
+    this.setData({ user_id: getUserId() });
   },
 
   onShow() {

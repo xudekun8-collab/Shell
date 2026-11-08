@@ -1,12 +1,7 @@
 const { request } = require('../../utils/request.js');
-
-const PHRASE_GROUPS = [
-  { title: '身上', items: ['我昨晚没睡好', '今天身上不太舒服', '我吃过了', '该吃药了'] },
-  { title: '家里人', items: ['我孙女快来看我了', '我想我儿子了', '今天孙子给我打电话了', '我老伴以前爱唱戏'] },
-  { title: '日常', items: ['今天天气不错', '我下楼走了一圈', '咱们聊会儿', '陪我玩个游戏'] },
-];
-
-const QUICK_PHRASES = ['我吃过了', '今天身上不太舒服', '咱们聊会儿', '陪我玩个游戏'];
+const { PHRASE_GROUPS, QUICK_PHRASES } = require('../../utils/constants.js');
+const { getUserId } = require('../../utils/user.js');
+const { shouldHidePhrase } = require('../../utils/taboo.js');
 const REPLY_TIMEOUT_MS = 8000;
 
 function normalizeReply(text) {
@@ -27,7 +22,7 @@ function normalizeReply(text) {
 
 Page({
   data: {
-    user_id: 'demo_user_1',
+    user_id: '',
     thread_id: '',
     greeting: '您好',
     messages: [],
@@ -56,6 +51,7 @@ Page({
     const history = wx.getStorageSync('chat_history_' + threadId) || [];
     const restored = Array.isArray(history) ? history : [];
     this.setData({
+      user_id: getUserId(),
       thread_id: threadId,
       messages: restored,
       scrollInto: restored.length ? 'msg-' + (restored.length - 1) : '',
@@ -89,15 +85,11 @@ Page({
   },
 
   applyPhraseWall(taboos) {
-    const hideLaoban = taboos.some((t) => t.indexOf('老伴') >= 0);
-    if (!hideLaoban) {
-      this.setData({ phraseGroups: PHRASE_GROUPS });
-      return;
-    }
+    const list = (taboos || []).filter((t) => t);
     this.setData({
       phraseGroups: PHRASE_GROUPS.map((g) => ({
         title: g.title,
-        items: g.items.filter((t) => t !== '我老伴以前爱唱戏'),
+        items: g.items.filter((phrase) => !shouldHidePhrase(phrase, list)),
       })).filter((g) => g.items.length > 0),
     });
   },
