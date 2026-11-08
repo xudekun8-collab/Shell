@@ -170,27 +170,65 @@ memory.wxss 的 .content）；CSS 变量 0 个；page 背景仍是 #f5f6f8；.ca
 
 ### 5.2 聊天页交互闭环（P0）
 
+现状（2026-11-08 核对 chat.js / chat.wxml / request.js，不用再查，九条一条都没做，全部要做）：
+发送后无占位气泡，成功直接追加（chat.js send）；失败只 `showToast`（chat.js L138），不标记该条、不能重发；
+`quickTexts`（再说一遍 / 慢一点 / 结束）藏在展开面板里（chat.wxml L43-45），不是常驻；
+消息只在内存，`onLoad` 只取 `thread_id`；`action` 只处理 `start_game`，`end` 没处理；
+顶部 `{{greeting}}` 是 `nickname + '，您好'`（chat.js L50）；`input` 没有 `maxlength`；
+`.input-bar` 不是 fixed（但已有 `env(safe-area-inset-bottom)`）；`request.js` 只返回 `{ok,data}` / `{ok,msg}`，没有 `status`。
+
 ```
-继续。只改 pages/chat 与 utils/request.js（仅为错误类型加字段），不改后端。
+继续。只改 pages/chat 三件套（js/wxml/wxss）与 utils/request.js（只加字段，不改现有错话术），
+不改后端接口、不改 other 页面。
 
-1. 等待反馈：发送后立刻在消息流末尾插助手占位气泡"正在回复…"，收到后按索引替换（不要清空重建）；
-   超过 15 秒改成"还没等到回复，再等等"。
-2. 失败处理：失败时该条用户消息标记 failed，气泡下方"没发出去，点这里重试"，只重发这一条；
-   失败时不要追加助手占位。
-3. 常驻快捷：把"再说一遍 / 慢一点 / 不聊了"从展开面板移到输入框上方常驻一行（≥72rpx）；
-   展开面板只放短语墙。
-4. 消息持久化：按 thread_id 存 storage（chat_history_<thread_id>，只存 role/content/时间戳，≤50 条），
-   onLoad 恢复；顶部胶囊区加"清空对话"，二次确认。
-5. 结束态：action=end 时插入居中浅色提示"这轮聊完了"，输入区禁用并显示"重新开始"；
-   点击生成新 thread_id 并清空当前 messages。
-6. 顶部称呼：只显示"张阿姨"，无 nickname 显示"您好"；问候交给气泡。
-7. 输入：input 加 maxlength=60，保留 confirm-type=send；不要改 textarea（会丢发送键）。
-8. 键盘：input-bar 改 fixed 底部，padding-bottom: calc(24rpx + env(safe-area-inset-bottom))；
-   .messages 补对应底部 padding。
-9. 兜底：reply_text 为空显示"我这儿没听清，您再说一遍"。
+0. 先给 request.js 加两个字段，其他逻辑不动：
+   success 里补 status: res.statusCode；fail 里补 kind: 'network'；
+   timeout 判断用 err.errMsg 含 'timeout' 时 kind: 'timeout'，否则 'network'。
+   保留 ok/msg 原样，其他页面不受影响。
 
-验收：关后端点发送→失败气泡可重发；连发 6 条→每条先占位再变正文；退出重进→历史在；
-点"不聊了"→结束态可重启；键盘弹起不遮挡。
+1. 等待反馈：发送后立刻在消息流末尾插入助手占位 {role:'assistant', pending:true, content:'正在回复…'}，
+   记住它的 index；收到回复后 **按 index 替换**该条（this.setData 用 `messages[i].content` 路径），
+   不要清空重建数组。超过 15 秒把占位文案改成"还没等到回复，再等等"（用 setTimeout，收到回复时 clearTimeout）。
+
+2. 失败处理：失败时把该条用户消息标记 failed:true，气泡下方渲染"没发出去，点这里重试"（bindtap=retry，
+   data-index 传索引）。retry 只重发这一条：删掉该条与随后失败的占位，用原 text 重新走 send。
+   失败时不要留占位气泡，也不要追加错误气泡。
+
+3. 常驻快捷：把"再说一遍 / 慢一点 / 不聊了"从展开面板（wx:else 块）移到收起态常驻一行，
+   紧贴输入框上方，高度 ≥72rpx；展开面板里只保留短语墙，不再重复这三个。
+
+4. 消息持久化：key 用 `chat_history_<thread_id>`，只存 {role, content, ts} 三个字段，
+   最多 50 条（超出从头部截断）；每次 send 成功与失败重试后写入。
+   onLoad 时恢复并按顺序渲染；顶部胶囊区加"清空对话"，点了先 wx.showModal 二次确认，
+   确认后清空 storage 与 messages，并重新生成 thread_id。
+
+5. 结束态：`res.data.action === 'end'` 时，在消息流末尾插入居中浅色系统提示"这轮聊完了"（不可点、无气泡样式）；
+   输入区禁用（input disabled、发送按钮置灰），并显示"重新开始"按钮；
+   点击后生成新 thread_id、清空 messages 与当前 thread 的 storage，恢复输入。
+
+6. 顶部称呼：只显示 nickname（没有就显示"您好"），去掉"，您好"后缀，问候交给气泡。
+   注意 onShow 的 maybeGreet 只在 messages 为空时插问候，恢复历史后不要重复插。
+
+7. 输入：input 加 maxlength="60"，保留 confirm-type="send" 与 bindconfirm，不要把 input 换成 textarea。
+
+8. 键盘遮挡：把快捷区与输入栏一起放进底部容器 `.dock`（position: fixed; left/right: 0; bottom: 0;
+   padding-bottom: calc(16rpx + env(safe-area-inset-bottom))）；`.messages` 补 padding-bottom
+   （dock 实际高度，至少 320rpx + safe-area），保证最后一条消息不被挡住。
+   若你更倾向保留 flex 布局，则用 input 的 bindkeyboardheightchange 动态设 .dock 的 bottom，
+   二选一，但验收必须证明键盘弹起时输入框与最后一条消息都可见。
+
+9. 兜底：reply_text 为空或 undefined 时显示"我这儿没听清，您再说一遍"；reply_text 超过 300 字时截断并保留句末。
+
+验收（逐条贴现象或截图，不许只写"已完成"）：
+① 关掉后端，点快捷语发送 → 出现"没发出去，点这里重试"，点它能重发成功一条，原消息不重复；
+② 连发 6 条 → 每条先出现"正在回复…"再变正文，顺序不乱；
+③ 退出小程序重进 → 历史还在，且不会多出一条问候；
+④ 发"不聊了" → 出现"这轮聊完了"，输入框禁用，点"重新开始"能正常发新消息；
+⑤ 键盘弹起 → 输入框、最后一条消息都可见；
+⑥ 顶部只显示称呼，没有"，您好"。
+
+禁止：清空 messages 重建数组；失败时把用户输入清掉；把整段 messages 无限存进 storage；
+     改后端接口；用 setInterval 轮询等待。
 ```
 
 ### 5.3 游戏页（P0）
