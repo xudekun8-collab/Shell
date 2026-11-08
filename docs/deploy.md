@@ -6,6 +6,12 @@
 2. 起 HTTPS 后端：双击 `scripts/start_https.bat`，uvicorn 起在 `0.0.0.0:8443`，带 `--ssl-keyfile` / `--ssl-certfile`。
 3. 验证：`curl.exe -k https://127.0.0.1:8443/api/health` 应返回 `{"status":"ok","db":"ok"}`。
 
+curl 不可用或不在 PATH 时，用这条不挑环境的命令代替：
+
+```bash
+backend\.venv\Scripts\python.exe -c "import httpx; print(httpx.get('https://127.0.0.1:8443/api/health', verify=False).text)"
+```
+
 HTTP 的 `backend/start_server.bat`（8000 端口）保留不动，两条路并存，答辩任选。
 
 ## 证书怎么重新生成
@@ -52,6 +58,7 @@ curl -k https://127.0.0.1:8443/api/health
 注意：
 
 - 密钥（`AUTH_SECRET`、`WX_SECRET`、数据库密码）全部走 `env_file`，没有写进 compose / Dockerfile / nginx.conf。
+- compose 读取的是 `deploy/.env`，不是 `backend/.env`；`deploy/.env` 从 `deploy/.env.example` 复制并填 `MYSQL_ROOT_PASSWORD`。
 - MySQL 用命名卷 `mysql_data` 持久化，字符集 `utf8mb4`。
 - `api` 通过 `depends_on: mysql: condition: service_healthy` 等 MySQL 就绪。
 - nginx 对 `/api/chat/stream` 设了 `proxy_http_version 1.1` + `proxy_buffering off` + `proxy_read_timeout 300s`，否则 SSE 会被缓冲成一次性返回。
