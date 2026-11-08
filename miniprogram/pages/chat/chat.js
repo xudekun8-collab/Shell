@@ -74,7 +74,7 @@ Page({
   },
 
   async loadGreeting() {
-    const res = await request({ url: '/api/memories/' + this.data.user_id });
+    const res = await request({ url: '/api/memories' });
     if (res.ok && res.data && res.data.profile) {
       const profile = res.data.profile;
       this.setData({ greeting: profile.nickname ? profile.nickname : '您好' });
@@ -102,7 +102,7 @@ Page({
 
   async maybeGreet() {
     if (this.data.messages.length > 0) return;
-    const res = await request({ url: '/api/greeting/' + this.data.user_id + '?thread_id=' + this.data.thread_id });
+    const res = await request({ url: '/api/greeting?thread_id=' + this.data.thread_id });
     if (!res.ok || !res.data || !res.data.greeting) return;
     const key = 'greeting_' + this.formatDate(new Date()) + '_' + res.data.period;
     if (wx.getStorageSync(key)) return;
@@ -171,7 +171,7 @@ Page({
     const res = await request({
       url: '/api/chat',
       method: 'POST',
-      data: { user_id: this.data.user_id, thread_id: this.data.thread_id, text },
+      data: { thread_id: this.data.thread_id, text },
     });
 
     clearTimeout(timeoutId);
@@ -271,6 +271,32 @@ Page({
           this.setData({ messages: [], ended: false, input: '' });
           this._resetThread();
         }
+      },
+    });
+  },
+
+  logout() {
+    wx.showModal({
+      title: '提示',
+      content: '确定要退出登录吗',
+      confirmText: '退出',
+      cancelText: '再想想',
+      success: (r) => {
+        if (!r.confirm) return;
+        wx.removeStorageSync('token');
+        wx.removeStorageSync('user_id');
+        wx.removeStorageSync('thread_id');
+        try {
+          const info = wx.getStorageInfoSync();
+          (info.keys || []).forEach((key) => {
+            if (key.indexOf('chat_history_') === 0) {
+              wx.removeStorageSync(key);
+            }
+          });
+        } catch (err) {
+          console.error('清空聊天缓存失败：', err);
+        }
+        wx.redirectTo({ url: '/pages/login/login' });
       },
     });
   },

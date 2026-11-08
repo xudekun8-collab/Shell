@@ -1,7 +1,8 @@
 """游戏接口：开始与提交。"""
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
+from app.api.deps import current_user
 from app.db.session import SessionLocal
 from app.services import game_engine
 
@@ -9,7 +10,6 @@ router = APIRouter()
 
 
 class StartRequest(BaseModel):
-    user_id: str
     game_type: str
 
 
@@ -42,14 +42,14 @@ class SubmitResponse(BaseModel):
 
 
 @router.post("/api/game/start", response_model=StartResponse)
-def start_game(request: StartRequest) -> StartResponse:
+def start_game(request: StartRequest, user: dict = Depends(current_user)) -> StartResponse:
     with SessionLocal() as db:
-        result = game_engine.start(request.user_id, request.game_type, db)
+        result = game_engine.start(user["user_id"], request.game_type, db)
     return StartResponse(**result)
 
 
 @router.post("/api/game/submit", response_model=SubmitResponse)
-def submit_game(request: SubmitRequest) -> SubmitResponse:
+def submit_game(request: SubmitRequest, user: dict = Depends(current_user)) -> SubmitResponse:
     try:
         with SessionLocal() as db:
             result = game_engine.submit(

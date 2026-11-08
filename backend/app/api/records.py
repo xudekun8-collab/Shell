@@ -1,9 +1,9 @@
 """训练记录查询接口。"""
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy import case, func, select
 
-from app.api.deps import require_demo_token
+from app.api.deps import current_user, legacy_path_allowed
 from app.db.models import TrainingRecord
 from app.db.session import SessionLocal
 
@@ -31,12 +31,7 @@ class RecordsResponse(BaseModel):
     summary: Summary
 
 
-@router.get(
-    "/api/records/{user_id}",
-    response_model=RecordsResponse,
-    dependencies=[Depends(require_demo_token)],
-)
-def get_records(user_id: str, limit: int = 20) -> RecordsResponse:
+def _query_records(user_id: str, limit: int) -> RecordsResponse:
     limit = max(1, min(limit, 50))
     with SessionLocal() as db:
         all_rows = db.execute(
@@ -92,3 +87,14 @@ def get_records(user_id: str, limit: int = 20) -> RecordsResponse:
             by_type=by_type,
         ),
     )
+
+
+@router.get("/api/records", response_model=RecordsResponse)
+def get_records(user: dict = Depends(current_user), limit: int = 20) -> RecordsResponse:
+    return _query_records(user["user_id"], limit)
+
+
+@router.get("/api/records/{user_id}", response_model=RecordsResponse)
+def get_records_legacy(user_id: str, limit: int = 20) -> RecordsResponse:
+    legacy_path_allowed()
+    return _query_records(user_id, limit)

@@ -1,0 +1,36 @@
+.page {
+  min-height: 100vh;
+  padding: 160rpx 56rpx;
+  box-sizing: border-box;
+  background-color: var(--c-bg);
+}
+
+.title {
+  font-size: 48rpx;
+  font-weight: 600;
+  color: var(--c-primary);
+  text-align: center;
+}
+
+.privacy {
+  margin-top: 40rpx;
+  font-size: 32rpx;
+  line-height: 1.7;
+  color: var(--c-text-weak);
+  text-align: center;
+}
+
+.start-btn {
+  margin-top: 96rpx;
+  height: 88rpx;
+  line-height: 88rpx;
+  text-align: center;
+  font-size: 34rpx;
+  color: #ffffff;
+  background-color: var(--c-primary);
+  border-radius: var(--r-btn);
+}
+
+.start-btn-hover {
+  opacity: 0.85;
+}

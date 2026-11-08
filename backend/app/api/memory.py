@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy import select
 
-from app.api.deps import require_demo_token
+from app.api.deps import current_user, legacy_path_allowed
 from app.db.models import Conversation, Memory, Profile
 from app.db.session import SessionLocal
 
@@ -35,12 +35,7 @@ class DeleteResponse(BaseModel):
     deleted: bool
 
 
-@router.get(
-    "/api/memories/{user_id}",
-    response_model=MemoryLayersResponse,
-    dependencies=[Depends(require_demo_token)],
-)
-def get_memories(user_id: str) -> MemoryLayersResponse:
+def _query_memories(user_id: str) -> MemoryLayersResponse:
     with SessionLocal() as session:
         profile = session.get(Profile, user_id)
         profile_data = None
@@ -76,12 +71,33 @@ def get_memories(user_id: str) -> MemoryLayersResponse:
     return MemoryLayersResponse(profile=profile_data, events=event_data, sessions=session_data)
 
 
-@router.delete(
-    "/api/memories/{user_id}/{memory_id}",
-    response_model=DeleteResponse,
-    dependencies=[Depends(require_demo_token)],
-)
-def delete_memory(user_id: str, memory_id: int) -> DeleteResponse:
+@router.get("/api/memories", response_model=MemoryLayersResponse)
+def get_memories(user: dict = Depends(current_user)) -> MemoryLayersResponse:
+    return _query_memories(user["user_id"])
+
+
+@router.get("/api/memories/{user_id}", response_model=MemoryLayersResponse)
+def get_memories_legacy(user_id: str) -> MemoryLayersResponse:
+    legacy_path_allowed()
+    return _query_memories(user_id)
+
+
+@router.delete("/api/memories/{memory_id}", response_model=DeleteResponse)
+def delete_memory(memory_id: int, user: dict = Depends(current_user)) -> DeleteResponse:
+    with SessionLocal() as session:
+        memory = session.get(Memory, memory_id)
+        if memory is None or memory.is_deleted == 1:
+            raise HTTPException(status_code=404, detail="记忆不存在")
+        if memory.user_id != user["user_id"]:
+            raise HTTPException(status_code=403, detail="无权删除该记忆")
+        memory.is_deleted = 1
+        session.commit()
+    return DeleteResponse(deleted=True)
+
+
+@router.delete("/api/memories/{user_id}/{memory_id}", response_model=DeleteResponse)
+def delete_memory_legacy(user_id: str, memory_id: int) -> DeleteResponse:
+    legacy_path_allowed()
     with SessionLocal() as session:
         memory = session.get(Memory, memory_id)
         if memory is None or memory.user_id != user_id or memory.is_deleted == 1:

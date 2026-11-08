@@ -112,7 +112,7 @@ Page({
     const res = await request({
       url: '/api/game/start',
       method: 'POST',
-      data: { user_id: this.data.user_id, game_type: this.data.game_type },
+      data: { game_type: this.data.game_type },
     });
     if (!res.ok) {
       this.setData({ phase: 'error', error_kind: 'network' });
@@ -156,7 +156,7 @@ Page({
   },
 
   async loadPrevCorrect() {
-    const res = await request({ url: '/api/records/' + this.data.user_id + '?limit=5' });
+    const res = await request({ url: '/api/records?limit=5' });
     if (res.ok && res.data && res.data.records) {
       const prev = res.data.records.find((r) => r.game_type === this.data.game_type);
       this._prevCorrect = prev ? prev.correct_count : null;

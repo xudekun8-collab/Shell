@@ -1,23 +1,16 @@
 # 答辩前自查报告
 
-本报告只描述现状与建议，不含任何密钥真实值。结论按「演示版（局域网、仅 demo_user_1）」口径评估。
+本报告只描述现状与建议，不含任何密钥真实值。结论按「演示版（局域网）」口径评估。
 
 ## A. 鉴权
 
-| 接口 | 是否校验调用者身份 | 现状 |
-|---|---|---|
-| GET /api/records/{user_id} | 否 | 仅凭路径 user_id 读取 |
-| GET /api/memories/{user_id} | 否 | 仅凭路径 user_id 读取 |
-| DELETE /api/memories/{user_id}/{memory_id} | 否（仅比对 memory.user_id == 路径 user_id） | 知道 user_id + memory_id 即可软删 |
-| POST /api/chat | 否 | body 里 user_id 任意 |
-| POST /api/game/start | 否 | body 里 user_id 任意 |
-| POST /api/game/submit | 否 | 仅凭 session_id |
-| GET /api/greeting/{user_id} | 否 | 仅凭路径 user_id |
-
-- 只需知道 user_id 就能读/删别人数据的接口：records、memories（GET 与 DELETE）、greeting 的读；chat 与 game/start 还能以任意 user_id 写。DELETE memories 是最需要关注的一处（软删）。
-- 结论：演示版可接受——局域网、单演示用户、无真实多用户数据，越权面有限；生产必须加身份认证（登录态或至少服务端签发的 token），并把 user_id 与服务端身份绑定，禁止客户端自报 user_id。
-- 可选缓解：本任务已加 `require_demo_token`（见 deps.py），DEMO_TOKEN 留空时完全放行；填值后 records 与 memories 的读/删接口要求 `X-Demo-Token` 头一致，chat / game / greeting 不受影响。
-- 风险等级：生产高，演示低。
+- 身份来源：服务端签发 JWT（HS256，7 天过期，载荷 {user_id, role, exp}），密钥 AUTH_SECRET 从 .env 读，代码无默认弱密钥。客户端统一在请求头 `Authorization: Bearer <token>` 携带，user_id 一律从 token 解出，不再信任客户端自报。
+- 登录入口：`POST /api/auth/wx`（wx.login 换 code → 服务端 jscode2session 换 openid）；演示后门 `POST /api/auth/demo` 仅当 DEMO_MODE=1 可用。
+- 业务接口均已挂 `current_user`（无 token 401）：/api/chat、/api/game/start、/api/game/submit、/api/records、/api/memories、/api/memories/{memory_id}、/api/greeting。
+- 越权防护：DELETE /api/memories/{memory_id} 校验 memory.user_id == 当前用户，不匹配返回 403。
+- 旧版带 user_id 的路径（/api/records/{user_id} 等）保留一个过渡期，但 DEMO_MODE=0 时返回 403 并记日志；DEMO_MODE=1 时仍可用。
+- 结论：演示版已有真实登录链路 + demo 后门；生产需补 family 角色绑定（6.3 落地 invite_code / elder_id），并给 token 加刷新/吊销。
+- 风险等级：低（演示）／中（生产）。
 
 ## B. 传输与暴露面
 
@@ -28,9 +21,10 @@
 
 ## C. 危险动作
 
-- wx.getUserInfo / wx.getUserProfile / wx.getSetting / wx.login / wx.getPhoneNumber：均未使用。
+- wx.login：已使用（登录页静默换 code，交服务端 jscode2session），属正常登录链路，无手机号、无账号密码输入。
+- wx.getUserInfo / wx.getUserProfile / wx.getSetting / wx.getPhoneNumber：均未使用。
 - 位置、剪贴板：未使用 wx.getLocation / wx.getClipboardData。
-- 结论：全部「未使用」。无微信登录、无手机号收集、无定位、无剪贴板读取；user_id 由前端固定 demo_user_1。无需替换。
+- 结论：wx.login 已接入并在服务端闭环；getPhoneNumber / 定位 / 剪贴板仍未使用，无需替换。
 - 风险等级：低。
 
 ## D. 合规材料（清单，正文另行撰写）

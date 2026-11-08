@@ -1,0 +1,5 @@
+<view class="page" wx:if="{{showContent}}">
+  <view class="title">您好，我在这儿</view>
+  <view class="privacy">只看您的聊天和练习记录，给家里人看的也只是摘要，不会发给别人。</view>
+  <view class="start-btn" hover-class="start-btn-hover" bindtap="onStart">开始使用</view>
+</view>
