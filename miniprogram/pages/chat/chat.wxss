@@ -138,9 +138,16 @@
 }
 
 .retry-hint {
-  margin-top: 8rpx;
+  min-height: 88rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 28rpx;
   font-size: 32rpx;
-  color: var(--c-text-weak);
+  color: var(--c-primary);
+  background: var(--c-soft);
+  border-radius: var(--r-btn);
+  margin-top: 12rpx;
 }
 
 .dock {
