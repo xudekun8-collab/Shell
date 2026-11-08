@@ -36,7 +36,7 @@ Page({
 
   async fetch() {
     this.setData({ loading: true, load_error: false });
-    const res = await request({ url: '/api/records/' + this.data.user_id + '?limit=20' });
+    const res = await request({ url: '/api/records?limit=20' });
     if (res.ok && res.data) {
       const list = (res.data.records || res.data.list || []).map((r) => ({
         game_type: r.game_type,

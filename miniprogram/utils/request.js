@@ -1,8 +1,27 @@
 const config = require('./config.js');
 
+let _redirecting = false;
+
+function token() {
+  return wx.getStorageSync('token') || '';
+}
+
+function handleUnauthorized() {
+  wx.removeStorageSync('token');
+  wx.removeStorageSync('user_id');
+  if (_redirecting) return;
+  _redirecting = true;
+  wx.showToast({ title: '再进一次就好', icon: 'none' });
+  wx.redirectTo({
+    url: '/pages/login/login',
+    complete() {
+      _redirecting = false;
+    },
+  });
+}
+
 function doRequest(options) {
   const method = (options.method || 'GET').toUpperCase();
-  // GET 都是本地数据库查询，8 秒足够；POST 要走大模型，才需要 15 秒
   const timeoutMs = options.timeout || (method === 'GET' ? 8000 : 15000);
   return new Promise((resolve) => {
     wx.request({
@@ -10,10 +29,16 @@ function doRequest(options) {
       method: method,
       data: options.data || {},
       timeout: timeoutMs,
-      header: { 'Content-Type': 'application/json' },
+      header: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + token(),
+      },
       success(res) {
         if (res.statusCode >= 200 && res.statusCode < 300) {
           resolve({ ok: true, data: res.data, status: res.statusCode });
+        } else if (res.statusCode === 401 && !options.skipAuthRedirect) {
+          handleUnauthorized();
+          resolve({ ok: false, msg: '登录已失效', status: 401 });
         } else {
           resolve({ ok: false, msg: '我这儿信号有点弱，咱们等会儿再说。', status: res.statusCode });
         }
@@ -30,7 +55,6 @@ function doRequest(options) {
 function request(options) {
   const method = (options.method || 'GET').toUpperCase();
   return doRequest(options).then((res) => {
-    // 只对"连不上"重试；超时不重试——否则一次 8 秒会变成 16.8 秒还没反馈，老人会以为卡死
     const shouldRetry = method === 'GET' && !res.ok && res.kind === 'network';
     if (!shouldRetry) return res;
     return new Promise((resolve) => {

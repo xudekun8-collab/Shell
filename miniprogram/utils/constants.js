@@ -6,5 +6,6 @@ const PHRASE_GROUPS = [
   { title: '日常', items: ['今天天气不错', '我下楼走了一圈', '咱们聊会儿', '陪我玩个游戏'] },
 ];
 const QUICK_PHRASES = ['我吃过了', '今天身上不太舒服', '咱们聊会儿', '陪我玩个游戏'];
+const DEMO_MODE = true;
 
-module.exports = { GAME_TYPE_TEXT, DIFFICULTY_TEXT, PHRASE_GROUPS, QUICK_PHRASES };
+module.exports = { GAME_TYPE_TEXT, DIFFICULTY_TEXT, PHRASE_GROUPS, QUICK_PHRASES, DEMO_MODE };

@@ -82,7 +82,7 @@ def _call_greeting(factory, thread_id=None):
     original = greeting_api.SessionLocal
     greeting_api.SessionLocal = factory
     try:
-        return greeting_api.get_greeting("demo_user_1", thread_id=thread_id)
+        return greeting_api.get_greeting({"user_id": "demo_user_1"}, thread_id=thread_id)
     finally:
         greeting_api.SessionLocal = original
 

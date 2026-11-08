@@ -228,15 +228,20 @@ def test_record_written(factory):
 
 def test_submit_missing_session_404(factory, monkeypatch):
     import app.api.games as games_mod
+    from app import config
+    from app.services.token import create_token
     from fastapi.testclient import TestClient
 
     monkeypatch.setattr(games_mod, "SessionLocal", factory)
+    monkeypatch.setattr(config, "AUTH_SECRET", "test-secret")
     from app.main import app
 
     client = TestClient(app)
+    token = create_token("u1", "elder", "test-secret")
     resp = client.post(
         "/api/game/submit",
         json={"session_id": "nope", "answers": [], "duration_sec": 0, "abandoned": False},
+        headers={"Authorization": "Bearer " + token},
     )
     assert resp.status_code == 404
     assert resp.json()["detail"] == "会话已失效，请重新开始"

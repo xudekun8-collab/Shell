@@ -81,7 +81,7 @@ Page({
 
   async fetch() {
     this.setData({ loading: true, load_error: false });
-    const res = await request({ url: '/api/memories/' + this.data.user_id });
+    const res = await request({ url: '/api/memories' });
     if (res.ok && res.data) {
       const profile = res.data.profile || null;
       if (profile) {
@@ -169,7 +169,7 @@ Page({
         const removed = this.data.events[index];
         this._applyEvents(this.data.events.filter((x) => x.memory_id !== id));
         const res = await request({
-          url: '/api/memories/' + this.data.user_id + '/' + id,
+          url: '/api/memories/' + id,
           method: 'DELETE',
         });
         if (res.ok) {

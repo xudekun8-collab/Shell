@@ -15,6 +15,11 @@ LLM_API_KEY = os.getenv("LLM_API_KEY", "")
 LLM_MODEL = os.getenv("LLM_MODEL", "deepseek-chat")
 LLM_TIMEOUT = int(os.getenv("LLM_TIMEOUT", "30"))
 
+WX_APPID = os.getenv("WX_APPID", "")
+WX_SECRET = os.getenv("WX_SECRET", "")
+AUTH_SECRET = os.getenv("AUTH_SECRET", "")
+DEMO_MODE = os.getenv("DEMO_MODE", "0")
+
 
 def database_url() -> str:
     """返回 SQLAlchemy 连接串。

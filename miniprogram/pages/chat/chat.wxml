@@ -5,6 +5,7 @@
       <view class="capsule" bindtap="clearChat">清空对话</view>
       <view class="capsule" bindtap="goMemory">记忆</view>
       <view class="capsule" bindtap="goGame">游戏</view>
+      <view class="capsule" bindtap="logout">退出</view>
     </view>
   </view>
   <view class="accent-line"></view>
