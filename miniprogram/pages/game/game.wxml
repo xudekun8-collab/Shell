@@ -4,13 +4,17 @@
   </view>
 
   <view wx:if="{{phase === 'error'}}" class="center">
-    <view class="tip">我这儿信号有点弱，咱们等会儿再说。</view>
-    <button class="primary-btn" bindtap="retry">再试一次</button>
+    <view class="tip">{{error_kind === 'expired' ? '这局等太久了，咱们重新开始' : '网络不太顺畅，对不住'}}</view>
+    <button class="primary-btn" bindtap="retry">{{error_kind === 'expired' ? '重新开始' : '再试一次'}}</button>
+    <button class="secondary-btn" wx:if="{{error_kind !== 'expired'}}" bindtap="backToChat">回去聊天</button>
   </view>
 
   <view wx:if="{{phase === 'remember'}}" class="stage">
     <view class="topbar">
-      <view class="progress">记住第 {{remember_index + 1}}/{{remember_total}}</view>
+      <view class="top-left">
+        <view class="progress">记住第 {{remember_index + 1}}/{{remember_total}}</view>
+        <view class="level-tag">这局：{{level_text}}</view>
+      </view>
       <view class="giveup" bindtap="tooHard">太难了</view>
     </view>
     <view class="show-item">{{remember_text}}</view>
@@ -18,28 +22,39 @@
 
   <view wx:if="{{phase === 'quiz'}}" class="stage">
     <view class="topbar">
-      <view class="progress">第 {{quiz_index + 1}}/{{quiz_total}}</view>
+      <view class="top-left">
+        <view class="progress">第 {{quiz_index + 1}}/{{quiz_total}}</view>
+        <view class="level-tag">这局：{{level_text}}</view>
+      </view>
       <view class="giveup" bindtap="tooHard">太难了</view>
     </view>
+
+    <view class="countdown-text {{countdown <= 3 ? 'urgent' : ''}}">剩余 {{countdown}} 秒</view>
+    <view class="countdown-bar">
+      <view class="countdown-fill {{countdown <= 3 ? 'urgent' : ''}}" style="width: {{countdown / time_limit_sec * 100}}%"></view>
+    </view>
+
     <block wx:if="{{game_type === 'memory_box'}}">
       <view class="question">刚才有「{{quiz_target}}」吗</view>
       <view class="btn-col">
-        <button class="big-btn" data-value="1" bindtap="answerMemory">有</button>
-        <button class="big-btn" data-value="0" bindtap="answerMemory">没有</button>
+        <button class="big-btn {{selectedValue === '1' ? 'selected' : ''}} {{answering || timeoutTip ? 'disabled' : ''}}" data-value="1" bindtap="answerMemory">有</button>
+        <button class="big-btn {{selectedValue === '0' ? 'selected' : ''}} {{answering || timeoutTip ? 'disabled' : ''}}" data-value="0" bindtap="answerMemory">没有</button>
       </view>
     </block>
     <block wx:if="{{game_type === 'category_sort'}}">
       <view class="question">「{{word}}」属于哪一类</view>
       <view class="btn-col">
-        <button class="big-btn" wx:for="{{options}}" wx:key="*this" data-value="{{item}}" bindtap="answerCategory">{{item}}</button>
+        <button class="big-btn {{selectedValue === item ? 'selected' : ''}} {{answering || timeoutTip ? 'disabled' : ''}}" wx:for="{{options}}" wx:key="*this" data-value="{{item}}" bindtap="answerCategory">{{item}}</button>
       </view>
     </block>
+
+    <view class="timeout-tip" wx:if="{{timeoutTip}}">时间到，下一题</view>
   </view>
 
   <view wx:if="{{phase === 'result'}}" class="stage">
     <view class="main-result">{{main_text}}</view>
     <view class="sub-result" wx:if="{{sub_text}}">{{sub_text}}</view>
-    <view class="result-note">这只是练习记录，不是看病依据。</view>
+    <view class="result-note" wx:if="{{result_note}}">{{result_note}}</view>
     <view class="next-diff">下一局：{{next_difficulty_text}}</view>
     <button class="primary-btn" bindtap="retry">再玩一次</button>
     <button class="secondary-btn" bindtap="backToChat">回去聊天</button>
