@@ -4,10 +4,15 @@
 
 .summary {
   display: flex;
+  flex-direction: column;
   margin-bottom: 24rpx;
   background-color: var(--c-primary);
   border-radius: var(--r-card);
   padding: 24rpx 0;
+}
+
+.summary-row {
+  display: flex;
 }
 
 .sum-item {
@@ -25,6 +30,31 @@
   margin-top: 8rpx;
   font-size: 32rpx;
   color: #dce5f0;
+}
+
+.by-type {
+  padding: 16rpx 24rpx 0;
+}
+
+.by-type-line {
+  margin-top: 12rpx;
+  font-size: 32rpx;
+  color: #dce5f0;
+  text-align: center;
+}
+
+.status {
+  padding: 120rpx 0;
+  text-align: center;
+  font-size: 32rpx;
+  color: var(--c-text-weak);
+}
+
+.clickable {
+  min-height: 88rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .empty {
