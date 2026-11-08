@@ -1,7 +1,17 @@
 page {
+  --c-bg: #fbf7f2;
+  --c-surface: #ffffff;
+  --c-primary: #1f3a5f;
+  --c-accent: #c98b5e;
+  --c-soft: #efe6da;
+  --c-text: #2b2b2b;
+  --c-text-weak: #6b6257;
+  --c-danger: #c0392b;
+  --r-card: 16rpx;
+  --r-btn: 44rpx;
   font-size: 34rpx;
   color: #333333;
-  background-color: #f5f6f8;
+  background-color: #fbf7f2;
 }
 
 button {

@@ -1,12 +1,12 @@
 .page {
-  padding: 24rpx;
+  padding: 28rpx;
 }
 
 .summary {
   display: flex;
   margin-bottom: 24rpx;
-  background-color: #1f3a5f;
-  border-radius: 12rpx;
+  background-color: var(--c-primary);
+  border-radius: var(--r-card);
   padding: 24rpx 0;
 }
 
@@ -30,31 +30,31 @@
 .empty {
   padding: 120rpx 0;
   text-align: center;
-  color: #999999;
+  color: var(--c-text-weak);
 }
 
 .item {
   margin-bottom: 20rpx;
   padding: 24rpx;
-  background-color: #ffffff;
-  border-radius: 12rpx;
+  background-color: var(--c-surface);
+  border-radius: var(--r-card);
 }
 
 .item .name {
   font-size: 36rpx;
-  color: #1f3a5f;
+  color: var(--c-primary);
 }
 
 .item .meta {
   margin-top: 12rpx;
   font-size: 32rpx;
-  color: #666666;
+  color: var(--c-text-weak);
 }
 
 .disclaimer {
   margin-top: 32rpx;
   padding: 24rpx;
-  font-size: 30rpx;
-  color: #999999;
+  font-size: 32rpx;
+  color: var(--c-text-weak);
   text-align: center;
 }

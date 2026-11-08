@@ -2,7 +2,7 @@
   display: flex;
   flex-direction: column;
   height: 100vh;
-  background-color: #fbf7f2;
+  background-color: var(--c-bg);
 }
 
 .topbar {
@@ -15,7 +15,7 @@
 .nickname {
   font-size: 38rpx;
   font-weight: 600;
-  color: #1f3a5f;
+  color: var(--c-primary);
 }
 
 .capsules {
@@ -24,20 +24,20 @@
 }
 
 .capsule {
-  height: 60rpx;
-  line-height: 60rpx;
+  height: 72rpx;
+  line-height: 72rpx;
   padding: 0 24rpx;
   margin-left: 16rpx;
-  font-size: 26rpx;
-  color: #2b2b2b;
-  background-color: #efe6da;
+  font-size: 32rpx;
+  color: var(--c-text);
+  background-color: var(--c-soft);
   border-radius: 30rpx;
 }
 
 .accent-line {
   height: 4rpx;
   margin: 0 28rpx 8rpx;
-  background-color: #c98b5e;
+  background-color: var(--c-accent);
 }
 
 .notice {
@@ -45,24 +45,28 @@
   flex-direction: column;
   margin: 8rpx 28rpx 0;
   padding: 24rpx 28rpx;
-  background-color: #ffffff;
-  border-radius: 20rpx;
+  background-color: var(--c-surface);
+  border-radius: var(--r-card);
   box-shadow: 0 4rpx 16rpx rgba(31, 58, 95, 0.06);
 }
 
 .notice-line {
-  font-size: 28rpx;
-  color: #8a8072;
+  font-size: 32rpx;
+  color: var(--c-text-weak);
   line-height: 1.7;
 }
 
 .notice-btn {
   align-self: flex-end;
+  min-height: 88rpx;
   margin-top: 16rpx;
-  padding: 8rpx 28rpx;
-  font-size: 28rpx;
-  color: #1f3a5f;
-  background-color: #efe6da;
+  padding: 0 28rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32rpx;
+  color: var(--c-primary);
+  background-color: var(--c-soft);
   border-radius: 32rpx;
 }
 
@@ -90,20 +94,20 @@
   padding: 28rpx;
   border-radius: 20rpx;
   box-shadow: 0 4rpx 16rpx rgba(31, 58, 95, 0.06);
-  word-break: break-all;
+  overflow-wrap: anywhere;
   font-size: 34rpx;
   line-height: 1.7;
 }
 
 .assistant .bubble {
   max-width: 78%;
-  background-color: #ffffff;
-  color: #2b2b2b;
+  background-color: var(--c-surface);
+  color: var(--c-text);
 }
 
 .user .bubble {
   max-width: 72%;
-  background-color: #1f3a5f;
+  background-color: var(--c-primary);
   color: #ffffff;
 }
 
@@ -126,19 +130,19 @@
   justify-content: center;
   text-align: center;
   font-size: 32rpx;
-  color: #2b2b2b;
-  background-color: #ffffff;
-  border-radius: 16rpx;
+  color: var(--c-text);
+  background-color: var(--c-surface);
+  border-radius: var(--r-card);
   box-shadow: 0 4rpx 16rpx rgba(31, 58, 95, 0.06);
   box-sizing: border-box;
 }
 
 .wall-toggle {
   margin-top: 16rpx;
-  padding: 16rpx 0;
+  padding: 28rpx 0;
   text-align: center;
-  font-size: 26rpx;
-  color: #8a8072;
+  font-size: 32rpx;
+  color: var(--c-text-weak);
 }
 
 .wall-scroll {
@@ -147,8 +151,8 @@
 
 .phrase-group-title {
   margin: 8rpx 4rpx;
-  font-size: 26rpx;
-  color: #8a8072;
+  font-size: 32rpx;
+  color: var(--c-text-weak);
   text-align: left;
 }
 
@@ -167,9 +171,9 @@
   justify-content: center;
   text-align: center;
   font-size: 32rpx;
-  color: #2b2b2b;
-  background-color: #ffffff;
-  border-radius: 16rpx;
+  color: var(--c-text);
+  background-color: var(--c-surface);
+  border-radius: var(--r-card);
   box-shadow: 0 4rpx 16rpx rgba(31, 58, 95, 0.06);
   box-sizing: border-box;
 }
@@ -182,13 +186,13 @@
 }
 
 .quick-btn {
-  height: 64rpx;
-  line-height: 64rpx;
+  height: 88rpx;
+  line-height: 88rpx;
   padding: 0 28rpx;
   margin: 0 8rpx 12rpx;
-  font-size: 26rpx;
-  color: #2b2b2b;
-  background-color: #efe6da;
+  font-size: 32rpx;
+  color: var(--c-text);
+  background-color: var(--c-soft);
   border-radius: 32rpx;
 }
 
@@ -198,7 +202,7 @@
   margin-top: 16rpx;
   padding: 16rpx 28rpx;
   padding-bottom: calc(16rpx + env(safe-area-inset-bottom));
-  background-color: #fbf7f2;
+  background-color: var(--c-bg);
 }
 
 .input {
@@ -206,14 +210,14 @@
   height: 88rpx;
   padding: 0 32rpx;
   font-size: 32rpx;
-  color: #2b2b2b;
-  background-color: #ffffff;
-  border-radius: 44rpx;
+  color: var(--c-text);
+  background-color: var(--c-surface);
+  border-radius: var(--r-btn);
 }
 
 .input-placeholder {
-  font-size: 28rpx;
-  color: #a9a096;
+  font-size: 32rpx;
+  color: var(--c-text-weak);
 }
 
 .send-btn {
@@ -224,8 +228,8 @@
   text-align: center;
   font-size: 32rpx;
   color: #ffffff;
-  background-color: #1f3a5f;
-  border-radius: 44rpx;
+  background-color: var(--c-primary);
+  border-radius: var(--r-btn);
 }
 
 .disabled {
