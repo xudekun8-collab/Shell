@@ -1,0 +1,66 @@
+.page {
+  padding: 24rpx;
+}
+
+.group {
+  margin-bottom: 32rpx;
+}
+
+.group-title {
+  margin-bottom: 16rpx;
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #1f3a5f;
+}
+
+.profile-card {
+  padding: 24rpx;
+  background-color: #ffffff;
+  border-radius: 12rpx;
+}
+
+.line {
+  margin-bottom: 12rpx;
+  font-size: 34rpx;
+  color: #333333;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16rpx;
+  padding: 24rpx;
+  background-color: #ffffff;
+  border-radius: 12rpx;
+}
+
+.item-body {
+  flex: 1;
+}
+
+.content {
+  font-size: 34rpx;
+  color: #333333;
+  word-break: break-all;
+}
+
+.meta {
+  margin-top: 10rpx;
+  font-size: 30rpx;
+  color: #999999;
+}
+
+.delete {
+  margin-left: 20rpx;
+  padding: 12rpx 20rpx;
+  font-size: 32rpx;
+  color: #c0392b;
+  background-color: #fdecea;
+  border-radius: 12rpx;
+}
+
+.empty {
+  padding: 80rpx 0;
+  text-align: center;
+  color: #999999;
+}

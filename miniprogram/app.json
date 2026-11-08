@@ -1,0 +1,21 @@
+{
+  "pages": [
+    "pages/chat/chat",
+    "pages/records/records",
+    "pages/memory/memory",
+    "pages/game/game"
+  ],
+  "window": {
+    "navigationBarTitleText": "陪伴助手",
+    "navigationBarBackgroundColor": "#1f3a5f",
+    "navigationBarTextStyle": "white"
+  },
+  "tabBar": {
+    "color": "#7a7a7a",
+    "selectedColor": "#1f3a5f",
+    "list": [
+      { "pagePath": "pages/chat/chat", "text": "聊天" },
+      { "pagePath": "pages/records/records", "text": "记录" }
+    ]
+  }
+}
