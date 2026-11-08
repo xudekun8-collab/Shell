@@ -1,8 +1,9 @@
 """记忆查询与删除接口。"""
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy import select
 
+from app.api.deps import require_demo_token
 from app.db.models import Conversation, Memory, Profile
 from app.db.session import SessionLocal
 
@@ -34,7 +35,11 @@ class DeleteResponse(BaseModel):
     deleted: bool
 
 
-@router.get("/api/memories/{user_id}", response_model=MemoryLayersResponse)
+@router.get(
+    "/api/memories/{user_id}",
+    response_model=MemoryLayersResponse,
+    dependencies=[Depends(require_demo_token)],
+)
 def get_memories(user_id: str) -> MemoryLayersResponse:
     with SessionLocal() as session:
         profile = session.get(Profile, user_id)
@@ -71,7 +76,11 @@ def get_memories(user_id: str) -> MemoryLayersResponse:
     return MemoryLayersResponse(profile=profile_data, events=event_data, sessions=session_data)
 
 
-@router.delete("/api/memories/{user_id}/{memory_id}", response_model=DeleteResponse)
+@router.delete(
+    "/api/memories/{user_id}/{memory_id}",
+    response_model=DeleteResponse,
+    dependencies=[Depends(require_demo_token)],
+)
 def delete_memory(user_id: str, memory_id: int) -> DeleteResponse:
     with SessionLocal() as session:
         memory = session.get(Memory, memory_id)

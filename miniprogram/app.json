@@ -14,8 +14,18 @@
     "color": "#7a7a7a",
     "selectedColor": "#1f3a5f",
     "list": [
-      { "pagePath": "pages/chat/chat", "text": "聊天" },
-      { "pagePath": "pages/records/records", "text": "记录" }
+      {
+        "pagePath": "pages/chat/chat",
+        "text": "聊天",
+        "iconPath": "assets/tabbar/chat.png",
+        "selectedIconPath": "assets/tabbar/chat-active.png"
+      },
+      {
+        "pagePath": "pages/records/records",
+        "text": "记录",
+        "iconPath": "assets/tabbar/records.png",
+        "selectedIconPath": "assets/tabbar/records-active.png"
+      }
     ]
   }
 }

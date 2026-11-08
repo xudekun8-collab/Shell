@@ -1,8 +1,9 @@
 """训练记录查询接口。"""
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 from sqlalchemy import select
 
+from app.api.deps import require_demo_token
 from app.db.models import TrainingRecord
 from app.db.session import SessionLocal
 
@@ -29,7 +30,11 @@ class RecordsResponse(BaseModel):
     summary: Summary
 
 
-@router.get("/api/records/{user_id}", response_model=RecordsResponse)
+@router.get(
+    "/api/records/{user_id}",
+    response_model=RecordsResponse,
+    dependencies=[Depends(require_demo_token)],
+)
 def get_records(user_id: str, limit: int = 20) -> RecordsResponse:
     limit = max(1, min(limit, 50))
     with SessionLocal() as db:

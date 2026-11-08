@@ -94,11 +94,45 @@ def test_low_accuracy_drops(factory):
         assert next_difficulty("u2", "memory_box", db) == 1
 
 
-def test_abandoned_drops(factory):
-    for i in range(3):
-        _add_record(factory, "u3", "memory_box", 3, 4, 4, 10, abandoned=1, minutes_ago=i)
+def test_abandoned_signal_2_to_1(factory):
+    # 对应「太难了」按钮回归：2 档最近 1 条放弃（该局 5/8），先降一档不看 acc
+    _add_record(factory, "a1", "memory_box", 2, 5, 8, 10, abandoned=1, minutes_ago=0)
+    for i in range(1, 5):
+        _add_record(factory, "a1", "memory_box", 2, 4, 4, 10, minutes_ago=i)
     with factory() as db:
-        assert next_difficulty("u3", "memory_box", db) == 2
+        assert next_difficulty("a1", "memory_box", db) == 1
+
+
+def test_abandoned_signal_3_to_2(factory):
+    _add_record(factory, "a2", "memory_box", 3, 5, 8, 10, abandoned=1, minutes_ago=0)
+    for i in range(1, 5):
+        _add_record(factory, "a2", "memory_box", 3, 4, 4, 10, minutes_ago=i)
+    with factory() as db:
+        assert next_difficulty("a2", "memory_box", db) == 2
+
+
+def test_abandoned_signal_1_stay(factory):
+    _add_record(factory, "a3", "memory_box", 1, 0, 4, 10, abandoned=1, minutes_ago=0)
+    for i in range(1, 5):
+        _add_record(factory, "a3", "memory_box", 1, 0, 4, 10, minutes_ago=i)
+    with factory() as db:
+        assert next_difficulty("a3", "memory_box", db) == 1
+
+
+def test_all_abandoned_fallback(factory):
+    for i in range(5):
+        _add_record(factory, "a4", "memory_box", 2, 5, 8, 10, abandoned=1, minutes_ago=i)
+    with factory() as db:
+        assert next_difficulty("a4", "memory_box", db) == 1
+
+
+def test_abandoned_excluded_from_acc(factory):
+    # 4 条正常 0.90 + 1 条放弃（最老，不在最近 3 条里），放弃不参与 acc → 应升档
+    for i in range(4):
+        _add_record(factory, "a5", "memory_box", 2, 9, 10, 10, minutes_ago=i)
+    _add_record(factory, "a5", "memory_box", 2, 0, 10, 10, abandoned=1, minutes_ago=4)
+    with factory() as db:
+        assert next_difficulty("a5", "memory_box", db) == 3
 
 
 def test_high_accuracy_fast_raises(factory):
@@ -117,6 +151,67 @@ def test_clamp_bounds(factory):
         _add_record(factory, "u6", "memory_box", 3, 4, 4, 1, minutes_ago=i)
     with factory() as db:
         assert next_difficulty("u6", "memory_box", db) == 3
+
+
+def _add_window(factory, user_id, difficulty, correct, total, n=5):
+    for i in range(n):
+        _add_record(factory, user_id, "memory_box", difficulty, correct, total, 10, minutes_ago=i)
+
+
+def test_entry_2_stay_at_070(factory):
+    _add_window(factory, "d1", 2, 7, 10)
+    with factory() as db:
+        assert next_difficulty("d1", "memory_box", db) == 2
+
+
+def test_entry_1_climb_to_2_at_070(factory):
+    # 死区回归：1 档下 0.70 能达到 2 档门槛，必须能爬回 2 档
+    _add_window(factory, "d2", 1, 7, 10)
+    with factory() as db:
+        assert next_difficulty("d2", "memory_box", db) == 2
+
+
+def test_entry_2_climb_to_3_at_090(factory):
+    _add_window(factory, "d3", 2, 9, 10)
+    with factory() as db:
+        assert next_difficulty("d3", "memory_box", db) == 3
+
+
+def test_entry_3_drop_to_2_at_080(factory):
+    _add_window(factory, "d4", 3, 8, 10)
+    with factory() as db:
+        assert next_difficulty("d4", "memory_box", db) == 2
+
+
+def test_entry_2_drop_to_1_at_050(factory):
+    _add_window(factory, "d5", 2, 5, 10)
+    with factory() as db:
+        assert next_difficulty("d5", "memory_box", db) == 1
+
+
+def test_entry_1_stay_at_030(factory):
+    _add_window(factory, "d6", 1, 3, 10)
+    with factory() as db:
+        assert next_difficulty("d6", "memory_box", db) == 1
+
+
+def test_only_recent_five_used(factory):
+    # 最老 1 条是 0 分，但窗口只取最近 5 条（0.70），不影响结果
+    _add_window(factory, "d7", 2, 7, 10, n=5)
+    _add_record(factory, "d7", "memory_box", 2, 0, 10, 10, minutes_ago=5)
+    with factory() as db:
+        assert next_difficulty("d7", "memory_box", db) == 2
+
+
+def test_less_than_three_returns_two(factory):
+    with factory() as db:
+        assert next_difficulty("d8", "memory_box", db) == 2
+    _add_record(factory, "d8", "memory_box", 2, 0, 10, 10, minutes_ago=0)
+    with factory() as db:
+        assert next_difficulty("d8", "memory_box", db) == 2
+    _add_record(factory, "d8", "memory_box", 2, 0, 10, 10, minutes_ago=0)
+    with factory() as db:
+        assert next_difficulty("d8", "memory_box", db) == 2
 
 
 def test_record_written(factory):

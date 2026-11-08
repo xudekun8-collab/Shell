@@ -50,3 +50,11 @@
   font-size: 32rpx;
   color: #666666;
 }
+
+.disclaimer {
+  margin-top: 32rpx;
+  padding: 24rpx;
+  font-size: 30rpx;
+  color: #999999;
+  text-align: center;
+}

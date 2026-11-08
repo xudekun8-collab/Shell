@@ -1,7 +1,10 @@
-"""演示数据：造 40 条事件记忆做消融实验底料。"""
+"""演示数据：造事件/会话记忆做消融实验底料。"""
+import argparse
 from datetime import date, timedelta
 
-from app.db.models import Memory
+from sqlalchemy import delete, func, select
+
+from app.db.models import Conversation, InteractionEvent, Memory, Profile, TrainingRecord
 
 SEED_MEMORIES = [
     ("我孙女上周末来看我，带了一盒点心", 5, 7),
@@ -91,31 +94,37 @@ SESSION_MEMORIES = [
 ]
 
 
-def seed_memories(session_factory, user_id: str = "demo_user_1") -> list[dict]:
-    """写入 40 条事件记忆 + 5 条 session 记忆，返回含 memory_id 的列表。"""
-    today = date.today()
+def _insert_seeds(session, user_id: str, today: date) -> list[Memory]:
+    """在给定会话里插入全部种子记忆，返回按插入顺序的对象列表。"""
     objects = []
+    for content, importance, days_ago in SEED_MEMORIES:
+        memory = Memory(
+            user_id=user_id,
+            layer="event",
+            content=content,
+            importance=importance,
+            occurred_at=today - timedelta(days=days_ago),
+        )
+        session.add(memory)
+        objects.append(memory)
+    for content, importance, days_ago in SESSION_MEMORIES:
+        memory = Memory(
+            user_id=user_id,
+            layer="session",
+            content=content,
+            importance=importance,
+            occurred_at=today - timedelta(days=days_ago),
+        )
+        session.add(memory)
+        objects.append(memory)
+    return objects
+
+
+def seed_memories(session_factory, user_id: str = "demo_user_1") -> list[dict]:
+    """追加全部种子记忆，返回含 memory_id 的列表（不做清理）。"""
+    today = date.today()
     with session_factory() as session:
-        for content, importance, days_ago in SEED_MEMORIES:
-            memory = Memory(
-                user_id=user_id,
-                layer="event",
-                content=content,
-                importance=importance,
-                occurred_at=today - timedelta(days=days_ago),
-            )
-            session.add(memory)
-            objects.append(memory)
-        for content, importance, days_ago in SESSION_MEMORIES:
-            memory = Memory(
-                user_id=user_id,
-                layer="session",
-                content=content,
-                importance=importance,
-                occurred_at=today - timedelta(days=days_ago),
-            )
-            session.add(memory)
-            objects.append(memory)
+        objects = _insert_seeds(session, user_id, today)
         session.commit()
     return [
         {
@@ -127,3 +136,78 @@ def seed_memories(session_factory, user_id: str = "demo_user_1") -> list[dict]:
         }
         for m in objects
     ]
+
+
+def reset_demo(session_factory) -> tuple[dict, dict]:
+    """只重置 demo_user_1：清空四类数据、重建画像、重灌种子。"""
+    user_id = "demo_user_1"
+    tables = {
+        "memories": Memory,
+        "training_records": TrainingRecord,
+        "interaction_events": InteractionEvent,
+        "conversations": Conversation,
+    }
+    with session_factory() as session:
+        before = {
+            name: session.execute(
+                select(func.count()).select_from(model).where(model.user_id == user_id)
+            ).scalar()
+            for name, model in tables.items()
+        }
+        for model in tables.values():
+            session.execute(delete(model).where(model.user_id == user_id))
+        profile = session.get(Profile, user_id)
+        if profile is None:
+            profile = Profile(
+                user_id=user_id,
+                nickname="张阿姨",
+                interests=["黄梅戏", "养花"],
+                taboos=["不要提去世的老伴"],
+            )
+            session.add(profile)
+        else:
+            profile.nickname = "张阿姨"
+            profile.interests = ["黄梅戏", "养花"]
+            profile.taboos = ["不要提去世的老伴"]
+        _insert_seeds(session, user_id, date.today())
+        session.commit()
+        after = {
+            name: session.execute(
+                select(func.count()).select_from(model).where(model.user_id == user_id)
+            ).scalar()
+            for name, model in tables.items()
+        }
+    return before, after
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description="演示数据脚本")
+    parser.add_argument(
+        "--reset",
+        action="store_true",
+        help="只重置 demo_user_1（清空记忆/训练/交互/会话，重建画像并重灌种子）",
+    )
+    args = parser.parse_args()
+
+    from app.db.session import SessionLocal
+
+    if args.reset:
+        before, after = reset_demo(SessionLocal)
+        print(
+            f"重置前 memories={before['memories']}, "
+            f"training_records={before['training_records']}, "
+            f"interaction_events={before['interaction_events']}, "
+            f"conversations={before['conversations']}"
+        )
+        print(f"重置后 memories={after['memories']}（应为种子总条数 {len(SEED_MEMORIES) + len(SESSION_MEMORIES)}）")
+    else:
+        seed_memories(SessionLocal)
+        with SessionLocal() as session:
+            total = session.execute(
+                select(func.count()).select_from(Memory).where(Memory.user_id == "demo_user_1")
+            ).scalar()
+        print(f"已追加种子记忆，demo_user_1 当前 memories={total}")
+
+
+if __name__ == "__main__":
+    main()

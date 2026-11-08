@@ -1,25 +1,55 @@
 <view class="page">
-  <view class="header">
-    <view class="greeting">{{greeting}}</view>
-    <view class="links">
-      <view class="link" bindtap="goMemory">记忆</view>
-      <view class="link" bindtap="goGame">游戏</view>
+  <view class="topbar">
+    <view class="nickname">{{greeting}}</view>
+    <view class="capsules">
+      <view class="capsule" bindtap="goMemory">记忆</view>
+      <view class="capsule" bindtap="goGame">游戏</view>
     </view>
+  </view>
+  <view class="accent-line"></view>
+
+  <view class="notice" wx:if="{{showNotice}}">
+    <view class="notice-line">这是一个陪您说话的练习帮手</view>
+    <view class="notice-line">您说的话会存在这台电脑上，不会发到别处</view>
+    <view class="notice-line">它不是医生，身体不舒服还是要找大夫</view>
+    <view class="notice-btn" bindtap="dismissNotice">知道了</view>
   </view>
 
   <scroll-view class="messages" scroll-y scroll-into-view="{{scrollInto}}" scroll-with-animation>
+    <view class="msg-row assistant" wx:if="{{messages.length === 0}}">
+      <view class="bubble">我在呢，您想说点啥，点下头的字就行。</view>
+    </view>
     <view class="msg-row {{item.role}}" wx:for="{{messages}}" wx:key="index" id="msg-{{index}}">
       <view class="bubble">{{item.content}}</view>
     </view>
   </scroll-view>
 
-  <view class="quick">
-    <view class="quick-btn" wx:for="{{quickTexts}}" wx:key="label" data-text="{{item.text}}" bindtap="onQuick">{{item.label}}</view>
+  <view class="wall">
+    <view class="wall-collapsed" wx:if="{{!wallExpanded}}">
+      <view class="quick-grid">
+        <view class="quick-phrase {{sending ? 'disabled' : ''}}" hover-class="hover" wx:for="{{quickPhrases}}" wx:key="*this" data-text="{{item}}" bindtap="onPhrase">{{item}}</view>
+      </view>
+      <view class="wall-toggle" bindtap="toggleWall">还有别的说法，点开看看</view>
+    </view>
+
+    <block wx:else>
+      <scroll-view class="wall-scroll" scroll-y>
+        <view class="phrase-group" wx:for="{{phraseGroups}}" wx:key="title" wx:for-item="group">
+          <view class="phrase-group-title">{{group.title}}</view>
+          <view class="phrase-row">
+            <view class="phrase-btn {{sending ? 'disabled' : ''}}" hover-class="hover" wx:for="{{group.items}}" wx:key="*this" data-text="{{item}}" bindtap="onPhrase">{{item}}</view>
+          </view>
+        </view>
+        <view class="quick-row">
+          <view class="quick-btn {{sending ? 'disabled' : ''}}" hover-class="hover" wx:for="{{quickTexts}}" wx:key="label" data-text="{{item.text}}" bindtap="onQuick">{{item.label}}</view>
+        </view>
+      </scroll-view>
+      <view class="wall-toggle" bindtap="toggleWall">收起</view>
+    </block>
   </view>
 
   <view class="input-bar">
-    <view class="voice-btn" bindtap="onVoice">语音</view>
-    <input class="input" value="{{input}}" bindinput="onInput" confirm-type="send" bindconfirm="onSend" placeholder="想说点什么" />
+    <input class="input" placeholder-class="input-placeholder" value="{{input}}" bindinput="onInput" confirm-type="send" bindconfirm="onSend" placeholder="想说点什么" />
     <view class="send-btn {{sending ? 'disabled' : ''}}" bindtap="onSend">{{sending ? '发送中' : '发送'}}</view>
   </view>
 </view>

@@ -79,7 +79,7 @@
   border: none;
 }
 
-.score {
+.main-result {
   font-size: 48rpx;
   font-weight: bold;
   text-align: center;
@@ -87,7 +87,7 @@
   margin: 40rpx 0 24rpx;
 }
 
-.summary-line {
+.sub-result {
   font-size: 34rpx;
   color: #333333;
   text-align: center;
@@ -95,7 +95,14 @@
   margin-bottom: 12rpx;
 }
 
-.diff {
+.result-note {
+  font-size: 26rpx;
+  color: #999999;
+  text-align: center;
+  margin-top: 8rpx;
+}
+
+.next-diff {
   font-size: 34rpx;
   color: #666666;
   text-align: center;
