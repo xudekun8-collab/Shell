@@ -14,7 +14,7 @@
 
     D:\mysql\stop_mysql.bat
 
-连接参数：`127.0.0.1:3306`，用户 `root`，密码 `elder_care_root`，库 `elder_care`，字符集 `utf8mb4`。
+连接参数：`127.0.0.1:3306`，用户 `root`，库 `elder_care`，字符集 `utf8mb4`。密码不写进仓库，统一在 `backend/.env` 的 `DATABASE_URL` 里配置（模板见 `.env.example`）。
 
 建表并写入演示用户（可重复执行）：
 
