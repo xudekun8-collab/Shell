@@ -1,12 +1,15 @@
 const config = require('./config.js');
 
 function doRequest(options) {
+  const method = (options.method || 'GET').toUpperCase();
+  // GET 都是本地数据库查询，8 秒足够；POST 要走大模型，才需要 15 秒
+  const timeoutMs = options.timeout || (method === 'GET' ? 8000 : 15000);
   return new Promise((resolve) => {
     wx.request({
       url: config.base_url + options.url,
-      method: options.method || 'GET',
+      method: method,
       data: options.data || {},
-      timeout: 15000,
+      timeout: timeoutMs,
       header: { 'Content-Type': 'application/json' },
       success(res) {
         if (res.statusCode >= 200 && res.statusCode < 300) {
@@ -27,7 +30,8 @@ function doRequest(options) {
 function request(options) {
   const method = (options.method || 'GET').toUpperCase();
   return doRequest(options).then((res) => {
-    const shouldRetry = method === 'GET' && !res.ok && (res.kind === 'network' || res.kind === 'timeout');
+    // 只对"连不上"重试；超时不重试——否则一次 8 秒会变成 16.8 秒还没反馈，老人会以为卡死
+    const shouldRetry = method === 'GET' && !res.ok && res.kind === 'network';
     if (!shouldRetry) return res;
     return new Promise((resolve) => {
       setTimeout(() => doRequest(options).then(resolve), 800);
