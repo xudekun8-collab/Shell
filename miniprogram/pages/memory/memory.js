@@ -1,4 +1,5 @@
 const { request } = require('../../utils/request.js');
+const { getUserId } = require('../../utils/user.js');
 
 const TOP_EVENT_LIMIT = 5;
 const DETAIL_EVENT_LIMIT = 20;
@@ -54,7 +55,7 @@ function sliceGroups(groups, limit) {
 
 Page({
   data: {
-    user_id: 'demo_user_1',
+    user_id: '',
     profile: null,
     events: [],
     eventsShown: [],
@@ -68,6 +69,10 @@ Page({
     showDetail: false,
     loading: false,
     load_error: false,
+  },
+
+  onLoad() {
+    this.setData({ user_id: getUserId() });
   },
 
   onShow() {
@@ -91,6 +96,7 @@ Page({
         const dt = parseDate(e.occurred_at);
         return {
           memory_id: e.memory_id,
+          // 仅展示层把"我"改成"您"，不写回库、不参与判分
           content: (e.content || '').replace(/我(?!们)/g, '您'),
           occurred_at: (e.occurred_at || '').slice(0, 10),
           date_text: dt ? dt.label : '日期不详',

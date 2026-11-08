@@ -1,11 +1,11 @@
 const { request } = require('../../utils/request.js');
-
-const DIFFICULTY_TEXT = { 1: '轻松一点', 2: '多动动脑', 3: '来点难的' };
+const { DIFFICULTY_TEXT } = require('../../utils/constants.js');
+const { getUserId } = require('../../utils/user.js');
 const LEVEL_TEXT = { 1: '轻松', 2: '动脑', 3: '挑战' };
 
 Page({
   data: {
-    user_id: 'demo_user_1',
+    user_id: '',
     game_type: 'memory_box',
     session_id: '',
     difficulty: 0,
@@ -38,7 +38,7 @@ Page({
 
   onLoad(query) {
     this.setData({
-      user_id: wx.getStorageSync('user_id') || 'demo_user_1',
+      user_id: getUserId(),
       game_type: (query && query.game_type) || 'memory_box',
     });
     this.startGame();
@@ -156,7 +156,7 @@ Page({
   },
 
   async loadPrevCorrect() {
-    const res = await request({ url: '/api/records/' + this.data.user_id + '?limit=50' });
+    const res = await request({ url: '/api/records/' + this.data.user_id + '?limit=5' });
     if (res.ok && res.data && res.data.records) {
       const prev = res.data.records.find((r) => r.game_type === this.data.game_type);
       this._prevCorrect = prev ? prev.correct_count : null;
