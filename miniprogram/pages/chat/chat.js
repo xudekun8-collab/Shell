@@ -54,9 +54,11 @@ Page({
       wx.setStorageSync('thread_id', threadId);
     }
     const history = wx.getStorageSync('chat_history_' + threadId) || [];
+    const restored = Array.isArray(history) ? history : [];
     this.setData({
       thread_id: threadId,
-      messages: Array.isArray(history) ? history : [],
+      messages: restored,
+      scrollInto: restored.length ? 'msg-' + (restored.length - 1) : '',
       showNotice: !wx.getStorageSync('notice_read'),
     });
     this.loadGreeting();
@@ -122,7 +124,9 @@ Page({
   },
 
   onSend() {
-    this.send(this.data.input);
+    const text = this.data.input;
+    this.send(text);
+    this.setData({ input: '' });
   },
 
   onQuick(e) {
@@ -161,7 +165,7 @@ Page({
 
     const uid = 'm' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
     this._active = (this._active || 0) + 1;
-    this.setData({ input: '', sending: true });
+    this.setData({ sending: true });
     const messages = this.data.messages.concat([
       { role: 'user', content: text, ts: Date.now(), uid },
       { role: 'assistant', pending: true, content: '正在回复…', uid },
