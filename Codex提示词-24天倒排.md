@@ -136,14 +136,13 @@ pytest 106 passed。不需要再 commit 一次。
 
 ### 5.1 小程序适老化与视觉统一（P0）
 
-现状（2026-11-08 实扫结果，不用再查，也不要假设前面改过）：
-全目录 12 处 `font-size` 小于 32rpx（chat 7、game 1、memory 3、records 1）；
-2 处 `word-break: break-all`（chat.wxss 的 .bubble、memory.wxss 的 .content）；
-CSS 变量 0 个；`page` 背景仍是 `#f5f6f8`；`.capsule` 高 60rpx、`.wall-toggle` padding 16rpx 0。
-这一批从零开始改。
-
 ```
-继续这个项目。本次只做"适老化 + 视觉统一"，不碰业务逻辑、不改接口、不改页面结构。
+继续这个项目。先读 AGENTS.md。本次只做"适老化 + 视觉统一"，不碰业务逻辑、不改接口、不改页面结构。
+
+现状（2026-11-08 实扫，不用再查，也不要假设前面改过）：全目录 12 处 font-size 小于 32rpx
+（chat 7、game 1、memory 3、records 1）；2 处 word-break: break-all（chat.wxss 的 .bubble、
+memory.wxss 的 .content）；CSS 变量 0 个；page 背景仍是 #f5f6f8；.capsule 高 60rpx、
+.wall-toggle padding 16rpx 0。这一批从零开始改。
 
 1. 字号：以下都低于 32rpx，逐个提到 32rpx。
    chat.wxss：.capsule 26、.notice-btn 28、.notice-line 28、.wall-toggle 26、
