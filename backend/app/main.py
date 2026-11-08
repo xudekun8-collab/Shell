@@ -5,7 +5,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 
-from app.api import chat, memory
+from app.api import chat, games, memory, records
 from app.db.session import engine
 
 logger = logging.getLogger("elder_care")
@@ -21,7 +21,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 app.include_router(chat.router)
+app.include_router(games.router)
 app.include_router(memory.router)
+app.include_router(records.router)
 
 
 @app.get("/api/health")

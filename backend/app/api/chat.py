@@ -28,6 +28,7 @@ class ChatResponse(BaseModel):
     reason: str
     available_actions: list[str]
     latency_ms: int
+    params: dict | None = None
 
 
 _llm_client = get_client()
@@ -54,6 +55,7 @@ def chat(request: ChatRequest) -> ChatResponse:
     reason = plan.get("reason", "")
     reply_text = result.get("reply_text", "")
     available_actions = result.get("available_actions", [action])
+    params = plan.get("params") if action == "start_game" else None
 
     msg_count = _persist(request, result, action, reason, reply_text, latency_ms)
     if msg_count >= COMPRESS_THRESHOLD:
@@ -65,6 +67,7 @@ def chat(request: ChatRequest) -> ChatResponse:
         reason=reason,
         available_actions=available_actions,
         latency_ms=latency_ms,
+        params=params,
     )
 
 
