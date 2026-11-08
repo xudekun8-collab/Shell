@@ -271,6 +271,25 @@ padding-bottom 固定 560rpx，差约 300rpx。
 禁止：为了 6 条并发引入队列状态机后又改坏现有逻辑；改后端；把 system 消息存进历史。
 ```
 
+### 5.2c 体验补丁：重试按钮化、并发不清输入（2026-11-08）
+
+```
+继续。只改 chat.js 与 chat.wxss 两处，不动 wxml 结构与其余逻辑。
+
+1. 重试提示改成可点的按钮（现在只有灰色 32rpx 文字，看着像说明而不像能点）：
+   .retry-hint 改为：min-height 88rpx（对齐 5.1 的热区标准）、display flex、
+   align-items center、justify-content center、padding 0 28rpx、font-size 32rpx、
+   color var(--c-primary)、background var(--c-soft)、border-radius var(--r-btn)、
+   margin-top 12rpx。文案不变，仍为"没发出去，点这里重试"。
+   验收：失败时提示明显是个按钮，点击能重发。
+
+2. 并发发送不再清空输入框（现在点快捷语会把正在打的字一起清掉）：
+   send 里删掉 setData 中的 input: ''，改到 onSend 里清：
+   onSend() { const text = this.data.input; this.send(text); this.setData({ input: '' }); }
+   验收：输入框打一半字再点快捷语 → 快捷语发出去，字还在；
+        点发送按钮 → 发出去，输入框清空。
+```
+
 ### 5.3 游戏页（P0）
 
 
