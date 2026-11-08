@@ -17,7 +17,7 @@ def build_graph(llm_client, session_factory):
     graph.add_node("perceive", make_perceive(session_factory))
     graph.add_node("retrieve", make_retrieve(session_factory))
     graph.add_node("plan", make_plan(llm_client, session_factory))
-    graph.add_node("act", make_act(session_factory))
+    graph.add_node("act", make_act(llm_client, session_factory))
     graph.add_edge(START, "perceive")
     graph.add_edge("perceive", "retrieve")
     graph.add_conditional_edges(
