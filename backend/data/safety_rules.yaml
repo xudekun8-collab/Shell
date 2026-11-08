@@ -1,0 +1,40 @@
+templates:
+  medical: "涉及用药和病情方面的问题，我不好随便判断，建议您咨询医生，或者去正规医院看看，让专业人员帮您把关。"
+  finance: "涉及转账、投资这些钱的事，您先别急着操作，建议先和家里人商量，或者打正规的银行电话核实一下。"
+  legal: "涉及遗嘱、房产这类法律上的事，我建议您找律师或者正规的法律服务机构，把情况说清楚再决定。"
+  bereavement: "听到您说起这些，我心里也不好受。想念亲人很正常，您愿意的话就多跟我说说，我陪您聊聊。"
+  crisis: "我在这儿听您说，您一定很不容易。这种时候别一个人扛，建议联系家人，或者拨打当地心理援助热线，让专业的人陪您聊聊。"
+
+rules:
+  - {id: med_1, category: medical, keywords: [药], severity: 1, template_key: medical, require_any: [吃, 片, 停, 少, 多, 能不能, 该不该, 副作用, 换药, 一起吃], exclude: [药店, 买药, 涨价, 报销, 医保, 电视里说]}
+  - {id: med_2, category: medical, keywords: [剂量], severity: 1, template_key: medical}
+  - {id: med_3, category: medical, keywords: [吃几片], severity: 1, template_key: medical}
+  - {id: med_4, category: medical, keywords: [停药], severity: 1, template_key: medical}
+  - {id: med_5, category: medical, keywords: [偏方], severity: 1, template_key: medical}
+  - {id: med_6, category: medical, keywords: [病情], severity: 1, template_key: medical}
+  - {id: med_7, category: medical, keywords: [诊断], severity: 1, template_key: medical}
+  - {id: med_8, category: medical, keywords: [检查结果], severity: 1, template_key: medical}
+  - {id: med_9, category: medical, keywords: [化疗], severity: 1, template_key: medical}
+  - {id: med_10, category: medical, keywords: [手术], severity: 1, template_key: medical}
+  - {id: fin_1, category: finance, keywords: [转账], severity: 2, template_key: finance}
+  - {id: fin_2, category: finance, keywords: [汇款], severity: 2, template_key: finance}
+  - {id: fin_3, category: finance, keywords: [投资], severity: 2, template_key: finance, require_any: [我, 给我, 让我, 转, 汇款, 能, 要不要, 靠谱], exclude: [我儿子, 我女儿, 我孙子, 在银行]}
+  - {id: fin_4, category: finance, keywords: [理财], severity: 2, template_key: finance, require_any: [我, 给我, 让我, 转, 汇款, 能, 要不要, 靠谱], exclude: [我儿子, 我女儿, 我孙子, 在银行]}
+  - {id: fin_5, category: finance, keywords: [中奖], severity: 2, template_key: finance}
+  - {id: fin_6, category: finance, keywords: [养老金被冻结], severity: 2, template_key: finance}
+  - {id: fin_7, category: finance, keywords: [银行卡密码], severity: 2, template_key: finance}
+  - {id: leg_1, category: legal, keywords: [遗嘱], severity: 2, template_key: legal}
+  - {id: leg_2, category: legal, keywords: [公证], severity: 2, template_key: legal}
+  - {id: leg_3, category: legal, keywords: [起诉], severity: 2, template_key: legal}
+  - {id: leg_4, category: legal, keywords: [合同], severity: 2, template_key: legal, exclude: [劳动合同法, 电视里说]}
+  - {id: leg_5, category: legal, keywords: [房产过户], severity: 2, template_key: legal}
+  - {id: ber_1, category: bereavement, keywords: [去世], severity: 1, template_key: bereavement}
+  - {id: ber_2, category: bereavement, keywords: [老伴走了, 他走了, 她走了, 人走了, 走了以后, 走了一个人], severity: 1, template_key: bereavement, exclude: [走了走, 出去走, 走走, 散步, 先走了, 走了几步]}
+  - {id: ber_3, category: bereavement, keywords: [葬礼], severity: 1, template_key: bereavement}
+  - {id: ber_4, category: bereavement, keywords: [墓地], severity: 1, template_key: bereavement}
+  - {id: ber_5, category: bereavement, keywords: [想他], severity: 1, template_key: bereavement}
+  - {id: cri_1, category: crisis, keywords: [不想活], severity: 3, template_key: crisis}
+  - {id: cri_2, category: crisis, keywords: [活着没意思, 日子没意思, 过得没意思, 没意思透了, 真没意思], severity: 3, template_key: crisis}
+  - {id: cri_3, category: crisis, keywords: [拖累], severity: 3, template_key: crisis}
+  - {id: cri_4, category: crisis, keywords: [整宿睡不着], severity: 3, template_key: crisis}
+  - {id: cri_5, category: crisis, keywords: [一个人难受], severity: 3, template_key: crisis}

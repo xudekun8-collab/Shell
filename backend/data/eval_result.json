@@ -1,0 +1,60 @@
+{
+  "weights": {
+    "overlap": 0.55,
+    "importance": 0.04,
+    "type": 0.08
+  },
+  "annotated": 36,
+  "results": {
+    "默认": {
+      "recall_at_3": 0.8333,
+      "mrr": 0.8077,
+      "hits": 30,
+      "total": 36
+    },
+    "去掉重要性项": {
+      "recall_at_3": 0.8056,
+      "mrr": 0.809,
+      "hits": 29,
+      "total": 36
+    },
+    "去掉类型项": {
+      "recall_at_3": 0.8333,
+      "mrr": 0.8077,
+      "hits": 30,
+      "total": 36
+    },
+    "时间预过滤": {
+      "recall_at_3": 0.8333,
+      "mrr": 0.8027,
+      "hits": 30,
+      "total": 36
+    }
+  },
+  "results_time": {
+    "默认": {
+      "recall_at_3": 0.5,
+      "mrr": 0.4375,
+      "hits": 3,
+      "total": 6
+    },
+    "去掉重要性项": {
+      "recall_at_3": 0.5,
+      "mrr": 0.4583,
+      "hits": 3,
+      "total": 6
+    },
+    "去掉类型项": {
+      "recall_at_3": 0.5,
+      "mrr": 0.4375,
+      "hits": 3,
+      "total": 6
+    },
+    "时间预过滤": {
+      "recall_at_3": 0.5,
+      "mrr": 0.4405,
+      "hits": 3,
+      "total": 6
+    }
+  }
+}

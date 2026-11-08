@@ -1,0 +1,25 @@
+"""动作白名单：只有这 6 个动作。"""
+ACTION_REPLY = "reply"
+ACTION_START_GAME = "start_game"
+ACTION_START_ASSESSMENT = "start_assessment"
+ACTION_SUGGEST_REST = "suggest_rest"
+ACTION_REMIND = "remind"
+ACTION_END = "end"
+
+ALL_ACTIONS = [
+    ACTION_REPLY,
+    ACTION_START_GAME,
+    ACTION_START_ASSESSMENT,
+    ACTION_SUGGEST_REST,
+    ACTION_REMIND,
+    ACTION_END,
+]
+
+ACTION_DESCRIPTIONS = {
+    ACTION_REPLY: "普通回复",
+    ACTION_START_GAME: "启动认知小游戏",
+    ACTION_START_ASSESSMENT: "简易测评",
+    ACTION_SUGGEST_REST: "建议休息",
+    ACTION_REMIND: "给出提醒",
+    ACTION_END: "结束对话",
+}

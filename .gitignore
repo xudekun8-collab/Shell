@@ -1,0 +1,23 @@
+# Python 虚拟环境与缓存
+backend/.venv/
+__pycache__/
+*.py[cod]
+
+# 密钥与环境变量：backend/.env 里有真实 DeepSeek key，严禁入库
+backend/.env
+*.env.local
+
+# 本地数据库与日志
+*.db
+*.sqlite3
+backend/*.log
+backend/_uv_*.log
+
+# 临时输出文件
+backend/_*.txt
+backend/eval_out.txt
+
+# 编辑器与系统文件
+.vscode/
+.idea/
+Thumbs.db
