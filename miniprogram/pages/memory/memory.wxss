@@ -69,9 +69,30 @@
   color: var(--c-text-weak);
 }
 
+.status {
+  padding: 120rpx 0;
+  text-align: center;
+  font-size: 32rpx;
+  color: var(--c-text-weak);
+}
+
+.clickable {
+  min-height: 88rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.month-title {
+  margin: 16rpx 0 12rpx;
+  font-size: 32rpx;
+  font-weight: bold;
+  color: var(--c-text-weak);
+}
+
 .more {
-  min-height: 60rpx;
-  line-height: 60rpx;
+  min-height: 88rpx;
+  line-height: 88rpx;
   font-size: 32rpx;
   color: var(--c-text-weak);
   text-align: left;

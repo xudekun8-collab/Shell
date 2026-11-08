@@ -1,7 +1,7 @@
 """训练记录查询接口。"""
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
-from sqlalchemy import select
+from sqlalchemy import case, func, select
 
 from app.api.deps import require_demo_token
 from app.db.models import TrainingRecord
@@ -23,6 +23,7 @@ class Summary(BaseModel):
     total: int
     avg_accuracy: int
     total_duration: int
+    by_type: list[dict]
 
 
 class RecordsResponse(BaseModel):
@@ -47,6 +48,24 @@ def get_records(user_id: str, limit: int = 20) -> RecordsResponse:
             if valid
             else 0
         )
+        by_type_rows = db.execute(
+            select(
+                TrainingRecord.game_type,
+                func.count(),
+                func.avg(
+                    case(
+                        (TrainingRecord.total_count > 0, TrainingRecord.correct_count * 100.0 / TrainingRecord.total_count),
+                        else_=None,
+                    )
+                ),
+            )
+            .where(TrainingRecord.user_id == user_id)
+            .group_by(TrainingRecord.game_type)
+        ).all()
+        by_type = [
+            {"game_type": gt, "total": cnt, "avg_accuracy": round(avg_acc or 0)}
+            for gt, cnt, avg_acc in by_type_rows
+        ]
         recent = db.execute(
             select(TrainingRecord)
             .where(TrainingRecord.user_id == user_id)
@@ -70,5 +89,6 @@ def get_records(user_id: str, limit: int = 20) -> RecordsResponse:
             total=len(all_rows),
             avg_accuracy=avg_accuracy,
             total_duration=sum(r.duration_sec for r in all_rows),
+            by_type=by_type,
         ),
     )
