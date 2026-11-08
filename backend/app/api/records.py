@@ -1,0 +1,69 @@
+"""训练记录查询接口。"""
+from fastapi import APIRouter
+from pydantic import BaseModel
+from sqlalchemy import select
+
+from app.db.models import TrainingRecord
+from app.db.session import SessionLocal
+
+router = APIRouter()
+
+
+class RecordItem(BaseModel):
+    game_type: str
+    difficulty: int
+    correct_count: int
+    total_count: int
+    duration_sec: int
+    created_at: str
+
+
+class Summary(BaseModel):
+    total: int
+    avg_accuracy: int
+    total_duration: int
+
+
+class RecordsResponse(BaseModel):
+    records: list[RecordItem]
+    summary: Summary
+
+
+@router.get("/api/records/{user_id}", response_model=RecordsResponse)
+def get_records(user_id: str, limit: int = 20) -> RecordsResponse:
+    limit = max(1, min(limit, 50))
+    with SessionLocal() as db:
+        all_rows = db.execute(
+            select(TrainingRecord).where(TrainingRecord.user_id == user_id)
+        ).scalars().all()
+        valid = [r for r in all_rows if r.total_count > 0]
+        avg_accuracy = (
+            round(sum(r.correct_count / r.total_count for r in valid) / len(valid) * 100)
+            if valid
+            else 0
+        )
+        recent = db.execute(
+            select(TrainingRecord)
+            .where(TrainingRecord.user_id == user_id)
+            .order_by(TrainingRecord.created_at.desc())
+            .limit(limit)
+        ).scalars().all()
+        records = [
+            RecordItem(
+                game_type=r.game_type,
+                difficulty=r.difficulty,
+                correct_count=r.correct_count,
+                total_count=r.total_count,
+                duration_sec=r.duration_sec,
+                created_at=r.created_at.strftime("%Y-%m-%d %H:%M:%S"),
+            )
+            for r in recent
+        ]
+    return RecordsResponse(
+        records=records,
+        summary=Summary(
+            total=len(all_rows),
+            avg_accuracy=avg_accuracy,
+            total_duration=sum(r.duration_sec for r in all_rows),
+        ),
+    )

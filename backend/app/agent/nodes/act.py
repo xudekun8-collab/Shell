@@ -34,6 +34,11 @@ def make_act(session_factory):
         params = plan.get("params") or {}
         if action == ACTION_END:
             text = END_REPLY_TEXT
+        elif action == ACTION_START_GAME:
+            if params.get("game_type") == "category_sort":
+                text = "咱们把东西分一分类"
+            else:
+                text = "咱们玩个记东西的小游戏，就当活动活动脑子。"
         elif action == ACTION_REPLY and params.get("reply_text"):
             text = params["reply_text"]
         else:

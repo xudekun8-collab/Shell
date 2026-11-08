@@ -64,6 +64,14 @@ Page({
     if (res.ok) {
       const next = this.data.messages.concat({ role: 'assistant', content: res.data.reply_text });
       this.setData({ messages: next, scrollInto: 'msg-' + (next.length - 1) });
+      if (res.data.action === 'start_game') {
+        const params = res.data.params || {};
+        setTimeout(() => {
+          wx.navigateTo({
+            url: '/pages/game/game?game_type=' + (params.game_type || 'memory_box') + '&difficulty=' + (params.difficulty || 0),
+          });
+        }, 600);
+      }
     } else {
       wx.showToast({ title: '网络不太顺畅，再试一次', icon: 'none' });
     }
