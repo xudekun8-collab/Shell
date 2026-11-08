@@ -69,3 +69,11 @@ node --check miniprogram/pages/chat/chat.js
 - 一键检查：双击仓库根目录的 `scripts/check.bat`，依次跑后端 pytest（基线 128 例）、前端 JS 语法、JSON 合法性、静态红线检查（字号 <30rpx、break-all、业务页面硬编码 demo_user_1），全过打印 `ALL CHECKS PASSED`，任一失败打印 `FAIL: <步骤>` 并退出码 1。
 - 后端接口由 pytest 覆盖（`tests/`，用内存 SQLite + FakeClient，不连 MySQL、不调真模型）；小程序端微信开发者工具的 CLI service port 本机关着，脚本驱动不了，靠 `docs/manual_checklist.md` 人工逐条确认（登录/聊天/游戏/记录/记忆五组）。
 - 自动化只覆盖后端接口，小程序端行为以 `docs/manual_checklist.md` 的人工勾选为准。
+
+## 部署
+
+本机 HTTPS（自签证书）、备份/恢复、容器化方案详见 `docs/deploy.md`。
+
+- HTTPS：`scripts/gen_cert.bat` 生成自签证书，`scripts/start_https.bat` 起 8443；HTTP 8000（`backend/start_server.bat`）保留并存。
+- 备份：`python scripts/backup_db.py`（保留最近 7 份），恢复验证 `python scripts/verify_restore.py`（导入临时库，不覆盖演示库）。
+- 容器化：`deploy/Dockerfile` / `deploy/docker-compose.yml` / `deploy/nginx.conf` 已产出，但**本机（Windows，无 Docker/WSL）未运行验证此方案**，仅作为可移植部署方案交付。
