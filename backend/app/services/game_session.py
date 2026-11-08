@@ -6,7 +6,7 @@ _SESSIONS = {}
 _TTL_SECONDS = 30 * 60  # 30 分钟未提交视为过期
 
 
-def create(user_id: str, game_type: str, difficulty: int, group: dict) -> str:
+def create(user_id: str, game_type: str, difficulty: int, payload: dict) -> str:
     """创建会话；同一用户新 start 覆盖旧会话。"""
     cleanup()
     for sid in list(_SESSIONS):
@@ -17,7 +17,7 @@ def create(user_id: str, game_type: str, difficulty: int, group: dict) -> str:
         "user_id": user_id,
         "game_type": game_type,
         "difficulty": difficulty,
-        "group": group,
+        "payload": payload,
         "started_at": time.time(),
     }
     return session_id

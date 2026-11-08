@@ -145,3 +145,102 @@ def test_submit_missing_session_404(factory, monkeypatch):
     )
     assert resp.status_code == 404
     assert resp.json()["detail"] == "会话已失效，请重新开始"
+
+
+def _cat_answer_map():
+    bank = json.loads((_DATA_DIR / "category_sort.json").read_text(encoding="utf-8"))
+    m = {}
+    for groups in bank.values():
+        for g in groups:
+            m[g["id"]] = g["answer"]
+    return m
+
+
+def test_category_sort_question_counts(factory):
+    with factory() as db:
+        start = game_engine.start("cs_mid_u", "category_sort", db)
+    assert len(start["items"]["questions"]) == 8
+
+    for i in range(3):
+        _add_record(factory, "cs_low_u", "category_sort", 1, 0, 3, 10, minutes_ago=i)
+    with factory() as db:
+        start = game_engine.start("cs_low_u", "category_sort", db)
+    assert len(start["items"]["questions"]) == 6
+
+    for i in range(3):
+        _add_record(factory, "cs_high_u", "category_sort", 3, 3, 3, 1, minutes_ago=i)
+    with factory() as db:
+        start = game_engine.start("cs_high_u", "category_sort", db)
+    assert len(start["items"]["questions"]) == 10
+
+
+def test_category_sort_ids_unique(factory):
+    with factory() as db:
+        start = game_engine.start("cs_uniq_u", "category_sort", db)
+    ids = [q["id"] for q in start["items"]["questions"]]
+    assert len(ids) == len(set(ids))
+
+
+def test_category_sort_judging(factory):
+    id_answer = _cat_answer_map()
+    with factory() as db:
+        start = game_engine.start("cs_j1", "category_sort", db)
+    qs = start["items"]["questions"]
+    all_correct = [{"index": i, "value": id_answer[q["id"]]} for i, q in enumerate(qs)]
+    with factory() as db:
+        r = game_engine.submit(start["session_id"], all_correct, 5, False, db)
+    assert r["correct"] == r["total"] == len(qs)
+
+    with factory() as db:
+        start2 = game_engine.start("cs_j2", "category_sort", db)
+    qs2 = start2["items"]["questions"]
+    all_wrong = [
+        {"index": i, "value": next(o for o in q["options"] if o != id_answer[q["id"]])}
+        for i, q in enumerate(qs2)
+    ]
+    with factory() as db:
+        r2 = game_engine.submit(start2["session_id"], all_wrong, 5, False, db)
+    assert r2["correct"] == 0
+    assert r2["total"] == len(qs2)
+
+    with factory() as db:
+        start3 = game_engine.start("cs_j3", "category_sort", db)
+    qs3 = start3["items"]["questions"]
+    partial = [
+        {"index": i, "value": id_answer[q["id"]] if i % 2 == 0 else next(o for o in q["options"] if o != id_answer[q["id"]])}
+        for i, q in enumerate(qs3)
+    ]
+    with factory() as db:
+        r3 = game_engine.submit(start3["session_id"], partial, 5, False, db)
+    assert r3["correct"] == sum(1 for i in range(len(qs3)) if i % 2 == 0)
+    assert r3["total"] == len(qs3)
+
+
+def test_category_sort_missing_answers(factory):
+    id_answer = _cat_answer_map()
+    with factory() as db:
+        start = game_engine.start("cs_j4", "category_sort", db)
+    qs = start["items"]["questions"]
+    submit_count = len(qs) - 3
+    answers = [{"index": i, "value": id_answer[q["id"]]} for i, q in enumerate(qs[:submit_count])]
+    with factory() as db:
+        r = game_engine.submit(start["session_id"], answers, 5, False, db)
+    assert r["total"] == len(qs)
+    assert r["correct"] == submit_count
+
+
+def test_category_sort_no_answer_leak(factory):
+    with factory() as db:
+        start = game_engine.start("cs_j5", "category_sort", db)
+    for q in start["items"]["questions"]:
+        assert "answer" not in q
+
+
+def test_category_sort_bank_counts():
+    bank = json.loads((_DATA_DIR / "category_sort.json").read_text(encoding="utf-8"))
+    assert len(bank["low"]) == 10
+    assert len(bank["mid"]) == 12
+    assert len(bank["high"]) == 12
+    for groups in bank.values():
+        for g in groups:
+            assert g["answer"] in g["options"]

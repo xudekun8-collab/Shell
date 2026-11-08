@@ -17,6 +17,7 @@ Page({
     quiz_total: 0,
     quiz_target: '',
     answers: [],
+    questions: [],
     word: '',
     options: [],
     result: null,
@@ -75,9 +76,11 @@ Page({
       patch.quiz_target = d.items.quizzes[0].target;
     } else {
       patch.phase = 'quiz';
-      patch.word = d.items.word;
-      patch.options = d.items.options;
-      patch.quiz_total = 1;
+      patch.questions = d.items.questions;
+      patch.quiz_total = d.items.questions.length;
+      patch.quiz_index = 0;
+      patch.word = d.items.questions[0].word;
+      patch.options = d.items.questions[0].options;
     }
     this.setData(patch);
     if (d.game_type === 'memory_box') {
@@ -112,7 +115,15 @@ Page({
     this.clearTimer();
     const next = this.data.quiz_index + 1;
     if (next < this.data.quiz_total) {
-      this.setData({ quiz_index: next, quiz_target: this.data.quizzes[next].target });
+      if (this.data.game_type === 'memory_box') {
+        this.setData({ quiz_index: next, quiz_target: this.data.quizzes[next].target });
+      } else {
+        this.setData({
+          quiz_index: next,
+          word: this.data.questions[next].word,
+          options: this.data.questions[next].options,
+        });
+      }
       this.scheduleQuiz();
     } else {
       this.submit(false);
@@ -129,8 +140,10 @@ Page({
 
   answerCategory(e) {
     this.clearTimer();
-    this.setData({ answers: [{ index: 0, value: e.currentTarget.dataset.value }] });
-    this.submit(false);
+    const idx = this.data.quiz_index;
+    const value = e.currentTarget.dataset.value;
+    this.setData({ answers: this.data.answers.concat([{ index: idx, value: value }]) });
+    this.nextQuiz();
   },
 
   tooHard() {

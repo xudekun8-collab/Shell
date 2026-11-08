@@ -11,7 +11,10 @@ _DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data" / "game_items
 _GAME_FILES = {"memory_box": "memory_box.json", "category_sort": "category_sort.json"}
 _LEVELS = {1: "low", 2: "mid", 3: "high"}
 
-# 同一用户同一类型最近用过的组 id，避免连续重复
+# 分类类一局题量：档位 -> 题数
+_CATEGORY_QUESTION_COUNT = {1: 6, 2: 8, 3: 10}
+
+# 同一用户同一类型最近用过的组 id：记忆类是单个 id，分类类是 id 集合
 _last_used = {}
 
 
@@ -23,17 +26,32 @@ def _load(game_type: str) -> dict:
 def start(user_id: str, game_type: str, db) -> dict:
     difficulty = next_difficulty(user_id, game_type, db)
     groups = _load(game_type)[_LEVELS[difficulty]]
-    last = _last_used.get((user_id, game_type))
-    candidates = [g for g in groups if g["id"] != last] or groups
-    group = random.choice(candidates)
-    _last_used[(user_id, game_type)] = group["id"]
-
-    session_id = game_session.create(user_id, game_type, difficulty, group)
 
     if game_type == "memory_box":
+        last = _last_used.get((user_id, game_type))
+        candidates = [g for g in groups if g["id"] != last] or groups
+        group = random.choice(candidates)
+        _last_used[(user_id, game_type)] = group["id"]
+        payload = {"quizzes": group["quizzes"]}
         items = {"show_items": group["show_items"], "quizzes": group["quizzes"]}
     else:
-        items = {"word": group["word"], "options": group["options"]}
+        count = min(_CATEGORY_QUESTION_COUNT[difficulty], len(groups))
+        used = _last_used.get((user_id, game_type), set())
+        unused = [g for g in groups if g["id"] not in used]
+        chosen = random.sample(unused, min(count, len(unused)))
+        if len(chosen) < count:
+            backfill = [g for g in groups if g["id"] in used]
+            chosen += random.sample(backfill, count - len(chosen))
+        _last_used[(user_id, game_type)] = {g["id"] for g in chosen}
+        payload = {"questions": chosen}
+        items = {
+            "questions": [
+                {"id": g["id"], "word": g["word"], "options": g["options"]}
+                for g in chosen
+            ]
+        }
+
+    session_id = game_session.create(user_id, game_type, difficulty, payload)
 
     return {
         "session_id": session_id,
@@ -49,7 +67,7 @@ def submit(session_id: str, answers: list, duration_sec: int, abandoned: bool, d
     if session is None:
         raise ValueError("会话已失效，请重新开始")
 
-    group = session["group"]
+    payload = session["payload"]
     user_id = session["user_id"]
     game_type = session["game_type"]
     difficulty = session["difficulty"]
@@ -58,15 +76,19 @@ def submit(session_id: str, answers: list, duration_sec: int, abandoned: bool, d
     answer_map = {a.get("index"): a.get("value") for a in (answers or [])}
 
     if game_type == "memory_box":
-        quizzes = group["quizzes"]
+        quizzes = payload["quizzes"]
         total = len(quizzes)
         correct = sum(
             1 for i, q in enumerate(quizzes)
             if i in answer_map and bool(answer_map[i]) == bool(q["appeared"])
         )
     else:
-        total = 1
-        correct = 1 if (0 in answer_map and answer_map[0] == group["answer"]) else 0
+        questions = payload["questions"]
+        total = len(questions)
+        correct = sum(
+            1 for i, q in enumerate(questions)
+            if i in answer_map and answer_map[i] == q["answer"]
+        )
 
     db.add(
         TrainingRecord(
