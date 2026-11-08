@@ -63,3 +63,9 @@ node --check miniprogram/pages/chat/chat.js
 ## 安全提醒（演示后门）
 
 `DEMO_MODE=1` 时，`POST /api/auth/demo` 接受任意 `user_id` 并直接签发 token，等于整站鉴权对任何人放开。这只用于答辩现场演示；正式部署必须 `DEMO_MODE=0`（此时演示登录返回 401，旧版带 user_id 的接口返回 403）。
+
+## 质量护栏
+
+- 一键检查：双击仓库根目录的 `scripts/check.bat`，依次跑后端 pytest（基线 128 例）、前端 JS 语法、JSON 合法性、静态红线检查（字号 <30rpx、break-all、业务页面硬编码 demo_user_1），全过打印 `ALL CHECKS PASSED`，任一失败打印 `FAIL: <步骤>` 并退出码 1。
+- 后端接口由 pytest 覆盖（`tests/`，用内存 SQLite + FakeClient，不连 MySQL、不调真模型）；小程序端微信开发者工具的 CLI service port 本机关着，脚本驱动不了，靠 `docs/manual_checklist.md` 人工逐条确认（登录/聊天/游戏/记录/记忆五组）。
+- 自动化只覆盖后端接口，小程序端行为以 `docs/manual_checklist.md` 的人工勾选为准。
