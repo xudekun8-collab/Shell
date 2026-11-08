@@ -231,7 +231,48 @@ memory.wxss 的 .content）；CSS 变量 0 个；page 背景仍是 #f5f6f8；.ca
      改后端接口；用 setInterval 轮询等待。
 ```
 
+### 5.2b 补丁：5.2 实测发现的三个必修缺陷（2026-11-08）
+
+```
+5.2 主体已完成，这次只修三个缺陷，不改其他已完成的功能。
+
+缺陷 1（必现）：结束态系统提示渲染错，而且会被存进历史。
+现象：发"不聊了"后，"这轮聊完了"显示成普通气泡（没有浅底胶囊样式），退出重进还在。
+根因：chat.js 的 _enterEnd 插入 {role:'system', content:'这轮聊完了'}，但没有 system 字段；
+wxml 用 wx:if="{{item.system}}" 判断，走不到 system-tip 分支；
+_persist 用 !m.system 过滤，所以这条被写进 storage。
+修：_enterEnd 插入时补 system: true；wxml 判断改成 wx:if="{{item.system || item.role === 'system'}}"；
+    _persist 的过滤加 m.role !== 'system'。
+验收：结束提示是浅底胶囊；退出重进后历史里没有"这轮聊完了"，输入框可用。
+
+缺陷 2（必现）：连发 6 条时，第 2 条起被静默丢弃。
+现象：点第一下后，再点任何快捷语都没反应，也没有提示。
+根因：send 开头 if (this.data.sending) return; 静默 return。
+修（二选一，优先 A）：
+A. 允许并发：去掉 sending 阻塞，每条消息带 uid（'m' + Date.now() + 随机），
+   用 pending 的 uid 定位替换，不再用 index；sending 只用于按钮文案（= 还有未完成请求）。
+B. 保留串行但给反馈：sending 时把文本塞回输入框并 toast"等我把上一句说完哈"，不丢弃。
+验收：连续点 6 条快捷语 → 6 条用户消息 + 6 个占位，回复各按 uid 落位，不串、不乱序。
+
+缺陷 3（展开态遮挡）：话术墙展开时最后一条消息被 dock 压住。
+根因：.wall-scroll max-height 52vh，展开态 dock 实际约 52vh + 200rpx，而 .messages 的
+padding-bottom 固定 560rpx，差约 300rpx。
+修：用 createSelectorQuery 在 onReady 与展开/收起时测量 .dock 实际高度，
+把它设为 .messages 的 padding-bottom（换算成 px 直接用即可）。
+验收：展开话术墙后滚到最底，最后一条消息完整可见。
+
+可选（不阻塞，自行判断）：
+- normalizeReply 截断 300 字时，尽量在最后一个句号/问号/感叹号处切；
+- 15 秒占位计时器实际不会触发（wx.request timeout 是 10s，10s 就失败并 clearTimeout），
+  要么改成 8s，要么承认它只是兜底，别再在验收里写"15 秒后变文案"；
+- kind/status 已加进 request，chat 页仍用统一话术，可按 kind 区分：
+  timeout → "我这儿慢了点，您再说一遍"，network → "没连上，等会儿再试"。
+
+禁止：为了 6 条并发引入队列状态机后又改坏现有逻辑；改后端；把 system 消息存进历史。
+```
+
 ### 5.3 游戏页（P0）
+
 
 ```
 继续。只改 pages/game 与 utils/request.js。
