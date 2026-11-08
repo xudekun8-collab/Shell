@@ -61,6 +61,7 @@
     </view>
 
     <view class="input-bar">
+      <view class="voice-btn {{recording ? 'recording' : ''}}" bindtouchstart="onVoiceStart" bindtouchend="onVoiceEnd" bindtouchcancel="onVoiceEnd">{{voiceLabel}}</view>
       <input class="input" placeholder-class="input-placeholder" value="{{input}}" maxlength="60" disabled="{{ended}}" bindinput="onInput" confirm-type="send" bindconfirm="onSend" placeholder="想说点什么" />
       <view class="send-btn" wx:if="{{!ended}}" bindtap="onSend">{{sending ? '发送中' : '发送'}}</view>
       <view class="send-btn restart" wx:else bindtap="restart">重新开始</view>
