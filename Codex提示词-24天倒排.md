@@ -292,25 +292,68 @@ padding-bottom 固定 560rpx，差约 300rpx。
 
 ### 5.3 游戏页（P0）
 
+现状（2026-11-08 核对 game.js / game.wxml / 后端 app/api/games.py，八条只有第 4 条部分做了）：
+答题无选中态、无停顿，`answerMemory` / `answerCategory` 直接 `nextQuiz()`；
+倒计时只有一次性 `setTimeout`，无剩余秒数、无进度条，超时静默跳题；
+结果文案 category_sort 也是"分对了 X 样东西"；error 页整页同一句、只有"再试一次"；
+没有 onHide/onShow；后端 `/api/game/submit` 已返回 `summary_text`
+（"这次完成了 X 题，答对 Y 题，用时 Z 秒。\n本结果只用于调整练习难度，不作为任何健康判断。"），
+前端没用它，自己拼了 `main_text` / `sub_text` 还硬编码了一句免责；quiz 顶部只有"第 X/Y"，没有难度标签。
+后端语义：submit 找不到会话返回 404（detail "会话已失效，请重新开始"），其余失败是网络或 5xx。
 
 ```
-继续。只改 pages/game 与 utils/request.js。
+继续。只改 pages/game 三件套（js/wxml/wxss）。utils/request.js 在 5.2 里已有 status 与 kind，
+不要重复改；后端不动。
 
-1. 答题反馈：点下后按钮立刻选中态，停 350ms 再跳题；期间 answering 标志禁止连点。
-2. 倒计时：quiz 阶段顶部加进度条 + 剩余秒数，用 time_limit_sec 递减；剩 3 秒变警示色。
-   计时器单独命名 _countdownTimer，不要复用管跳题的 _timer。
-3. 超时提示：超时跳题前显示"时间到，下一题"，停 1 秒。
-4. 文案修正：category_sort 结果"分对了 X 样东西"→"分对了 X 题"；memory_box 保持"记住了 X 样东西"；
-   "下一局"统一为"轻松一点 / 多动动脑 / 来点难的"。
-5. 错误区分（等 request.js 返回 status）：
-   404 → "这局等太久了，咱们重新开始"，按钮直接 startGame()
-   网络/5xx → "网络不太顺畅"，按钮"再试一次"与"回去聊天"
-6. 切后台：onHide 清 _countdownTimer 并记剩余，onShow 恢复；onUnload 两个计时器都清。
-7. 结果页直接展示后端 summary_text，不要前端再拼免责句。
-8. quiz 顶部补"这局：轻松 / 动脑 / 挑战"。
+1. 答题反馈：点下后立刻给选中态（data 里存 selectedValue，wxml 用 {{selectedValue === item}} 高亮），
+   同时置 answering: true 禁止连点；停 350ms 再清选中态、answering 并 nextQuiz()。
+   memory_box 的"有/没有"与 category_sort 的选项都要有。
+   注意：点下的瞬间先 clearTimer()，否则 350ms 内超时计时器可能触发跳题。
 
-验收：emoji 无；倒计时可见且最后 3 秒变色；点选有反馈且不连跳；停手有超时提示；
-category 结果是"题"；404 提示准确并能重开；切后台 30 秒回来计时暂停。
+2. 倒计时：quiz 阶段顶部加进度条 + 剩余秒数，用 time_limit_sec 初始化，
+   计时器命名 _countdownTimer（setInterval 每秒递减 data.countdown），不要复用管切词/跳题的 _timer。
+   剩余 3 秒给秒数和进度条加警示色（新 class .urgent，用 --c-danger）。
+   剩余到 0 时进入第 3 条的超时流程，不要再直接 nextQuiz。
+
+3. 超时提示：超时后先显示"时间到，下一题"（data 里 timeoutTip: true，居中一行），
+   停 1 秒再 nextQuiz()。这一秒内答题按钮不可点。
+
+4. 文案：category_sort 一律用"题"，memory_box 用"样东西"：
+   main_text：category → "今天分对了 X 题"；memory → "今天记住了 X 样东西"。
+   sub_text 同步：category → "比上次多对了 X 题""头一回就对 X 题"；memory → "比上次多记了 X 样""头一回就记 X 样"。
+   DIFFICULTY_TEXT 改为 {1:'轻松一点', 2:'多动动脑', 3:'来点难的'}，wxml 的"下一局：{{}}"保留。
+
+5. 错误区分（用 request 返回的 status 与 kind）：
+   submit 返回 404 → "这局等太久了，咱们重新开始"，只放一个按钮，点了直接 startGame()；
+   submit 5xx 或 kind 为 network/timeout → "网络不太顺畅，对不住"，放"再试一次"与"回去聊天"两个按钮；
+   start 失败 → 归到网络类。error 页用 data 里的 error_kind 区分文案与按钮，不要全页一句话。
+
+6. 切后台：onHide 清 _countdownTimer 与 _timer，把当前剩余秒数存进 this._remainingSec；
+   onShow 从 _remainingSec 恢复倒计时（remember 阶段记当前 remember_index，回来后从该词重新计 2 秒）。
+   onUnload 两个计时器都清。切走再回来不能算超时，也不能直接跳到下一题。
+
+7. 结果页改用后端 summary_text：按 \n 拆开，第一行做 main（"这次完成了 X 题，答对 Y 题，用时 Z 秒。"），
+   第二行做底部小字（后端已带"不作为任何健康判断"）。删掉 wxml 里硬编码的
+   "这只是练习记录，不是看病依据。"，避免同一句出现两次。
+   sub_text 的鼓励语（比上次多记了/头一回就记）保留，放在 main 下方。
+   summary_text 只有一行时第二行留空，不要报错。
+
+8. 难度标签：quiz 与 remember 顶部补"这局：轻松 / 动脑 / 挑战"，跟 difficulty 1/2/3 对应，
+   和"第 X/Y" 并列，字号 ≥32rpx。
+
+9. 可选（不阻塞，自行判断）：remember 阶段每词 2 秒偏快（8 个词要 16 秒），
+   改成 3 秒或加一个"记住了，下一个"手动按钮；这个改动不影响自适应逻辑。
+
+验收（逐条贴现象，不许只写"已完成"）：
+① 点选项 → 立刻变高亮，350ms 后跳下一题；连点两下只前进一题；
+② quiz 顶部有"剩余 X 秒"和进度条，剩 3 秒变红，到 0 显示"时间到，下一题"再跳；
+③ 答完 category_sort → 结果是"分对了 X 题"，不是"样东西"；
+④ 结果页第一行是"本次完成了 X 题，答对 Y 题"，下面只有一句免责，不重复；
+⑤ 停掉后端提交 → 404 与网络两种文案分别出现，按钮个数正确（404 一个，网络两个）；
+⑥ 玩到一半切后台 30 秒回来 → 倒计时停在切走时的秒数继续，没有跳题。
+
+禁止：把 _timer 与 _countdownTimer 合并成一个变量；在 answering 期间允许再点；
+     改后端接口或改 summary_text 文案；结果页同时出现"不作为健康判断"和"不是看病依据"两句。
 ```
 
 ### 5.4 记录页与记忆页（P1）
