@@ -190,7 +190,7 @@ Page({
     this.clearCountdown();
     this.clearTimeoutTimer();
     const start = initialSec != null && initialSec > 0 ? initialSec : this.data.time_limit_sec;
-    this.setData({ countdown: start, timeoutTip: false, answering: false });
+    this.setData({ countdown: start, timeoutTip: false, answering: false, selectedValue: '' });
     this._countdownTimer = setInterval(() => {
       const next = this.data.countdown - 1;
       if (next <= 0) {
@@ -296,7 +296,11 @@ Page({
     const noteText = (lines[1] || '').trim();
     const correct = d.correct;
     let subText = '';
-    if (correct > 0) {
+    if (correct === 0) {
+      subText = this.data.game_type === 'memory_box'
+        ? '今天有点累，咱们下回少记几样，慢慢来。'
+        : '今天这些不太熟，下回我挑更好认的给您。';
+    } else if (correct > 0) {
       if (this._prevCorrect === null || this._prevCorrect === undefined) {
         subText = this.data.game_type === 'memory_box'
           ? '头一回就记 ' + correct + ' 样，挺好'
