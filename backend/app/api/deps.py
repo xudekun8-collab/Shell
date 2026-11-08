@@ -21,7 +21,10 @@ def current_user(authorization: str | None = Header(default=None)) -> dict:
         payload = decode_token(token, config.AUTH_SECRET)
     except Exception:
         raise HTTPException(status_code=401, detail="登录已失效")
-    return {"user_id": payload["user_id"], "role": payload.get("role", "elder")}
+    user_id = payload.get("user_id")
+    if not user_id:
+        raise HTTPException(status_code=401, detail="登录已失效")
+    return {"user_id": user_id, "role": payload.get("role", "elder")}
 
 
 def require_role(role: str):

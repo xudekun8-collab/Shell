@@ -1,5 +1,4 @@
 const { request } = require('../../utils/request.js');
-const { DEMO_MODE } = require('../../utils/constants.js');
 
 Page({
   data: {
@@ -15,10 +14,11 @@ Page({
   },
 
   async onStart() {
-    if (DEMO_MODE) {
-      await this._demoLogin();
-    } else {
-      await this._wxLogin();
+    const demoOk = await this._demoLogin();
+    if (demoOk) return;
+    const wxOk = await this._wxLogin();
+    if (!wxOk) {
+      wx.showToast({ title: '没连上，再试一次', icon: 'none' });
     }
   },
 
@@ -27,20 +27,20 @@ Page({
       url: '/api/auth/demo',
       method: 'POST',
       data: { user_id: 'demo_user_1' },
+      timeout: 400,
       skipAuthRedirect: true,
     });
     if (res.ok) {
       this._saveAndEnter(res.data);
-    } else {
-      wx.showToast({ title: '演示登录没开，请确认后端', icon: 'none' });
+      return true;
     }
+    return false;
   },
 
   async _wxLogin() {
     const code = await this._getWxCode();
     if (!code) {
-      wx.showToast({ title: '没拿到微信凭证，再试一次', icon: 'none' });
-      return;
+      return false;
     }
     const res = await request({
       url: '/api/auth/wx',
@@ -50,9 +50,9 @@ Page({
     });
     if (res.ok) {
       this._saveAndEnter(res.data);
-    } else {
-      wx.showToast({ title: '登录没成功，再试一次', icon: 'none' });
+      return true;
     }
+    return false;
   },
 
   _getWxCode() {

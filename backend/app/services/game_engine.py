@@ -62,10 +62,12 @@ def start(user_id: str, game_type: str, db) -> dict:
     }
 
 
-def submit(session_id: str, answers: list, duration_sec: int, abandoned: bool, db) -> dict:
+def submit(session_id: str, answers: list, duration_sec: int, abandoned: bool, db, expect_user_id: str | None = None) -> dict:
     session = game_session.get(session_id)
     if session is None:
         raise ValueError("会话已失效，请重新开始")
+    if expect_user_id is not None and session["user_id"] != expect_user_id:
+        raise PermissionError("会话不属于当前用户")
 
     payload = session["payload"]
     user_id = session["user_id"]

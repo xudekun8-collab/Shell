@@ -58,7 +58,10 @@ def submit_game(request: SubmitRequest, user: dict = Depends(current_user)) -> S
                 request.duration_sec,
                 request.abandoned,
                 db,
+                expect_user_id=user["user_id"],
             )
+    except PermissionError:
+        raise HTTPException(status_code=403, detail="会话不属于当前用户")
     except ValueError:
         raise HTTPException(status_code=404, detail="会话已失效，请重新开始")
     return SubmitResponse(**result)
