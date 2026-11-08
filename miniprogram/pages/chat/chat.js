@@ -100,7 +100,7 @@ Page({
   },
 
   onVoiceStart() {
-    if (this.data.ended) return;
+    if (this.data.ended || this.data.recording) return;
     if (!wx.getStorageSync('voice_notice_shown')) {
       wx.setStorageSync('voice_notice_shown', true);
       wx.showModal({
@@ -109,14 +109,14 @@ Page({
         showCancel: false,
         confirmText: '知道了',
       });
+      return;
     }
     this._recorder.start({ duration: 60000, format: 'mp3' });
   },
 
   onVoiceEnd() {
-    if (this._recorder) {
-      this._recorder.stop();
-    }
+    if (!this.data.recording || !this._recorder) return;
+    this._recorder.stop();
   },
 
   _genThreadId() {
