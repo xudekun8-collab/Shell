@@ -44,7 +44,7 @@ def _elder_for_family(db, family_user_id: str) -> str | None:
 
 
 @router.post("/api/family/invite", response_model=InviteResponse)
-def create_invite(user: dict = Depends(current_user)) -> InviteResponse:
+def create_invite(user: dict = Depends(require_role("elder"))) -> InviteResponse:
     """老人生成 6 位邀请码，24 小时内有效。"""
     code = f"{random.randint(0, 999999):06d}"
     expires = datetime.now() + timedelta(hours=INVITE_TTL_HOURS)
@@ -59,6 +59,8 @@ def bind(request: BindRequest, user: dict = Depends(current_user)) -> BindRespon
     """家属凭邀请码绑定老人，成功后换发 role=family 的 token。"""
     if not config.AUTH_SECRET:
         raise HTTPException(status_code=500, detail="AUTH_SECRET 未配置")
+    if user.get("role") == "family":
+        raise HTTPException(status_code=400, detail="家属账号无需再绑定")
     now = datetime.now()
     with SessionLocal() as db:
         row = db.execute(
@@ -70,6 +72,8 @@ def bind(request: BindRequest, user: dict = Depends(current_user)) -> BindRespon
         ).scalars().first()
         if row is None:
             raise HTTPException(status_code=400, detail="邀请码无效或已过期")
+        if row.elder_id == user["user_id"]:
+            raise HTTPException(status_code=400, detail="不能绑定自己的邀请码")
         row.family_user_id = user["user_id"]
         row.bound_at = now
         elder_id = row.elder_id

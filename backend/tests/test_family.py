@@ -95,3 +95,32 @@ def test_unbound_family_404(client):
     for path in ("/api/family/overview", "/api/family/records", "/api/family/alerts"):
         resp = c.get(path, headers=headers)
         assert resp.status_code == 404, path
+
+
+def test_self_bind_400(client):
+    c, _ = client
+    invite = c.post("/api/family/invite", headers=_elder_headers())
+    assert invite.status_code == 200
+    code = invite.json()["invite_code"]
+    resp = c.post("/api/family/bind", json={"invite_code": code}, headers=_elder_headers())
+    assert resp.status_code == 400
+    assert resp.json()["detail"] == "不能绑定自己的邀请码"
+
+
+def test_family_invite_403(client):
+    c, _ = client
+    headers = {"Authorization": "Bearer " + create_token("family_x", "family", SECRET)}
+    resp = c.post("/api/family/invite", headers=headers)
+    assert resp.status_code == 403
+
+
+def test_family_bind_again_400(client):
+    c, _ = client
+    token = _bind(c)
+    resp = c.post(
+        "/api/family/bind",
+        json={"invite_code": "000000"},
+        headers={"Authorization": "Bearer " + token},
+    )
+    assert resp.status_code == 400
+    assert resp.json()["detail"] == "家属账号无需再绑定"
