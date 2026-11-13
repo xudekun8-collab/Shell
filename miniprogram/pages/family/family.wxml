@@ -1,0 +1,27 @@
+<view class="page">
+  <view class="title">家属查看</view>
+  <view class="tip">只能看摘要、训练记录和告警，看不到原始对话。</view>
+
+  <view class="bind" wx:if="{{!bound}}">
+    <input class="code-input" placeholder="输入老人给的 6 位邀请码" bindinput="onCode" maxlength="6" />
+    <view class="btn" bindtap="onBind">绑定</view>
+  </view>
+
+  <block wx:else>
+    <view class="section">
+      <view class="section-title">概览</view>
+      <view class="line">今天聊了 {{overview.today_chat_count || 0}} 轮</view>
+      <view class="line" wx:if="{{overview.last_summary}}">最近摘要：{{overview.last_summary}}</view>
+    </view>
+    <view class="section">
+      <view class="section-title">最近训练</view>
+      <view class="empty" wx:if="{{records.length === 0}}">还没有训练记录</view>
+      <view class="item" wx:for="{{records}}" wx:key="index">{{item.game_type}} · 正确率{{item.accuracy}}% · {{item.date}}</view>
+    </view>
+    <view class="section">
+      <view class="section-title">告警</view>
+      <view class="empty" wx:if="{{alerts.length === 0}}">暂无告警</view>
+      <view class="item" wx:for="{{alerts}}" wx:key="index">{{item.detail}}</view>
+    </view>
+  </block>
+</view>

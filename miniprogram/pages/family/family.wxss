@@ -1,0 +1,66 @@
+.page {
+  padding: 28rpx;
+}
+
+.title {
+  font-size: 40rpx;
+  font-weight: 600;
+  color: var(--c-primary);
+}
+
+.tip {
+  margin-top: 12rpx;
+  font-size: 32rpx;
+  color: var(--c-text-weak);
+}
+
+.bind {
+  margin-top: 40rpx;
+}
+
+.code-input {
+  height: 88rpx;
+  padding: 0 28rpx;
+  font-size: 34rpx;
+  background-color: var(--c-surface);
+  border-radius: var(--r-btn);
+}
+
+.btn {
+  margin-top: 24rpx;
+  height: 88rpx;
+  line-height: 88rpx;
+  text-align: center;
+  font-size: 34rpx;
+  color: #ffffff;
+  background-color: var(--c-primary);
+  border-radius: var(--r-btn);
+}
+
+.section {
+  margin-top: 32rpx;
+}
+
+.section-title {
+  margin-bottom: 12rpx;
+  font-size: 34rpx;
+  font-weight: bold;
+  color: var(--c-primary);
+}
+
+.line,
+.item {
+  margin-bottom: 12rpx;
+  padding: 20rpx 24rpx;
+  font-size: 32rpx;
+  color: #333333;
+  background-color: var(--c-surface);
+  border-radius: var(--r-card);
+}
+
+.empty {
+  padding: 40rpx 0;
+  text-align: center;
+  font-size: 32rpx;
+  color: var(--c-text-weak);
+}

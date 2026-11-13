@@ -4,8 +4,10 @@
     "pages/chat/chat",
     "pages/records/records",
     "pages/memory/memory",
+    "pages/family/family",
     "pages/game/game"
   ],
+  "lazyCodeLoading": "requiredComponents",
   "window": {
     "navigationBarTitleText": "陪伴助手",
     "navigationBarBackgroundColor": "#1f3a5f",

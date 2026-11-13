@@ -14,7 +14,7 @@ from app.agent.nodes.act import make_act
 from app.agent.nodes.perceive import make_perceive
 from app.agent.nodes.plan import make_plan
 from app.agent.nodes.retrieve import make_retrieve
-from app.api.deps import current_user
+from app.api.deps import require_role
 from app.db.models import Conversation, InteractionEvent
 from app.db.session import SessionLocal
 from app.llm.client import get_client
@@ -47,10 +47,10 @@ _act = make_act(_llm_client, SessionLocal)
 
 
 @router.post("/api/chat", response_model=ChatResponse)
-def chat(request: ChatRequest, user: dict = Depends(current_user)) -> ChatResponse:
+def chat(request: ChatRequest, user: dict = Depends(require_role("elder"))) -> ChatResponse:
     started = time.perf_counter()
     user_id = user["user_id"]
-    recent = recent_turns(user_id, request.thread_id)
+    recent = recent_turns(user_id, request.thread_id, session_factory=SessionLocal)
     result = _graph.invoke(
         {
             "user_id": user_id,
@@ -165,9 +165,9 @@ def _stream_gen(user_id: str, thread_id: str, text: str, recent: list[str]):
 
 
 @router.post("/api/chat/stream")
-def chat_stream(request: ChatRequest, user: dict = Depends(current_user)):
+def chat_stream(request: ChatRequest, user: dict = Depends(require_role("elder"))):
     user_id = user["user_id"]
-    recent = recent_turns(user_id, request.thread_id)
+    recent = recent_turns(user_id, request.thread_id, session_factory=SessionLocal)
     return StreamingResponse(
         _stream_gen(user_id, request.thread_id, request.text, recent),
         media_type="text/event-stream",

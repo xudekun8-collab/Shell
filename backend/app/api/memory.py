@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy import select
 
-from app.api.deps import current_user, legacy_path_allowed
+from app.api.deps import legacy_path_allowed, require_role
 from app.db.models import Conversation, Memory, Profile
 from app.db.session import SessionLocal
 
@@ -72,7 +72,7 @@ def _query_memories(user_id: str) -> MemoryLayersResponse:
 
 
 @router.get("/api/memories", response_model=MemoryLayersResponse)
-def get_memories(user: dict = Depends(current_user)) -> MemoryLayersResponse:
+def get_memories(user: dict = Depends(require_role("elder"))) -> MemoryLayersResponse:
     return _query_memories(user["user_id"])
 
 
@@ -83,7 +83,7 @@ def get_memories_legacy(user_id: str) -> MemoryLayersResponse:
 
 
 @router.delete("/api/memories/{memory_id}", response_model=DeleteResponse)
-def delete_memory(memory_id: int, user: dict = Depends(current_user)) -> DeleteResponse:
+def delete_memory(memory_id: int, user: dict = Depends(require_role("elder"))) -> DeleteResponse:
     with SessionLocal() as session:
         memory = session.get(Memory, memory_id)
         if memory is None or memory.is_deleted == 1:

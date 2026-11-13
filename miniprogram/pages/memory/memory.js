@@ -118,6 +118,23 @@ Page({
     this.fetch();
   },
 
+  async onInvite() {
+    const res = await request({ url: '/api/family/invite', method: 'POST' });
+    if (res.ok && res.data && res.data.invite_code) {
+      wx.showModal({
+        title: '邀请码',
+        content: '请把这 6 位邀请码告诉家人：' + res.data.invite_code + '（24 小时内有效）',
+        showCancel: false,
+      });
+    } else {
+      wx.showToast({ title: '生成失败，再试一次', icon: 'none' });
+    }
+  },
+
+  goFamily() {
+    wx.navigateTo({ url: '/pages/family/family' });
+  },
+
   _applyEvents(events) {
     const eventGroups = groupEventsByMonth(events);
     this.setData({
