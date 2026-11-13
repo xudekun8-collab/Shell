@@ -30,6 +30,7 @@ Page({
     input: '',
     sending: false,
     recording: false,
+    translating: false,
     voiceLabel: '按住说话',
     ended: false,
     scrollInto: '',
@@ -79,39 +80,79 @@ Page({
       this.setData({ recording: true, voiceLabel: '松开结束' });
     });
     this._recorder.onStop((res) => {
-      this.setData({ recording: false, voiceLabel: '按住说话' });
+      this.setData({ recording: false, translating: true, voiceLabel: '正在听…' });
       const dur = res && res.duration ? res.duration : 0;
       if (dur < 1000) {
+        this.setData({ translating: false, voiceLabel: '按住说话' });
         wx.showToast({ title: '太短了，您多说两句', icon: 'none' });
         return;
       }
-      // 没有 ASR 能力：不上传、不落库，只提示
-      wx.showToast({ title: '语音还没开通，您打字，我在这儿听着', icon: 'none' });
+      const path = res && res.tempFilePath;
+      if (!path) {
+        this.setData({ translating: false, voiceLabel: '按住说话' });
+        wx.showToast({ title: '这会儿听不清，您打字也行', icon: 'none' });
+        return;
+      }
+      wx.getFileSystemManager().readFile({
+        filePath: path,
+        encoding: 'base64',
+        success: (fileRes) => this._sendAsr(fileRes.data),
+        fail: () => {
+          this.setData({ translating: false, voiceLabel: '按住说话' });
+          wx.showToast({ title: '这会儿听不清，您打字也行', icon: 'none' });
+        },
+      });
     });
     this._recorder.onError((err) => {
-      this.setData({ recording: false, voiceLabel: '按住说话' });
+      this.setData({ recording: false, translating: false, voiceLabel: '按住说话' });
       const msg = (err && err.errMsg) || '';
       if (msg.indexOf('auth') >= 0) {
         wx.showToast({ title: '没拿到麦克风权限，您打字也行', icon: 'none' });
       } else {
-        wx.showToast({ title: '语音还没开通，您打字，我在这儿听着', icon: 'none' });
+        wx.showToast({ title: '这会儿听不清，您打字也行', icon: 'none' });
       }
     });
   },
 
+  async _sendAsr(audioBase64) {
+    this.setData({ translating: true, voiceLabel: '正在听…' });
+    const res = await request({
+      url: '/api/asr',
+      method: 'POST',
+      data: { audio_base64: audioBase64, format: 'mp3' },
+    });
+    this.setData({ translating: false, voiceLabel: '按住说话' });
+    if (res.ok && res.data) {
+      const text = (res.data.text || '').trim();
+      if (text) {
+        this.setData({ input: text });
+      } else {
+        wx.showToast({ title: '没听清，您再说一遍或打字', icon: 'none' });
+      }
+    } else {
+      wx.showToast({ title: '这会儿听不清，您打字也行', icon: 'none' });
+    }
+  },
+
   onVoiceStart() {
-    if (this.data.ended || this.data.recording) return;
-    if (!wx.getStorageSync('voice_notice_shown')) {
-      wx.setStorageSync('voice_notice_shown', true);
+    if (this.data.ended || this.data.recording || this.data.translating) return;
+    if (!wx.getStorageSync('voice_notice_asr_shown')) {
+      wx.setStorageSync('voice_notice_asr_shown', true);
       wx.showModal({
         title: '提示',
-        content: '语音功能还没开通。开通后录音只在您手机上转成文字，我们不会存录音。',
+        content: '按住说话，录音会发到云端转成文字，转完就删，不会保存。您看一眼再点发送。',
         showCancel: false,
         confirmText: '知道了',
       });
       return;
     }
-    this._recorder.start({ duration: 60000, format: 'mp3' });
+    this._recorder.start({
+      duration: 60000,
+      format: 'mp3',
+      sampleRate: 16000,
+      encodeBitRate: 48000,
+      numberOfChannels: 1,
+    });
   },
 
   onVoiceEnd() {
