@@ -24,6 +24,10 @@ TTS_API_KEY = os.getenv("TTS_API_KEY", "")
 TTS_VOICE = os.getenv("TTS_VOICE", "")
 TTS_PROVIDER = os.getenv("TTS_PROVIDER", "")
 
+TENCENT_SECRET_ID = os.getenv("TENCENT_SECRET_ID", "")
+TENCENT_SECRET_KEY = os.getenv("TENCENT_SECRET_KEY", "")
+TENCENT_ASR_REGION = os.getenv("TENCENT_ASR_REGION", "ap-shanghai")
+
 
 def database_url() -> str:
     """返回 SQLAlchemy 连接串。
