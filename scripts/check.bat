@@ -23,7 +23,7 @@ if errorlevel 1 (
 popd
 
 echo [2/5] 前端 JS 语法
-for %%f in (miniprogram\pages\chat\chat.js miniprogram\pages\game\game.js miniprogram\pages\records\records.js miniprogram\pages\memory\memory.js miniprogram\pages\login\login.js miniprogram\utils\request.js miniprogram\utils\user.js miniprogram\utils\constants.js miniprogram\app.js) do (
+for %%f in (miniprogram\pages\chat\chat.js miniprogram\pages\game\game.js miniprogram\pages\records\records.js miniprogram\pages\memory\memory.js miniprogram\pages\family\family.js miniprogram\pages\login\login.js miniprogram\utils\request.js miniprogram\utils\user.js miniprogram\utils\constants.js miniprogram\app.js) do (
   node --check "%%f" >nul 2>&1
   if errorlevel 1 (
     echo FAIL: JS 语法错误 %%f
@@ -32,7 +32,7 @@ for %%f in (miniprogram\pages\chat\chat.js miniprogram\pages\game\game.js minipr
 )
 
 echo [3/5] JSON 合法性
-backend\.venv\Scripts\python.exe -c "import json; [json.load(open(f,encoding='utf-8')) for f in ['miniprogram/app.json','miniprogram/sitemap.json','miniprogram/pages/chat/chat.json','miniprogram/pages/game/game.json','miniprogram/pages/records/records.json','miniprogram/pages/memory/memory.json','miniprogram/pages/login/login.json']]" >nul 2>&1
+backend\.venv\Scripts\python.exe -c "import json; [json.load(open(f,encoding='utf-8')) for f in ['miniprogram/app.json','miniprogram/sitemap.json','miniprogram/pages/chat/chat.json','miniprogram/pages/game/game.json','miniprogram/pages/records/records.json','miniprogram/pages/memory/memory.json','miniprogram/pages/family/family.json','miniprogram/pages/login/login.json']]" >nul 2>&1
 if errorlevel 1 (
   echo FAIL: JSON 校验失败
   exit /b 1

@@ -2,7 +2,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
-from app.api.deps import current_user
+from app.api.deps import require_role
 from app.db.session import SessionLocal
 from app.services import game_engine
 
@@ -42,14 +42,14 @@ class SubmitResponse(BaseModel):
 
 
 @router.post("/api/game/start", response_model=StartResponse)
-def start_game(request: StartRequest, user: dict = Depends(current_user)) -> StartResponse:
+def start_game(request: StartRequest, user: dict = Depends(require_role("elder"))) -> StartResponse:
     with SessionLocal() as db:
         result = game_engine.start(user["user_id"], request.game_type, db)
     return StartResponse(**result)
 
 
 @router.post("/api/game/submit", response_model=SubmitResponse)
-def submit_game(request: SubmitRequest, user: dict = Depends(current_user)) -> SubmitResponse:
+def submit_game(request: SubmitRequest, user: dict = Depends(require_role("elder"))) -> SubmitResponse:
     try:
         with SessionLocal() as db:
             result = game_engine.submit(

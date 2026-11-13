@@ -4,7 +4,7 @@ import logging
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 
-from app.api.deps import current_user, legacy_path_allowed
+from app.api.deps import legacy_path_allowed, require_role
 from app.db.models import Profile
 from app.db.session import SessionLocal
 from app.services.greeting import build_greeting, record_greeting
@@ -32,7 +32,7 @@ def _greeting(user_id: str, thread_id: str | None) -> GreetingResponse:
 
 
 @router.get("/api/greeting", response_model=GreetingResponse)
-def get_greeting(user: dict = Depends(current_user), thread_id: str | None = None) -> GreetingResponse:
+def get_greeting(user: dict = Depends(require_role("elder")), thread_id: str | None = None) -> GreetingResponse:
     return _greeting(user["user_id"], thread_id)
 
 

@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 
 from app import config
-from app.api.deps import current_user
+from app.api.deps import require_role
 
 router = APIRouter()
 
@@ -13,7 +13,7 @@ class TtsRequest(BaseModel):
 
 
 @router.post("/api/tts")
-def synthesize(request: TtsRequest, user: dict = Depends(current_user)):
+def synthesize(request: TtsRequest, user: dict = Depends(require_role("elder"))):
     # 接入点：待接入云 TTS 后，用 TTS_API_KEY/TTS_VOICE/TTS_PROVIDER 调云服务拿 mp3 字节流，
     # 返回 StreamingResponse(content=bytes, media_type="audio/mpeg")。不打印 key 与 text 原文。
     if not config.TTS_API_KEY:

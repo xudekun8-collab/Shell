@@ -139,3 +139,18 @@ class InteractionEvent(Base):
     created_at: Mapped[datetime] = mapped_column(
         DateTime, nullable=False, default=datetime.now, server_default=func.now()
     )
+
+
+class FamilyBind(Base):
+    """家属邀请码与绑定关系：elder_id 生成邀请码，family_user_id 凭码绑定。"""
+    __tablename__ = "family_bind"
+
+    id: Mapped[int] = mapped_column(BigIntPK, primary_key=True, autoincrement=True)
+    elder_id: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
+    family_user_id: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
+    invite_code: Mapped[str] = mapped_column(String(16), nullable=False, index=True)
+    expires_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    bound_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, nullable=False, default=datetime.now, server_default=func.now()
+    )
