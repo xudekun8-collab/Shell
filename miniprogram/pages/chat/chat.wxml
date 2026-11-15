@@ -43,39 +43,45 @@
 
   <view class="dock">
     <view class="wall">
-      <view class="wall-collapsed" wx:if="{{!wallExpanded}}">
-        <view class="quick-heading">常说的话</view>
-        <scroll-view class="quick-scroll" scroll-x>
-          <view class="quick-grid">
-            <block wx:for="{{quickPhrases}}" wx:key="*this">
-              <view class="phrase-chip quick-card {{ended ? 'disabled' : ''}}" hover-class="hover" wx:if="{{index > 0}}" data-text="{{item}}" bindtap="onPhrase">{{item}}</view>
-            </block>
+      <block wx:if="{{wallExpanded}}">
+        <view class="wall-head">
+          <view class="wall-title">常说的话</view>
+          <view class="wall-close" hover-class="press" bindtap="toggleWall">
+            <text>收起</text>
+            <text class="close-mark">⌄</text>
           </view>
-        </scroll-view>
-        <view class="wall-toggle" hover-class="press" bindtap="toggleWall">
-          <text>还有别的说法</text>
-          <text class="toggle-arrow">›</text>
         </view>
-      </view>
 
-      <block wx:else>
+        <view class="quick-bar">
+          <view class="quick-pill {{ended ? 'disabled' : ''}}" hover-class="hover" wx:for="{{quickTexts}}" wx:key="label" data-text="{{item.text}}" bindtap="onQuick">{{item.label}}</view>
+        </view>
+
         <scroll-view class="wall-scroll" scroll-y>
-          <view class="phrase-group">
-            <view class="phrase-group-title">常用回答</view>
-            <view class="phrase-row">
-              <view class="phrase-chip {{ended ? 'disabled' : ''}}" hover-class="hover" wx:for="{{quickTexts}}" wx:key="label" data-text="{{item.text}}" bindtap="onQuick">{{item.label}}</view>
-            </view>
-          </view>
           <view class="phrase-group" wx:for="{{phraseGroups}}" wx:key="title" wx:for-item="group">
-            <view class="phrase-group-title">{{group.title}}</view>
-            <view class="phrase-row">
+            <view class="group-head">
+              <view class="group-mark"></view>
+              <view class="group-title">{{group.title}}</view>
+              <view class="group-count">{{group.items.length}} 句</view>
+            </view>
+            <view class="group-grid">
               <view class="phrase-chip {{ended ? 'disabled' : ''}}" hover-class="hover" wx:for="{{group.items}}" wx:key="*this" data-text="{{item}}" bindtap="onPhrase">{{item}}</view>
             </view>
           </view>
         </scroll-view>
-        <view class="wall-toggle" hover-class="press" bindtap="toggleWall">
-          <text>收起</text>
-          <text class="toggle-arrow">⌃</text>
+      </block>
+
+      <block wx:else>
+        <view class="wall-collapsed">
+          <scroll-view class="quick-scroll" scroll-x>
+            <view class="quick-grid">
+              <view class="phrase-chip quick-card action {{ended ? 'disabled' : ''}}" hover-class="hover" wx:for="{{quickTexts}}" wx:key="label" data-text="{{item.text}}" bindtap="onQuick">{{item.label}}</view>
+              <view class="phrase-chip quick-card {{ended ? 'disabled' : ''}}" hover-class="hover" wx:for="{{quickPhrases}}" wx:key="*this" data-text="{{item}}" bindtap="onPhrase">{{item}}</view>
+            </view>
+          </scroll-view>
+          <view class="wall-toggle" hover-class="press" bindtap="toggleWall">
+            <text>还有别的说法</text>
+            <text class="toggle-arrow">›</text>
+          </view>
         </view>
       </block>
     </view>

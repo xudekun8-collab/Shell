@@ -315,6 +315,126 @@
   padding: 0;
 }
 
+/* 展开态：顶部常驻标题与收起，下面三种「常用回答」，再下面是可滚动的分组卡片 */
+.wall-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4rpx var(--sp-4) 0;
+}
+
+.wall-title {
+  font-size: var(--fs-body);
+  font-weight: 700;
+  color: var(--c-text);
+}
+
+.wall-close {
+  min-width: 160rpx;
+  min-height: 88rpx;
+  padding: 0 var(--sp-3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8rpx;
+  font-size: var(--fs-body);
+  color: var(--c-primary);
+  background-color: var(--c-brand-soft);
+  border-radius: var(--r-pill);
+  box-sizing: border-box;
+}
+
+.close-mark {
+  font-size: var(--fs-title);
+  line-height: 1;
+}
+
+.quick-bar {
+  display: flex;
+  gap: 12rpx;
+  padding: 4rpx var(--sp-4) 12rpx;
+  box-sizing: border-box;
+}
+
+/* 这三句是「动作」不是「话题」，用暖色与话题区分开 */
+.quick-pill {
+  flex: 1 1 0;
+  min-height: 96rpx;
+  padding: 8rpx var(--sp-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--fs-body);
+  font-weight: 600;
+  color: var(--c-accent);
+  background-color: var(--c-accent-soft);
+  border-radius: var(--r-pill);
+  box-sizing: border-box;
+}
+
+.wall-scroll {
+  max-height: 36vh;
+  padding: 0 var(--sp-4) 8rpx;
+  box-sizing: border-box;
+}
+
+.phrase-group {
+  margin-bottom: 16rpx;
+  padding: 4rpx 16rpx 20rpx;
+  background-color: var(--c-surface-strong);
+  border: 1rpx solid var(--c-line);
+  border-radius: var(--r-lg);
+  box-sizing: border-box;
+}
+
+.group-head {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  padding: 12rpx 4rpx 14rpx;
+}
+
+.group-mark {
+  width: 8rpx;
+  height: 32rpx;
+  border-radius: 4rpx;
+  background-color: var(--c-accent);
+}
+
+.group-title {
+  font-size: var(--fs-body);
+  font-weight: 700;
+  color: var(--c-text);
+}
+
+.group-count {
+  margin-left: auto;
+  font-size: var(--fs-note);
+  color: var(--c-text-weak);
+}
+
+/* 两列等宽：长短句都占半行，避免每行长短不齐的锯齿感 */
+.group-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+}
+
+.group-grid .phrase-chip {
+  flex: 1 1 calc(50% - 6rpx);
+  min-width: 0;
+  min-height: 96rpx;
+  padding: 12rpx var(--sp-2);
+  justify-content: center;
+  text-align: center;
+  line-height: 1.35;
+}
+
+/* 折叠态：一行横向滑动，动作在前、话题在后 */
+.wall-collapsed {
+  padding: 0;
+}
+
 .quick-scroll {
   width: 100%;
   padding: 0 var(--sp-4);
@@ -328,13 +448,6 @@
   min-width: 100%;
   padding-bottom: 4rpx;
   box-sizing: border-box;
-}
-
-.quick-heading {
-  padding: 12rpx var(--sp-4) 8rpx;
-  font-size: var(--fs-note);
-  font-weight: 600;
-  color: var(--c-text-weak);
 }
 
 .phrase-chip {
@@ -361,11 +474,17 @@
   white-space: nowrap;
 }
 
+.quick-card.action {
+  color: var(--c-accent);
+  background-color: var(--c-accent-soft);
+  font-weight: 600;
+}
+
 .wall-toggle {
   min-width: 96rpx;
-  height: 96rpx;
-  min-height: 96rpx;
-  padding: var(--sp-1) var(--sp-4);
+  height: 88rpx;
+  min-height: 88rpx;
+  padding: var(--sp-1) var(--sp-4) 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -379,26 +498,6 @@
 .toggle-arrow {
   font-size: var(--fs-title);
   color: var(--c-accent);
-}
-
-.wall-scroll {
-  max-height: 52vh;
-  padding: 0 var(--sp-4);
-  box-sizing: border-box;
-}
-
-.phrase-group-title {
-  margin: var(--sp-1) var(--sp-1) var(--sp-2);
-  font-size: var(--fs-note);
-  color: var(--c-text-weak);
-  text-align: left;
-}
-
-.phrase-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12rpx;
-  margin-bottom: var(--sp-2);
 }
 
 .voice-preview {
