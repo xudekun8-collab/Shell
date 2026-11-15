@@ -13,8 +13,8 @@ test('剥掉噪声词和的了，只留关键词', () => {
 });
 
 test('整句忌讳能命中带同关键词的短语', () => {
-  const phrase = '我老伴以前爱唱戏';
-  assert.equal(shouldHidePhrase(phrase, ['不要提去世的老伴']), true);
+  const phrase = '我想儿子了';
+  assert.equal(shouldHidePhrase(phrase, ['不要提去世的儿子']), true);
 });
 
 test('词直接出现在短语里也算命中', () => {
