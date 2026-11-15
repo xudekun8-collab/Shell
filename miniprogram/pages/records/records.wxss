@@ -179,43 +179,92 @@
   font-size: var(--fs-body);
 }
 
-/* ---------- 日期筛选（点组标题进入，顶部一条返回） ---------- */
+/* ---------- 日期筛选（点日期标题弹出面板） ---------- */
 
-.filter-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--sp-2);
-  margin-bottom: var(--sp-2);
+.list-hint {
+  margin: var(--sp-2) 0 0;
+  font-size: var(--fs-note);
+  color: var(--c-text-weak);
 }
 
-.filter-back {
-  flex: none;
-  min-width: 168rpx;
-  min-height: 88rpx;
-  padding: 0 var(--sp-3);
+.sheet-mask {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  z-index: 100;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6rpx;
-  font-size: var(--fs-body);
-  color: var(--c-primary);
-  background-color: var(--c-brand-soft);
-  border-radius: var(--r-pill);
+  align-items: flex-end;
+  background-color: rgba(28, 24, 20, 0.45);
+}
+
+.sheet {
+  width: 100%;
+  padding: var(--sp-3) var(--sp-4) calc(var(--sp-3) + env(safe-area-inset-bottom));
+  background-color: var(--c-surface);
+  border-radius: var(--r-lg) var(--r-lg) 0 0;
   box-sizing: border-box;
 }
 
-.back-mark {
-  font-size: var(--fs-title);
-  color: var(--c-accent);
+.sheet-title {
+  padding: var(--sp-1) 0 var(--sp-2);
+  font-size: var(--fs-body);
+  font-weight: 700;
+  color: var(--c-text);
+  text-align: center;
 }
 
-.filter-current {
+.sheet-scroll {
+  max-height: 52vh;
+}
+
+.sheet-item {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  min-height: 96rpx;
+  padding: 0 var(--sp-2);
+  border-bottom: 1rpx solid var(--c-line);
+  box-sizing: border-box;
+}
+
+.sheet-item.active .sheet-label {
+  color: var(--c-primary);
+  font-weight: 700;
+}
+
+.sheet-label {
   flex: 1 1 auto;
   min-width: 0;
-  text-align: right;
+  font-size: var(--fs-body);
+  color: var(--c-text);
+}
+
+.sheet-count {
+  flex: none;
   font-size: var(--fs-note);
   color: var(--c-text-weak);
+}
+
+.sheet-check {
+  flex: none;
+  width: 40rpx;
+  font-size: var(--fs-body);
+  color: var(--c-success);
+  text-align: center;
+}
+
+.sheet-cancel {
+  margin-top: var(--sp-3);
+  min-height: 96rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--fs-body);
+  color: var(--c-text-weak);
+  background-color: var(--c-brand-soft);
+  border-radius: var(--r-pill);
 }
 
 .group-empty {
@@ -229,12 +278,6 @@
 
 .group {
   margin-bottom: var(--sp-1);
-}
-
-.list-hint {
-  margin: var(--sp-2) 0 0;
-  font-size: var(--fs-note);
-  color: var(--c-text-weak);
 }
 
 .group-head {
@@ -267,8 +310,8 @@
   color: var(--c-muted);
 }
 
-.group-arrow {
-  font-size: var(--fs-title);
+.group-caret {
+  font-size: var(--fs-note);
   color: var(--c-accent);
 }
 

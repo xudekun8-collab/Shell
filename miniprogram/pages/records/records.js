@@ -93,8 +93,9 @@ Page({
     groups: [],
     activeDate: 'all',
     activeLabel: '',
-    activeCount: 0,
     isFiltered: false,
+    dateOptions: [],
+    showDateSheet: false,
     summary: {
       total: 0,
       total_duration: 0,
@@ -163,17 +164,33 @@ Page({
     const hit = allGroups.filter((group) => group.date === wanted)[0];
     const activeDate = hit ? wanted : 'all';
     const isFiltered = activeDate !== 'all';
+    const activeLabel = isFiltered ? hit.label : '';
+    // 弹层里的选项：只在有记录的日期里选，带当天条数
+    const dateOptions = [{ key: 'all', label: '全部日期', count: records.length, active: !isFiltered }].concat(
+      allGroups.map((group) => ({
+        key: group.date,
+        label: group.label,
+        count: group.count,
+        active: isFiltered && group.date === activeDate,
+      }))
+    );
     const groups = isFiltered
-      ? [{ label: '', date: activeDate, count: 0, items: records.filter((item) => item.date === activeDate) }]
+      ? [
+          {
+            label: activeLabel,
+            date: activeDate,
+            count: hit.count,
+            items: records.filter((item) => item.date === activeDate),
+          },
+        ]
       : allGroups;
     this.setData(
       Object.assign(
         {
           activeDate: activeDate,
+          activeLabel: activeLabel,
           isFiltered: isFiltered,
-          // 筛选态顶部那条「‹ 全部 / 昨天 · 4 次」用的
-          activeLabel: isFiltered ? hit.label : '',
-          activeCount: isFiltered ? hit.count : 0,
+          dateOptions: dateOptions,
           groups: groups,
           summary: summary,
         },
@@ -182,18 +199,24 @@ Page({
     );
   },
 
-  // 点日期标题：只看这一天的记录
-  onGroupTap(e) {
-    const key = e.currentTarget.dataset.date;
+  // 点日期标题：弹出日期选择面板
+  onGroupTap() {
+    this.setData({ showDateSheet: true });
+  },
+
+  closeDateSheet() {
+    this.setData({ showDateSheet: false });
+  },
+
+  onPickDate(e) {
+    const key = e.currentTarget.dataset.key;
+    this.setData({ showDateSheet: false });
     if (!key || key === this.data.activeDate) return;
     this._applyRecords(this._records || [], this.data.summary, null, key);
   },
 
-  // 返回全部
-  onFilterAll() {
-    if (!this.data.isFiltered) return;
-    this._applyRecords(this._records || [], this.data.summary, null, 'all');
-  },
+  // 面板内部点击不要穿透到遮罩
+  noop() {},
 
   async fetch() {
     if (this._fetching) return;

@@ -49,23 +49,15 @@
     </view>
 
     <!-- 筛选态：顶部一条返回，标题在右，列表不再重复组标题 -->
-    <view class="filter-bar" wx:if="{{isFiltered}}">
-      <view class="filter-back" hover-class="press" bindtap="onFilterAll">
-        <text class="back-mark">‹</text>
-        <text>全部</text>
-      </view>
-      <view class="filter-current">{{activeLabel}} · {{activeCount}} 次</view>
-    </view>
+    <view class="list-hint" wx:if="{{!isFiltered && groups.length > 1}}">点日期，可以换着看</view>
 
-    <!-- 按天分组：今天 / 昨天 / 3 天前 / 11-08；点标题就看这一天的记录 -->
-    <view class="list-hint" wx:if="{{!isFiltered && groups.length > 1}}">点日期，只看那一天的记录</view>
-
+    <!-- 按天分组：点日期标题弹出选择面板 -->
     <view class="group" wx:for="{{groups}}" wx:key="label" wx:for-item="group">
-      <view class="group-head" wx:if="{{group.label}}" hover-class="press" data-date="{{group.date}}" bindtap="onGroupTap">
+      <view class="group-head" wx:if="{{group.label}}" hover-class="press" bindtap="onGroupTap">
         <view class="group-label">{{group.label}}</view>
         <view class="group-tail">
           <text class="group-count">{{group.count}} 次</text>
-          <text class="group-arrow">›</text>
+          <text class="group-caret">▾</text>
         </view>
       </view>
       <view class="item card" wx:for="{{group.items}}" wx:key="key" hover-class="press">
@@ -84,4 +76,19 @@
 
     <view class="disclaimer">本结果只用于调整练习难度，不作为任何健康判断。</view>
   </block>
+
+  <!-- 日期选择面板：只列有记录的日期，右边的次数是当天条数 -->
+  <view class="sheet-mask" wx:if="{{showDateSheet}}" bindtap="closeDateSheet">
+    <view class="sheet" catchtap="noop">
+      <view class="sheet-title">看哪一天的记录</view>
+      <scroll-view class="sheet-scroll" scroll-y>
+        <view class="sheet-item {{item.active ? 'active' : ''}}" hover-class="press" wx:for="{{dateOptions}}" wx:key="key" data-key="{{item.key}}" bindtap="onPickDate">
+          <text class="sheet-label">{{item.label}}</text>
+          <text class="sheet-count">{{item.count}} 次</text>
+          <text class="sheet-check" wx:if="{{item.active}}">✓</text>
+        </view>
+      </scroll-view>
+      <view class="sheet-cancel" hover-class="press" bindtap="closeDateSheet">取消</view>
+    </view>
+  </view>
 </view>
