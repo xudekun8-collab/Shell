@@ -5,7 +5,38 @@
 }
 
 .page-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--sp-2);
   margin-bottom: var(--sp-4);
+}
+
+.page-head-main {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* 设置入口挪到页头右上角，不占列表底部一行按钮 */
+.head-action {
+  flex: none;
+  min-width: 168rpx;
+  min-height: 88rpx;
+  padding: 0 var(--sp-3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6rpx;
+  font-size: var(--fs-body);
+  color: var(--c-primary);
+  background-color: var(--c-brand-soft);
+  border-radius: var(--r-pill);
+  box-sizing: border-box;
+}
+
+.head-action-arrow {
+  font-size: var(--fs-title);
+  color: var(--c-accent);
 }
 
 .page-kicker {
@@ -257,14 +288,4 @@
   line-height: 1.6;
   color: var(--c-text-weak);
   text-align: center;
-}
-
-.settings-link {
-  min-height: 88rpx;
-  margin-top: var(--sp-2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: var(--fs-body);
-  color: var(--c-primary);
 }

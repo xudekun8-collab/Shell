@@ -54,12 +54,20 @@ function mapRecords(data) {
   });
 
   const rawSummary = data.summary || {};
+  // 按练习页菜单的顺序排，老人在两个页面看到的是同一个次序
+  const typeOrder = ['memory_box', 'category_sort', 'number_seq', 'common_sense'];
   const byType = (rawSummary.by_type || [])
     .map((b) => ({
+      game_type: b.game_type,
       game_type_text: GAME_TYPE_TEXT[b.game_type] || b.game_type,
       total: b.total,
     }))
-    .filter((b) => b.total > 0);
+    .filter((b) => b.total > 0)
+    .sort((a, b) => {
+      const ia = typeOrder.indexOf(a.game_type);
+      const ib = typeOrder.indexOf(b.game_type);
+      return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib);
+    });
   const totalDuration = rawSummary.total_duration || 0;
 
   return {

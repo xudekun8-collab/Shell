@@ -1,7 +1,13 @@
 <view class="page pad">
   <view class="page-head">
-    <view class="page-kicker">一步一步，都算数</view>
-    <view class="t-hero">练习记录</view>
+    <view class="page-head-main">
+      <view class="page-kicker">一步一步，都算数</view>
+      <view class="t-hero">练习记录</view>
+    </view>
+    <view class="head-action" hover-class="press" bindtap="goSettings">
+      <text>设置</text>
+      <text class="head-action-arrow">›</text>
+    </view>
   </view>
 
   <view class="status card" wx:if="{{loading}}">正在读…</view>
@@ -61,6 +67,5 @@
     </view>
 
     <view class="disclaimer">本结果只用于调整练习难度，不作为任何健康判断。</view>
-    <view class="settings-link" hover-class="press" bindtap="goSettings">我的设置 ›</view>
   </block>
 </view>
