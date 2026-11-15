@@ -57,4 +57,33 @@ function listKey(item, index) {
   return createdAt + '|' + type + '|' + index;
 }
 
-module.exports = { normalizeReply, formatDuration, dateLabel, listKey };
+// 本地日期键（YYYY-MM-DD），用于「今天练了几次」这类按天统计
+function dayKey(date) {
+  const d = date || new Date();
+  return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate());
+}
+
+// 记录按天分组：入参已按时间倒序，同一天一定相邻，顺序扫一遍即可
+function groupByDay(records) {
+  const groups = [];
+  (records || []).forEach((item) => {
+    const label = (item && item.date_label) || '更早';
+    let group = groups[groups.length - 1];
+    if (!group || group.label !== label) {
+      group = { label: label, count: 0, items: [] };
+      groups.push(group);
+    }
+    group.count += 1;
+    group.items.push(item);
+  });
+  return groups;
+}
+
+module.exports = {
+  normalizeReply,
+  formatDuration,
+  dateLabel,
+  listKey,
+  dayKey,
+  groupByDay,
+};

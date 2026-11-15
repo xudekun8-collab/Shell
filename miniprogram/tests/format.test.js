@@ -3,7 +3,14 @@
 const test = require('node:test');
 const assert = require('node:assert');
 
-const { normalizeReply, formatDuration, dateLabel, listKey } = require('../utils/format.js');
+const {
+  normalizeReply,
+  formatDuration,
+  dateLabel,
+  listKey,
+  dayKey,
+  groupByDay,
+} = require('../utils/format.js');
 
 test('normalizeReply：空回复给固定话术', () => {
   assert.equal(normalizeReply(''), '我这儿没听清，您再说一遍');
@@ -69,4 +76,30 @@ test('listKey：拼接时间类型与序号，保证列表 key 唯一', () => {
     listKey({ created_at: '2026-11-15 10:00:00', game_type: 'memory_box' }, 3)
   );
   assert.equal(listKey(null, 0), '||0');
+});
+
+test('dayKey：补零到 YYYY-MM-DD', () => {
+  assert.equal(dayKey(new Date(2026, 0, 5)), '2026-01-05');
+  assert.equal(dayKey(new Date(2026, 10, 15)), '2026-11-15');
+});
+
+test('groupByDay：同一天归一组，组内保持倒序', () => {
+  const records = [
+    { id: 1, date_label: '今天' },
+    { id: 2, date_label: '今天' },
+    { id: 3, date_label: '昨天' },
+    { id: 4, date_label: '11-08' },
+  ];
+  const groups = groupByDay(records);
+  assert.equal(groups.length, 3);
+  assert.deepEqual(groups.map((g) => g.label), ['今天', '昨天', '11-08']);
+  assert.deepEqual(groups.map((g) => g.count), [2, 1, 1]);
+  assert.deepEqual(groups[0].items.map((i) => i.id), [1, 2]);
+});
+
+test('groupByDay：空列表与缺字段不抛错', () => {
+  assert.deepEqual(groupByDay([]), []);
+  assert.deepEqual(groupByDay(null), []);
+  const groups = groupByDay([{ id: 1 }]);
+  assert.equal(groups[0].label, '更早');
 });

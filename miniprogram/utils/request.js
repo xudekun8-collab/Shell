@@ -26,6 +26,7 @@ function clearElderSession() {
   wx.removeStorageSync('thread_id');
   // 记录页的缓存是上一个账号的数据，换号时必须清掉，避免短暂串号
   wx.removeStorageSync('records_cache_v1');
+  wx.removeStorageSync('records_cache_v2');
   try {
     const info = wx.getStorageInfoSync();
     (info.keys || []).forEach((key) => {
