@@ -184,12 +184,12 @@ Page({
       if (res.ok && res.data) {
         const profile = res.data.profile || null;
         if (profile) {
-          profile.interests_text = (profile.interests || []).length
-            ? (profile.interests || []).join('、')
-            : '还没告诉我';
-          profile.taboos_text = (profile.taboos || []).length
-            ? (profile.taboos || []).join('、')
-            : '还没告诉我';
+          const interests = profile.interests || [];
+          const taboos = profile.taboos || [];
+          profile.interests_text = interests.length ? interests.join('、') : '还没说';
+          profile.taboos_text = taboos.length ? taboos.join('、') : '还没说';
+          // 两样都没填时，整块换成一句引导，不再写两遍「还没说」
+          profile.has_prefs = interests.length > 0 || taboos.length > 0;
         }
         const events = (res.data.events || []).map((e) => {
           const dt = parseDate(e.occurred_at);

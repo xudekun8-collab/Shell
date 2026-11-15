@@ -5,7 +5,7 @@
 }
 
 .page-head {
-  margin-bottom: var(--sp-5);
+  margin-bottom: var(--sp-4);
 }
 
 .page-kicker {
@@ -13,6 +13,13 @@
   font-size: var(--fs-note);
   font-weight: 600;
   color: var(--c-accent);
+}
+
+.page-note {
+  margin-top: var(--sp-2);
+  font-size: var(--fs-note);
+  line-height: 1.6;
+  color: var(--c-text-weak);
 }
 
 .group {
@@ -37,20 +44,54 @@
 }
 
 .line {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-2);
   margin-bottom: var(--sp-1);
   font-size: var(--fs-body);
   line-height: 1.6;
   color: var(--c-text);
 }
 
+.line-key {
+  flex: none;
+  min-width: 132rpx;
+  color: var(--c-text-weak);
+}
+
+.line-value {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-wrap: break-word;
+}
+
+.line-empty {
+  color: var(--c-text-weak);
+}
+
 .profile-card {
   border-left: 8rpx solid var(--c-accent);
 }
 
+/* 改成右上小胶囊：原来 width:100% 的浅蓝按钮看着像禁用 */
 .profile-edit {
-  width: 100%;
-  margin-top: var(--sp-2);
+  width: auto;
+  min-width: 200rpx;
+  min-height: 88rpx;
+  margin: var(--sp-2) 0 0 auto;
+  padding: 0 var(--sp-3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6rpx;
+  font-size: var(--fs-body);
   color: var(--c-primary);
+  box-sizing: border-box;
+}
+
+.edit-arrow {
+  font-size: var(--fs-title);
+  color: var(--c-accent);
 }
 
 .profile-editor {

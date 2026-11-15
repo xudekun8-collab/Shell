@@ -1,7 +1,8 @@
 <view class="page pad">
   <view class="page-head">
-    <view class="page-kicker">只属于您</view>
-    <view class="t-hero">我的</view>
+    <view class="page-kicker">记着的，都能删</view>
+    <view class="t-hero">我的记忆</view>
+    <view class="page-note">家里人只能看到摘要，看不到原话。</view>
   </view>
 
   <view class="status" wx:if="{{loading}}">正在读…</view>
@@ -12,9 +13,25 @@
     <view class="group" wx:if="{{profile}}">
       <view class="group-title">您告诉我的</view>
       <view class="profile-card card">
-        <view class="line">喜欢：{{profile.interests_text}}</view>
-        <view class="line">不想提：{{profile.taboos_text}}</view>
-        <view class="profile-edit btn-ghost" hover-class="press" bindtap="toggleProfileEdit">{{editProfileOpen ? '收起修改' : '修改称呼和习惯'}}</view>
+        <view class="line" wx:if="{{profile.nickname}}">
+          <text class="line-key">称呼</text>
+          <text class="line-value">{{profile.nickname}}</text>
+        </view>
+        <block wx:if="{{profile.has_prefs}}">
+          <view class="line">
+            <text class="line-key">喜欢</text>
+            <text class="line-value">{{profile.interests_text}}</text>
+          </view>
+          <view class="line">
+            <text class="line-key">不想提</text>
+            <text class="line-value">{{profile.taboos_text}}</text>
+          </view>
+        </block>
+        <view class="line line-empty" wx:else>还没说过喜欢什么、不想提什么</view>
+        <view class="profile-edit btn-ghost" hover-class="press" bindtap="toggleProfileEdit">
+          <text>{{editProfileOpen ? '收起' : '改一改'}}</text>
+          <text class="edit-arrow" wx:if="{{!editProfileOpen}}">›</text>
+        </view>
       </view>
       <view class="profile-editor card" wx:if="{{editProfileOpen}}">
         <view class="field-label">怎么称呼您</view>
