@@ -22,8 +22,19 @@ backend/_uv_*.log
 # 临时输出文件
 backend/_*.txt
 backend/eval_out.txt
+backend/data/*.legacy_backup.json
 
 # 编辑器与系统文件
 .vscode/
 .idea/
 Thumbs.db
+
+# 测试缓存
+.pytest_cache/
+
+# 过程文档：需求记录、提示词、临时笔记只留在本地，不入库也不推远程
+.requirements/
+skill.txt
+*提示词*.md
+Codex*.md
+
