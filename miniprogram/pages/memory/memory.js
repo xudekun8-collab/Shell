@@ -186,9 +186,9 @@ Page({
         if (profile) {
           const interests = profile.interests || [];
           const taboos = profile.taboos || [];
-          profile.interests_text = interests.length ? interests.join('、') : '还没说';
-          profile.taboos_text = taboos.length ? taboos.join('、') : '还没说';
-          // 两样都没填时，整块换成一句引导，不再写两遍「还没说」
+          // 标签化展示比「喜欢：下棋、早上散步」更好扫读，也便于以后单个删改
+          profile.interest_tags = interests;
+          profile.taboo_tags = taboos;
           profile.has_prefs = interests.length > 0 || taboos.length > 0;
         }
         const events = (res.data.events || []).map((e) => {

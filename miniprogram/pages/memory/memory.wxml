@@ -1,8 +1,6 @@
 <view class="page pad">
   <view class="page-head">
-    <view class="page-kicker">记着的，都能删</view>
     <view class="t-hero">我的记忆</view>
-    <view class="page-note">家里人只能看到摘要，看不到原话。</view>
   </view>
 
   <view class="status" wx:if="{{loading}}">正在读…</view>
@@ -11,27 +9,34 @@
 
   <block wx:if="{{!loading && !load_error}}">
     <view class="group" wx:if="{{profile}}">
-      <view class="group-title">您告诉我的</view>
+      <!-- 身份与偏好合成一张档案卡：省掉原来「标题两行 + 分组标题」的堆叠 -->
       <view class="profile-card card">
-        <view class="line" wx:if="{{profile.nickname}}">
-          <text class="line-key">称呼</text>
-          <text class="line-value">{{profile.nickname}}</text>
-        </view>
-        <block wx:if="{{profile.has_prefs}}">
-          <view class="line">
-            <text class="line-key">喜欢</text>
-            <text class="line-value">{{profile.interests_text}}</text>
+        <view class="profile-top">
+          <view class="profile-name" wx:if="{{profile.nickname}}">{{profile.nickname}}</view>
+          <view class="profile-name placeholder" wx:else>还没告诉我怎么称呼</view>
+          <view class="profile-edit" hover-class="press" bindtap="toggleProfileEdit">
+            <text>{{editProfileOpen ? '收起' : '改一改'}}</text>
+            <text class="edit-arrow" wx:if="{{!editProfileOpen}}">›</text>
           </view>
-          <view class="line">
-            <text class="line-key">不想提</text>
-            <text class="line-value">{{profile.taboos_text}}</text>
-          </view>
-        </block>
-        <view class="line line-empty" wx:else>还没说过喜欢什么、不想提什么</view>
-        <view class="profile-edit btn-ghost" hover-class="press" bindtap="toggleProfileEdit">
-          <text>{{editProfileOpen ? '收起' : '改一改'}}</text>
-          <text class="edit-arrow" wx:if="{{!editProfileOpen}}">›</text>
         </view>
+
+        <view class="tag-row">
+          <view class="tag-label">喜欢</view>
+          <view class="tags" wx:if="{{profile.interest_tags.length > 0}}">
+            <view class="tag" wx:for="{{profile.interest_tags}}" wx:key="*this">{{item}}</view>
+          </view>
+          <view class="tag-none" wx:else>还没说</view>
+        </view>
+
+        <view class="tag-row">
+          <view class="tag-label">不想提</view>
+          <view class="tags" wx:if="{{profile.taboo_tags.length > 0}}">
+            <view class="tag warn" wx:for="{{profile.taboo_tags}}" wx:key="*this">{{item}}</view>
+          </view>
+          <view class="tag-none" wx:else>还没说</view>
+        </view>
+
+        <view class="profile-privacy">记下的事您随时能删；家里人只能看到摘要，看不到原话。</view>
       </view>
       <view class="profile-editor card" wx:if="{{editProfileOpen}}">
         <view class="field-label">怎么称呼您</view>
