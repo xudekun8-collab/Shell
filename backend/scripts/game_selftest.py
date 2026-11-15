@@ -1,56 +1,96 @@
-"""游戏引擎自检：记忆类 6 次提交观察难度，分类类打一局观察多题。"""
-import json
+"""游戏引擎自检：固定种子模拟四类游戏各 20 局。"""
+import random
+import sys
+from datetime import datetime, timedelta
 from pathlib import Path
 
-from sqlalchemy import create_engine, func, select
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+from sqlalchemy import create_engine, select
+from sqlalchemy.pool import StaticPool
 from sqlalchemy.orm import sessionmaker
 
 from app.db.init_db import init_db
 from app.db.models import TrainingRecord
-from app.services import game_engine
+from app.services import game_engine, game_session
+from app.services.games import GAME_REGISTRY
+
+SEED = 20261108
+ROUNDS = 20
+MODELS = {"strong": 0.90, "normal": 0.70, "weak": 0.45}
+BASE_TIME = datetime(2026, 1, 1, 12, 0, 0)
+
+
+def _wrong_value(question: dict) -> str:
+    if "appeared" in question:
+        return not question["appeared"]
+    answer = question["answer"]
+    if "digits" in question:
+        return str(int(answer[0]) % 9 + 1) + answer[1:]
+    return next(option for option in question["options"] if option != answer)
 
 
 def main() -> None:
-    engine = create_engine("sqlite://")
+    engine = create_engine(
+        "sqlite://",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
     init_db(engine)
     factory = sessionmaker(bind=engine, expire_on_commit=False)
 
-    print("step | game_type   | difficulty | correct | total | next_difficulty")
-    print("-----|-------------|------------|---------|-------|----------------")
-    for step in range(1, 7):
-        with factory() as db:
-            start = game_engine.start("demo_user_1", "memory_box", db)
-            quizzes = start["items"]["quizzes"]
-        if step <= 3:
-            answers = [{"index": i, "value": not q["appeared"]} for i, q in enumerate(quizzes)]
-        else:
-            answers = [{"index": i, "value": q["appeared"]} for i, q in enumerate(quizzes)]
-        with factory() as db:
-            result = game_engine.submit(start["session_id"], answers, 2, False, db)
-        print(
-            f"{step:4d} | memory_box  | {start['difficulty']:10d} | {result['correct']:7d} | "
-            f"{result['total']:5d} | {result['next_difficulty']:14d}"
-        )
-
-    print()
-    print("category_sort 一局自检：")
-    with factory() as db:
-        cat_start = game_engine.start("demo_user_1", "category_sort", db)
-        cat_questions = cat_start["items"]["questions"]
-    print(f"题量（questions 长度）：{len(cat_questions)}")
-    bank = json.loads(Path("data/game_items/category_sort.json").read_text(encoding="utf-8"))
-    id_answer = {}
-    for groups in bank.values():
-        for g in groups:
-            id_answer[g["id"]] = g["answer"]
-    cat_answers = [{"index": i, "value": id_answer[q["id"]]} for i, q in enumerate(cat_questions)]
-    with factory() as db:
-        cat_result = game_engine.submit(cat_start["session_id"], cat_answers, 5, False, db)
-    print(f"correct={cat_result['correct']} total={cat_result['total']}")
-
-    with factory() as db:
-        count = db.execute(select(func.count()).select_from(TrainingRecord)).scalar()
-    print(f"写入训练记录条数：{count}")
+    print(f"seed={SEED} rounds={ROUNDS}")
+    print("game_type     | model  | final | last5_avg | total_correct / total")
+    print("--------------|--------|-------|-----------|---------------------")
+    failures = []
+    for game_type in GAME_REGISTRY:
+        for model, probability in MODELS.items():
+            rng = random.Random(SEED)
+            user_id = f"selftest_{game_type}_{model}"
+            difficulties = []
+            correct_sum = 0
+            total_sum = 0
+            for round_index in range(ROUNDS):
+                with factory() as db:
+                    start = game_engine.start(user_id, game_type, db)
+                questions = game_session.get(start["session_id"])["payload"]["questions"]
+                difficulties.append(start["difficulty"])
+                answers = []
+                for index, question in enumerate(questions):
+                    if rng.random() < probability:
+                        value = (
+                            question["appeared"]
+                            if "appeared" in question
+                            else question["correct_text"]
+                        )
+                    else:
+                        value = _wrong_value(question)
+                    answers.append({"index": index, "value": value})
+                with factory() as db:
+                    result = game_engine.submit(start["session_id"], answers, 20, False, db)
+                    record = db.execute(
+                        select(TrainingRecord)
+                        .where(TrainingRecord.user_id == user_id)
+                        .order_by(TrainingRecord.id.desc())
+                        .limit(1)
+                    ).scalar_one()
+                    record.created_at = BASE_TIME + timedelta(minutes=round_index)
+                    db.commit()
+                correct_sum += result["correct"]
+                total_sum += result["total"]
+                final = result["next_difficulty"]
+            last5 = round(sum(difficulties[-5:]) / 5, 2)
+            expected = {"strong": 3, "normal": 2, "weak": 1}[model]
+            if final != expected:
+                failures.append((game_type, model, final, expected))
+            print(
+                f"{game_type:13s} | {model:6s} | {final:5d} | {last5:9.2f} | "
+                f"{correct_sum:13d} / {total_sum}"
+            )
+    if failures:
+        print("收敛失败：", failures)
+        raise SystemExit(1)
+    print("四类游戏 strong=3 normal=2 weak=1 全部通过")
 
 
 if __name__ == "__main__":

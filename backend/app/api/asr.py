@@ -15,7 +15,7 @@ router = APIRouter()
 
 class AsrRequest(BaseModel):
     audio_base64: str = Field(min_length=1, max_length=4_000_000)
-    format: str = "mp3"
+    format: str = Field(default="mp3", min_length=1, max_length=16)
 
 
 class AsrResponse(BaseModel):
@@ -34,5 +34,9 @@ def transcribe(request: AsrRequest, user: dict = Depends(require_role("elder")))
         text = recognize(audio_bytes, request.format)
     except AsrError as exc:
         logger.warning("ASR 识别失败：%s", exc.code)
+        if exc.code == "UnsupportedOperation.ServerNotOpen" or exc.code.startswith(
+            ("AuthFailure", "UnauthorizedOperation")
+        ):
+            raise HTTPException(status_code=503, detail="语音识别服务未配置或未开通") from exc
         raise HTTPException(status_code=502, detail="这会儿没听清，您再说一遍")
     return AsrResponse(text=text)

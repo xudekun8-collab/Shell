@@ -85,6 +85,21 @@ def test_asr_cloud_error_502_hides_code(client, monkeypatch):
     assert "FailedOperation" not in resp.text
 
 
+def test_asr_service_not_open_503(client, monkeypatch):
+    import app.api.asr as asr_api_mod
+
+    monkeypatch.setattr(config, "TENCENT_SECRET_ID", "fake-id")
+    monkeypatch.setattr(config, "TENCENT_SECRET_KEY", "fake-key")
+
+    def fail_recognize(audio, fmt):
+        raise AsrError("UnsupportedOperation.ServerNotOpen")
+
+    monkeypatch.setattr(asr_api_mod, "recognize", fail_recognize)
+    resp = client.post("/api/asr", json={"audio_base64": "AAAA"}, headers=_elder_headers())
+    assert resp.status_code == 503
+    assert resp.json()["detail"] == "语音识别服务未配置或未开通"
+
+
 def test_asr_network_error_becomes_asr_error(monkeypatch):
     import app.services.asr as asr_service
 

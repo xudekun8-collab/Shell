@@ -21,6 +21,7 @@ services:
       - ../backend/.env
     environment:
       DATABASE_URL: mysql+pymysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/elder_care?charset=utf8mb4
+      TRUST_PROXY_HEADERS: "1"
     depends_on:
       mysql:
         condition: service_healthy

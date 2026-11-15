@@ -19,6 +19,12 @@ WX_APPID = os.getenv("WX_APPID", "")
 WX_SECRET = os.getenv("WX_SECRET", "")
 AUTH_SECRET = os.getenv("AUTH_SECRET", "")
 DEMO_MODE = os.getenv("DEMO_MODE", "0")
+DEMO_USERS = {
+    item.strip()
+    for item in os.getenv("DEMO_USERS", "demo_user_1").split(",")
+    if item.strip()
+}
+TRUST_PROXY_HEADERS = os.getenv("TRUST_PROXY_HEADERS", "0") == "1"
 
 TTS_API_KEY = os.getenv("TTS_API_KEY", "")
 TTS_VOICE = os.getenv("TTS_VOICE", "")

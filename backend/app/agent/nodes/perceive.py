@@ -40,7 +40,8 @@ def make_perceive(session_factory):
         if thread_id:
             with session_factory() as session:
                 conv = session.get(Conversation, thread_id)
-                task_context = conv.open_items if conv else None
+                if conv and conv.user_id == state.get("user_id"):
+                    task_context = conv.open_items
         return {
             "intent": intent,
             "emotion": emotion,

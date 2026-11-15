@@ -1,0 +1,53 @@
+{
+  "low": [
+    {"id": "cs_life_l_01", "question": "冬天路面结冰，走路应该快还是慢", "options": ["快一点", "慢一点"], "answer": "慢一点", "explanation": "路面滑的时候慢一点走，会更稳妥。"},
+    {"id": "cs_life_l_02", "question": "过马路前先看什么", "options": ["红绿灯", "手机"], "answer": "红绿灯", "explanation": "先看红绿灯和路上车辆，再决定怎么走。"},
+    {"id": "cs_life_l_03", "question": "菜刀用完后放在哪里更稳妥", "options": ["刀架里", "桌子边上"], "answer": "刀架里", "explanation": "刀具收好，桌面清爽也更安全。"},
+    {"id": "cs_life_l_04", "question": "天气冷出门前应该做什么", "options": ["穿件外套", "开风扇"], "answer": "穿件外套", "explanation": "出门前看看天气，穿得合适心里也踏实。"},
+    {"id": "cs_life_l_05", "question": "吃饭前先做什么更合适", "options": ["洗手", "擦桌子"], "answer": "洗手", "explanation": "饭前洗手是个简单又顺手的好习惯。"},
+    {"id": "cs_life_l_06", "question": "端热汤时应该怎么走", "options": ["慢慢端", "跑着端"], "answer": "慢慢端", "explanation": "热汤端稳一点，少着急就更安心。"},
+    {"id": "cs_life_l_07", "question": "下雨出门要带什么", "options": ["雨伞", "扇子"], "answer": "雨伞", "explanation": "看见下雨先拿伞，回来时也少淋雨。"},
+    {"id": "cs_life_l_08", "question": "手机没电了该怎么做", "options": ["充电", "放进冰箱"], "answer": "充电", "explanation": "手机电量低了就尽早充电，出门更放心。"},
+    {"id": "cs_life_l_09", "question": "晚上睡觉前记得关什么", "options": ["灯", "窗帘盒"], "answer": "灯", "explanation": "睡前把不用的灯关掉，屋里安稳也省电。"},
+    {"id": "cs_life_l_10", "question": "陌生电话让马上转账，应该怎么做", "options": ["挂断", "立刻转账"], "answer": "挂断", "explanation": "陌生电话提到转账先别急，和家人商量更稳妥。"},
+    {"id": "cs_life_l_11", "question": "用过的纸巾应该放在哪里", "options": ["垃圾桶", "窗台上"], "answer": "垃圾桶", "explanation": "用过的纸巾放进垃圾桶，屋里更干净。"},
+    {"id": "cs_life_l_12", "question": "水烧开后应该做什么", "options": ["关火", "继续烧"], "answer": "关火", "explanation": "水开了就关火，既省心也更安全。"},
+    {"id": "cs_life_l_13", "question": "地上刚拖完还有水，怎么走", "options": ["慢一点", "跑过去"], "answer": "慢一点", "explanation": "湿地慢走，等地面干了再收拾也不迟。"},
+    {"id": "cs_life_l_14", "question": "门铃响了应该先做什么", "options": ["问是谁", "直接开门"], "answer": "问是谁", "explanation": "先问清来人身份，再决定要不要开门。"},
+    {"id": "cs_life_l_15", "question": "手是湿的，能直接插电源吗", "options": ["擦干手", "直接插"], "answer": "擦干手", "explanation": "插电源前把手擦干，是个稳妥的小习惯。"}
+  ],
+  "mid": [
+    {"id": "cs_life_m_01", "question": "闻到燃气味时先做什么", "options": ["开窗并关阀门", "打开电灯"], "answer": "开窗并关阀门", "explanation": "闻到燃气味先通风、关阀门，再联系家人处理。"},
+    {"id": "cs_life_m_02", "question": "金属碗可以放进微波炉吗", "options": ["不能放", "可以放"], "answer": "不能放", "explanation": "金属不要放进微波炉，换合适的餐具更稳妥。"},
+    {"id": "cs_life_m_03", "question": "油锅着火时先怎么处理", "options": ["盖锅盖", "泼水"], "answer": "盖锅盖", "explanation": "油锅着火先关火并盖住锅盖，不要往锅里泼水。"},
+    {"id": "cs_life_m_04", "question": "坐公交车时什么时候起身", "options": ["车停稳后", "快到站时提前站起"], "answer": "车停稳后", "explanation": "等车停稳再起身，扶好扶手更安心。"},
+    {"id": "cs_life_m_05", "question": "发现食品已经过期该怎么办", "options": ["不再食用", "热一热再吃"], "answer": "不再食用", "explanation": "过期食品不入口，拿不准时问家人更稳妥。"},
+    {"id": "cs_life_m_06", "question": "陌生短信发来链接让填写信息", "options": ["不要点", "马上点开"], "answer": "不要点", "explanation": "陌生链接先放一放，确认来源后再处理。"},
+    {"id": "cs_life_m_07", "question": "冰箱停电后怎样做更好", "options": ["少开冰箱门", "反复开门看看"], "answer": "少开冰箱门", "explanation": "少开门能让里面的温度保持得久一些。"},
+    {"id": "cs_life_m_08", "question": "切菜时手指应该怎么放", "options": ["手指向内收", "伸到刀口前"], "answer": "手指向内收", "explanation": "手指向内收，刀慢慢走，切菜更稳妥。"},
+    {"id": "cs_life_m_09", "question": "浴室地面湿滑时可以怎么做", "options": ["铺防滑垫", "光脚快走"], "answer": "铺防滑垫", "explanation": "铺好防滑垫，洗澡前后都更安心。"},
+    {"id": "cs_life_m_10", "question": "过马路是绿灯时还要做什么", "options": ["左右看看", "低头看手机"], "answer": "左右看看", "explanation": "绿灯也要左右看看，确认车辆停稳再走。"},
+    {"id": "cs_life_m_11", "question": "陌生人说要进门维修怎么办", "options": ["先核实身份", "马上开门"], "answer": "先核实身份", "explanation": "先联系家人或物业核实，再决定开不开门。"},
+    {"id": "cs_life_m_12", "question": "热水袋装上热水后怎么用", "options": ["用毛巾包一层", "直接贴在皮肤上"], "answer": "用毛巾包一层", "explanation": "热水袋外面包一层，温度更均匀也更稳妥。"},
+    {"id": "cs_life_m_13", "question": "楼道里适不适合堆放纸箱", "options": ["不要堆放", "靠墙堆高"], "answer": "不要堆放", "explanation": "楼道保持通畅，平时进出和遇到急事都更方便。"},
+    {"id": "cs_life_m_14", "question": "大风天走路要离什么远一点", "options": ["广告牌", "路边树木"], "answer": "广告牌", "explanation": "大风天避开广告牌和高处悬挂物，走稳一点。"},
+    {"id": "cs_life_m_15", "question": "刚洗完手要拿电器插头怎么办", "options": ["先把水擦干", "直接拿插头"], "answer": "先把水擦干", "explanation": "碰电器前先擦干手，安全习惯要放在前面。"}
+  ],
+  "high": [
+    {"id": "cs_life_h_01", "question": "被困电梯时应该怎么做", "options": ["按警铃等待", "强行掰门"], "answer": "按警铃等待", "explanation": "按警铃联系外面，站稳等待救援更稳妥。"},
+    {"id": "cs_life_h_02", "question": "家用电器冒烟起火时先做什么", "options": ["先断电", "先泼水"], "answer": "先断电", "explanation": "先切断电源，再根据火情联系家人或消防。"},
+    {"id": "cs_life_h_03", "question": "室内遇到明显晃动时更稳妥的做法", "options": ["躲到结实桌下", "冲向电梯"], "answer": "躲到结实桌下", "explanation": "先躲到结实遮挡处，等晃动减轻再有序离开。"},
+    {"id": "cs_life_h_04", "question": "燃气味很重时能先开灯吗", "options": ["不能开灯", "马上开灯查看"], "answer": "不能开灯", "explanation": "先开窗通风并关阀门，不要触碰电器开关。"},
+    {"id": "cs_life_h_05", "question": "高压锅排气结束前能打开吗", "options": ["等排完气再开", "马上打开"], "answer": "等排完气再开", "explanation": "等压力完全释放再开盖，锅边也多留一点距离。"},
+    {"id": "cs_life_h_06", "question": "高温天气外出应该准备什么", "options": ["水和遮阳帽", "厚棉衣"], "answer": "水和遮阳帽", "explanation": "避开最晒的时段，带水和遮阳帽更从容。"},
+    {"id": "cs_life_h_07", "question": "打雷时应该离哪里远一点", "options": ["大树和金属杆", "结实屋檐下"], "answer": "大树和金属杆", "explanation": "雷电天气尽量进入室内，避开大树和金属杆。"},
+    {"id": "cs_life_h_08", "question": "做饭时临时要离开厨房怎么办", "options": ["先关火", "让锅继续烧"], "answer": "先关火", "explanation": "离开厨房前先关火，能少一分牵挂。"},
+    {"id": "cs_life_h_09", "question": "重东西放在柜子里应该放在哪层", "options": ["下层", "最高层"], "answer": "下层", "explanation": "重物放下层，拿取时不用踮脚和仰身。"},
+    {"id": "cs_life_h_10", "question": "有人自称物业要求进门检查", "options": ["先联系物业核实", "立即开门"], "answer": "先联系物业核实", "explanation": "先通过熟悉电话核实身份，再决定是否开门。"},
+    {"id": "cs_life_h_11", "question": "从公交车下车后先做什么", "options": ["等车开走再看车流", "立刻横穿马路"], "answer": "等车开走再看车流", "explanation": "下车后站稳，观察路况再从合适位置过街。"},
+    {"id": "cs_life_h_12", "question": "晚上散步选哪条路更稳妥", "options": ["灯亮人多的路", "偏僻近路"], "answer": "灯亮人多的路", "explanation": "走灯亮、有人经过的路，家里人也更放心。"},
+    {"id": "cs_life_h_13", "question": "亲友突然发消息让转账", "options": ["先打电话确认", "直接转账"], "answer": "先打电话确认", "explanation": "涉及转账先电话确认，给自己留出判断时间。"},
+    {"id": "cs_life_h_14", "question": "结冰的河面能不能上去走", "options": ["不能上去", "可以试试"], "answer": "不能上去", "explanation": "冰面情况看不准，绕开走才最稳妥。"},
+    {"id": "cs_life_h_15", "question": "火灾烟雾较浓时怎么通过", "options": ["低姿快速撤离", "坐电梯下楼"], "answer": "低姿快速撤离", "explanation": "用湿毛巾捂住口鼻，低姿沿安全通道离开。"}
+  ]
+}

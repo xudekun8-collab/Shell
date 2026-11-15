@@ -74,7 +74,7 @@ def test_compress_at_ninth_turn(factory):
                 )
             )
         session.commit()
-    assert maybe_compress("t2", FakeClient(), session_factory=factory)
+    assert maybe_compress("t2", "demo_user_1", FakeClient(), session_factory=factory)
     with factory() as session:
         conv = session.get(Conversation, "t2")
         assert conv.summary and len(conv.summary) <= 100
@@ -112,7 +112,7 @@ def test_compress_cumulative_keeps_first_round(factory):
                 )
             )
         session.commit()
-    assert maybe_compress("t3", FakeClient(), session_factory=factory)
+    assert maybe_compress("t3", "demo_user_1", FakeClient(), session_factory=factory)
     with factory() as session:
         first_summary = session.get(Conversation, "t3").summary
     assert "孙女" in first_summary
@@ -134,7 +134,7 @@ def test_compress_cumulative_keeps_first_round(factory):
                 )
             )
         session.commit()
-    assert maybe_compress("t3", FakeClient(), session_factory=factory)
+    assert maybe_compress("t3", "demo_user_1", FakeClient(), session_factory=factory)
     with factory() as session:
         final_summary = session.get(Conversation, "t3").summary
     assert "孙女" in final_summary

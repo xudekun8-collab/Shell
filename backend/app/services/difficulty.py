@@ -2,12 +2,7 @@
 from sqlalchemy import select
 
 from app.db.models import TrainingRecord
-
-# 每档每题限时（秒）
-TIME_LIMITS = {
-    "memory_box": {1: 8, 2: 6, 3: 5},
-    "category_sort": {1: 10, 2: 8, 3: 6},
-}
+from app.services.games import get_game
 
 # 进入某档的正确率门槛：升到 2 档需 >= 0.60，升到 3 档需 >= 0.85。
 # 进入与留在某档用同一把尺子：低于 ENTRY[cur] 就退出当前档。
@@ -15,7 +10,10 @@ ENTRY = {2: 0.60, 3: 0.85}
 
 
 def time_limit(game_type: str, difficulty: int) -> int:
-    return TIME_LIMITS.get(game_type, {}).get(difficulty, 8)
+    game = get_game(game_type)
+    if difficulty not in game.TIME_LIMIT:
+        raise ValueError("未知难度")
+    return game.TIME_LIMIT[difficulty]
 
 
 def next_difficulty(user_id: str, game_type: str, db) -> int:

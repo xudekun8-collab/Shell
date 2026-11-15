@@ -1,26 +1,782 @@
 {
   "low": [
-    {"id": "mb_l_01", "show_items": ["钥匙", "雨伞", "眼镜", "茶杯"], "quizzes": [{"target": "雨伞", "appeared": true}, {"target": "钥匙", "appeared": true}, {"target": "手套", "appeared": false}, {"target": "电视", "appeared": false}]},
-    {"id": "mb_l_02", "show_items": ["梳子", "毛巾", "拐杖", "扇子"], "quizzes": [{"target": "拐杖", "appeared": true}, {"target": "梳子", "appeared": true}, {"target": "手机", "appeared": false}, {"target": "空调", "appeared": false}]},
-    {"id": "mb_l_03", "show_items": ["报纸", "药盒", "老花镜", "拖鞋"], "quizzes": [{"target": "药盒", "appeared": true}, {"target": "报纸", "appeared": true}, {"target": "汽车", "appeared": false}, {"target": "洗衣机", "appeared": false}]},
-    {"id": "mb_l_04", "show_items": ["碗", "筷子", "锅", "扫帚"], "quizzes": [{"target": "筷子", "appeared": true}, {"target": "锅", "appeared": true}, {"target": "电脑", "appeared": false}, {"target": "电梯", "appeared": false}]},
-    {"id": "mb_l_05", "show_items": ["帽子", "围巾", "手套", "棉袄"], "quizzes": [{"target": "围巾", "appeared": true}, {"target": "手套", "appeared": true}, {"target": "火车", "appeared": false}, {"target": "冰箱", "appeared": false}]},
-    {"id": "mb_l_06", "show_items": ["镜子", "牙刷", "脸盆", "香皂"], "quizzes": [{"target": "脸盆", "appeared": true}, {"target": "镜子", "appeared": true}, {"target": "飞机", "appeared": false}, {"target": "手机", "appeared": false}]}
+    {
+      "id": "mb_l_01",
+      "show_items": [
+        "钥匙",
+        "雨伞",
+        "眼镜",
+        "茶杯"
+      ],
+      "quizzes": [
+        {
+          "target": "雨伞",
+          "appeared": true,
+          "explanation": "刚才看到过雨伞，慢慢回想就好。"
+        },
+        {
+          "target": "钥匙",
+          "appeared": true,
+          "explanation": "刚才看到过钥匙，慢慢回想就好。"
+        },
+        {
+          "target": "手套",
+          "appeared": false,
+          "explanation": "刚才没有出现手套，没记住也没关系。"
+        },
+        {
+          "target": "电视",
+          "appeared": false,
+          "explanation": "刚才没有出现电视，没记住也没关系。"
+        }
+      ]
+    },
+    {
+      "id": "mb_l_02",
+      "show_items": [
+        "梳子",
+        "毛巾",
+        "拐杖",
+        "扇子"
+      ],
+      "quizzes": [
+        {
+          "target": "拐杖",
+          "appeared": true,
+          "explanation": "刚才看到过拐杖，慢慢回想就好。"
+        },
+        {
+          "target": "梳子",
+          "appeared": true,
+          "explanation": "刚才看到过梳子，慢慢回想就好。"
+        },
+        {
+          "target": "手机",
+          "appeared": false,
+          "explanation": "刚才没有出现手机，没记住也没关系。"
+        },
+        {
+          "target": "空调",
+          "appeared": false,
+          "explanation": "刚才没有出现空调，没记住也没关系。"
+        }
+      ]
+    },
+    {
+      "id": "mb_l_03",
+      "show_items": [
+        "报纸",
+        "药盒",
+        "老花镜",
+        "拖鞋"
+      ],
+      "quizzes": [
+        {
+          "target": "药盒",
+          "appeared": true,
+          "explanation": "刚才看到过药盒，慢慢回想就好。"
+        },
+        {
+          "target": "报纸",
+          "appeared": true,
+          "explanation": "刚才看到过报纸，慢慢回想就好。"
+        },
+        {
+          "target": "汽车",
+          "appeared": false,
+          "explanation": "刚才没有出现汽车，没记住也没关系。"
+        },
+        {
+          "target": "洗衣机",
+          "appeared": false,
+          "explanation": "刚才没有出现洗衣机，没记住也没关系。"
+        }
+      ]
+    },
+    {
+      "id": "mb_l_04",
+      "show_items": [
+        "碗",
+        "筷子",
+        "锅",
+        "扫帚"
+      ],
+      "quizzes": [
+        {
+          "target": "筷子",
+          "appeared": true,
+          "explanation": "刚才看到过筷子，慢慢回想就好。"
+        },
+        {
+          "target": "锅",
+          "appeared": true,
+          "explanation": "刚才看到过锅，慢慢回想就好。"
+        },
+        {
+          "target": "电脑",
+          "appeared": false,
+          "explanation": "刚才没有出现电脑，没记住也没关系。"
+        },
+        {
+          "target": "电梯",
+          "appeared": false,
+          "explanation": "刚才没有出现电梯，没记住也没关系。"
+        }
+      ]
+    },
+    {
+      "id": "mb_l_05",
+      "show_items": [
+        "帽子",
+        "围巾",
+        "手套",
+        "棉袄"
+      ],
+      "quizzes": [
+        {
+          "target": "围巾",
+          "appeared": true,
+          "explanation": "刚才看到过围巾，慢慢回想就好。"
+        },
+        {
+          "target": "手套",
+          "appeared": true,
+          "explanation": "刚才看到过手套，慢慢回想就好。"
+        },
+        {
+          "target": "火车",
+          "appeared": false,
+          "explanation": "刚才没有出现火车，没记住也没关系。"
+        },
+        {
+          "target": "冰箱",
+          "appeared": false,
+          "explanation": "刚才没有出现冰箱，没记住也没关系。"
+        }
+      ]
+    },
+    {
+      "id": "mb_l_06",
+      "show_items": [
+        "镜子",
+        "牙刷",
+        "脸盆",
+        "香皂"
+      ],
+      "quizzes": [
+        {
+          "target": "脸盆",
+          "appeared": true,
+          "explanation": "刚才看到过脸盆，慢慢回想就好。"
+        },
+        {
+          "target": "镜子",
+          "appeared": true,
+          "explanation": "刚才看到过镜子，慢慢回想就好。"
+        },
+        {
+          "target": "飞机",
+          "appeared": false,
+          "explanation": "刚才没有出现飞机，没记住也没关系。"
+        },
+        {
+          "target": "手机",
+          "appeared": false,
+          "explanation": "刚才没有出现手机，没记住也没关系。"
+        }
+      ]
+    }
   ],
   "mid": [
-    {"id": "mb_m_01", "show_items": ["钥匙", "雨伞", "眼镜", "茶杯", "梳子", "毛巾"], "quizzes": [{"target": "雨伞", "appeared": true}, {"target": "眼镜", "appeared": true}, {"target": "毛巾", "appeared": true}, {"target": "手套", "appeared": false}, {"target": "电视", "appeared": false}, {"target": "手机", "appeared": false}]},
-    {"id": "mb_m_02", "show_items": ["拐杖", "扇子", "报纸", "药盒", "老花镜", "拖鞋"], "quizzes": [{"target": "老花镜", "appeared": true}, {"target": "拐杖", "appeared": true}, {"target": "药盒", "appeared": true}, {"target": "电脑", "appeared": false}, {"target": "空调", "appeared": false}, {"target": "汽车", "appeared": false}]},
-    {"id": "mb_m_03", "show_items": ["碗", "筷子", "锅", "扫帚", "簸箕", "米缸"], "quizzes": [{"target": "簸箕", "appeared": true}, {"target": "筷子", "appeared": true}, {"target": "米缸", "appeared": true}, {"target": "电梯", "appeared": false}, {"target": "洗衣机", "appeared": false}, {"target": "地铁", "appeared": false}]},
-    {"id": "mb_m_04", "show_items": ["帽子", "围巾", "手套", "棉袄", "毛毯", "暖水袋"], "quizzes": [{"target": "毛毯", "appeared": true}, {"target": "棉袄", "appeared": true}, {"target": "暖水袋", "appeared": true}, {"target": "火车", "appeared": false}, {"target": "冰箱", "appeared": false}, {"target": "飞机", "appeared": false}]},
-    {"id": "mb_m_05", "show_items": ["镜子", "牙刷", "脸盆", "香皂", "牙膏", "毛巾"], "quizzes": [{"target": "牙膏", "appeared": true}, {"target": "香皂", "appeared": true}, {"target": "脸盆", "appeared": true}, {"target": "手机", "appeared": false}, {"target": "电脑", "appeared": false}, {"target": "电梯", "appeared": false}]},
-    {"id": "mb_m_06", "show_items": ["茶壶", "茶杯", "水杯", "保温杯", "暖水瓶", "果盘"], "quizzes": [{"target": "保温杯", "appeared": true}, {"target": "茶壶", "appeared": true}, {"target": "果盘", "appeared": true}, {"target": "汽车", "appeared": false}, {"target": "空调", "appeared": false}, {"target": "地铁", "appeared": false}]}
+    {
+      "id": "mb_m_01",
+      "show_items": [
+        "钥匙",
+        "雨伞",
+        "眼镜",
+        "茶杯",
+        "梳子",
+        "毛巾"
+      ],
+      "quizzes": [
+        {
+          "target": "雨伞",
+          "appeared": true,
+          "explanation": "刚才看到过雨伞，慢慢回想就好。"
+        },
+        {
+          "target": "眼镜",
+          "appeared": true,
+          "explanation": "刚才看到过眼镜，慢慢回想就好。"
+        },
+        {
+          "target": "毛巾",
+          "appeared": true,
+          "explanation": "刚才看到过毛巾，慢慢回想就好。"
+        },
+        {
+          "target": "手套",
+          "appeared": false,
+          "explanation": "刚才没有出现手套，没记住也没关系。"
+        },
+        {
+          "target": "电视",
+          "appeared": false,
+          "explanation": "刚才没有出现电视，没记住也没关系。"
+        },
+        {
+          "target": "手机",
+          "appeared": false,
+          "explanation": "刚才没有出现手机，没记住也没关系。"
+        }
+      ]
+    },
+    {
+      "id": "mb_m_02",
+      "show_items": [
+        "拐杖",
+        "扇子",
+        "报纸",
+        "药盒",
+        "老花镜",
+        "拖鞋"
+      ],
+      "quizzes": [
+        {
+          "target": "老花镜",
+          "appeared": true,
+          "explanation": "刚才看到过老花镜，慢慢回想就好。"
+        },
+        {
+          "target": "拐杖",
+          "appeared": true,
+          "explanation": "刚才看到过拐杖，慢慢回想就好。"
+        },
+        {
+          "target": "药盒",
+          "appeared": true,
+          "explanation": "刚才看到过药盒，慢慢回想就好。"
+        },
+        {
+          "target": "电脑",
+          "appeared": false,
+          "explanation": "刚才没有出现电脑，没记住也没关系。"
+        },
+        {
+          "target": "空调",
+          "appeared": false,
+          "explanation": "刚才没有出现空调，没记住也没关系。"
+        },
+        {
+          "target": "汽车",
+          "appeared": false,
+          "explanation": "刚才没有出现汽车，没记住也没关系。"
+        }
+      ]
+    },
+    {
+      "id": "mb_m_03",
+      "show_items": [
+        "碗",
+        "筷子",
+        "锅",
+        "扫帚",
+        "簸箕",
+        "米缸"
+      ],
+      "quizzes": [
+        {
+          "target": "簸箕",
+          "appeared": true,
+          "explanation": "刚才看到过簸箕，慢慢回想就好。"
+        },
+        {
+          "target": "筷子",
+          "appeared": true,
+          "explanation": "刚才看到过筷子，慢慢回想就好。"
+        },
+        {
+          "target": "米缸",
+          "appeared": true,
+          "explanation": "刚才看到过米缸，慢慢回想就好。"
+        },
+        {
+          "target": "电梯",
+          "appeared": false,
+          "explanation": "刚才没有出现电梯，没记住也没关系。"
+        },
+        {
+          "target": "洗衣机",
+          "appeared": false,
+          "explanation": "刚才没有出现洗衣机，没记住也没关系。"
+        },
+        {
+          "target": "地铁",
+          "appeared": false,
+          "explanation": "刚才没有出现地铁，没记住也没关系。"
+        }
+      ]
+    },
+    {
+      "id": "mb_m_04",
+      "show_items": [
+        "帽子",
+        "围巾",
+        "手套",
+        "棉袄",
+        "毛毯",
+        "暖水袋"
+      ],
+      "quizzes": [
+        {
+          "target": "毛毯",
+          "appeared": true,
+          "explanation": "刚才看到过毛毯，慢慢回想就好。"
+        },
+        {
+          "target": "棉袄",
+          "appeared": true,
+          "explanation": "刚才看到过棉袄，慢慢回想就好。"
+        },
+        {
+          "target": "暖水袋",
+          "appeared": true,
+          "explanation": "刚才看到过暖水袋，慢慢回想就好。"
+        },
+        {
+          "target": "火车",
+          "appeared": false,
+          "explanation": "刚才没有出现火车，没记住也没关系。"
+        },
+        {
+          "target": "冰箱",
+          "appeared": false,
+          "explanation": "刚才没有出现冰箱，没记住也没关系。"
+        },
+        {
+          "target": "飞机",
+          "appeared": false,
+          "explanation": "刚才没有出现飞机，没记住也没关系。"
+        }
+      ]
+    },
+    {
+      "id": "mb_m_05",
+      "show_items": [
+        "镜子",
+        "牙刷",
+        "脸盆",
+        "香皂",
+        "牙膏",
+        "毛巾"
+      ],
+      "quizzes": [
+        {
+          "target": "牙膏",
+          "appeared": true,
+          "explanation": "刚才看到过牙膏，慢慢回想就好。"
+        },
+        {
+          "target": "香皂",
+          "appeared": true,
+          "explanation": "刚才看到过香皂，慢慢回想就好。"
+        },
+        {
+          "target": "脸盆",
+          "appeared": true,
+          "explanation": "刚才看到过脸盆，慢慢回想就好。"
+        },
+        {
+          "target": "手机",
+          "appeared": false,
+          "explanation": "刚才没有出现手机，没记住也没关系。"
+        },
+        {
+          "target": "电脑",
+          "appeared": false,
+          "explanation": "刚才没有出现电脑，没记住也没关系。"
+        },
+        {
+          "target": "电梯",
+          "appeared": false,
+          "explanation": "刚才没有出现电梯，没记住也没关系。"
+        }
+      ]
+    },
+    {
+      "id": "mb_m_06",
+      "show_items": [
+        "茶壶",
+        "茶杯",
+        "水杯",
+        "保温杯",
+        "暖水瓶",
+        "果盘"
+      ],
+      "quizzes": [
+        {
+          "target": "保温杯",
+          "appeared": true,
+          "explanation": "刚才看到过保温杯，慢慢回想就好。"
+        },
+        {
+          "target": "茶壶",
+          "appeared": true,
+          "explanation": "刚才看到过茶壶，慢慢回想就好。"
+        },
+        {
+          "target": "果盘",
+          "appeared": true,
+          "explanation": "刚才看到过果盘，慢慢回想就好。"
+        },
+        {
+          "target": "汽车",
+          "appeared": false,
+          "explanation": "刚才没有出现汽车，没记住也没关系。"
+        },
+        {
+          "target": "空调",
+          "appeared": false,
+          "explanation": "刚才没有出现空调，没记住也没关系。"
+        },
+        {
+          "target": "地铁",
+          "appeared": false,
+          "explanation": "刚才没有出现地铁，没记住也没关系。"
+        }
+      ]
+    }
   ],
   "high": [
-    {"id": "mb_h_01", "show_items": ["钥匙", "雨伞", "眼镜", "茶杯", "梳子", "毛巾", "拐杖", "扇子"], "quizzes": [{"target": "扇子", "appeared": true}, {"target": "眼镜", "appeared": true}, {"target": "拐杖", "appeared": true}, {"target": "雨伞", "appeared": true}, {"target": "手套", "appeared": false}, {"target": "电视", "appeared": false}, {"target": "手机", "appeared": false}, {"target": "电脑", "appeared": false}]},
-    {"id": "mb_h_02", "show_items": ["报纸", "药盒", "老花镜", "拖鞋", "碗", "筷子", "锅", "扫帚"], "quizzes": [{"target": "老花镜", "appeared": true}, {"target": "筷子", "appeared": true}, {"target": "报纸", "appeared": true}, {"target": "药盒", "appeared": true}, {"target": "汽车", "appeared": false}, {"target": "空调", "appeared": false}, {"target": "洗衣机", "appeared": false}, {"target": "电梯", "appeared": false}]},
-    {"id": "mb_h_03", "show_items": ["帽子", "围巾", "手套", "棉袄", "毛毯", "暖水袋", "棉鞋", "护膝"], "quizzes": [{"target": "护膝", "appeared": true}, {"target": "毛毯", "appeared": true}, {"target": "围巾", "appeared": true}, {"target": "棉鞋", "appeared": true}, {"target": "火车", "appeared": false}, {"target": "冰箱", "appeared": false}, {"target": "飞机", "appeared": false}, {"target": "地铁", "appeared": false}]},
-    {"id": "mb_h_04", "show_items": ["镜子", "牙刷", "脸盆", "香皂", "牙膏", "毛巾", "漱口杯", "剃须刀"], "quizzes": [{"target": "剃须刀", "appeared": true}, {"target": "牙膏", "appeared": true}, {"target": "漱口杯", "appeared": true}, {"target": "香皂", "appeared": true}, {"target": "手机", "appeared": false}, {"target": "电脑", "appeared": false}, {"target": "电梯", "appeared": false}, {"target": "洗衣机", "appeared": false}]},
-    {"id": "mb_h_05", "show_items": ["茶壶", "茶杯", "水杯", "保温杯", "暖水瓶", "果盘", "砧板", "菜刀"], "quizzes": [{"target": "砧板", "appeared": true}, {"target": "菜刀", "appeared": true}, {"target": "保温杯", "appeared": true}, {"target": "果盘", "appeared": true}, {"target": "汽车", "appeared": false}, {"target": "空调", "appeared": false}, {"target": "地铁", "appeared": false}, {"target": "飞机", "appeared": false}]},
-    {"id": "mb_h_06", "show_items": ["蒲扇", "算盘", "毛笔", "砚台", "棋盘", "象棋", "相册", "花瓶"], "quizzes": [{"target": "算盘", "appeared": true}, {"target": "毛笔", "appeared": true}, {"target": "棋盘", "appeared": true}, {"target": "相册", "appeared": true}, {"target": "电视", "appeared": false}, {"target": "手机", "appeared": false}, {"target": "电脑", "appeared": false}, {"target": "冰箱", "appeared": false}]}
+    {
+      "id": "mb_h_01",
+      "show_items": [
+        "钥匙",
+        "雨伞",
+        "眼镜",
+        "茶杯",
+        "梳子",
+        "毛巾",
+        "拐杖",
+        "扇子"
+      ],
+      "quizzes": [
+        {
+          "target": "扇子",
+          "appeared": true,
+          "explanation": "刚才看到过扇子，慢慢回想就好。"
+        },
+        {
+          "target": "眼镜",
+          "appeared": true,
+          "explanation": "刚才看到过眼镜，慢慢回想就好。"
+        },
+        {
+          "target": "拐杖",
+          "appeared": true,
+          "explanation": "刚才看到过拐杖，慢慢回想就好。"
+        },
+        {
+          "target": "雨伞",
+          "appeared": true,
+          "explanation": "刚才看到过雨伞，慢慢回想就好。"
+        },
+        {
+          "target": "手套",
+          "appeared": false,
+          "explanation": "刚才没有出现手套，没记住也没关系。"
+        },
+        {
+          "target": "电视",
+          "appeared": false,
+          "explanation": "刚才没有出现电视，没记住也没关系。"
+        },
+        {
+          "target": "手机",
+          "appeared": false,
+          "explanation": "刚才没有出现手机，没记住也没关系。"
+        },
+        {
+          "target": "电脑",
+          "appeared": false,
+          "explanation": "刚才没有出现电脑，没记住也没关系。"
+        }
+      ]
+    },
+    {
+      "id": "mb_h_02",
+      "show_items": [
+        "报纸",
+        "药盒",
+        "老花镜",
+        "拖鞋",
+        "碗",
+        "筷子",
+        "锅",
+        "扫帚"
+      ],
+      "quizzes": [
+        {
+          "target": "老花镜",
+          "appeared": true,
+          "explanation": "刚才看到过老花镜，慢慢回想就好。"
+        },
+        {
+          "target": "筷子",
+          "appeared": true,
+          "explanation": "刚才看到过筷子，慢慢回想就好。"
+        },
+        {
+          "target": "报纸",
+          "appeared": true,
+          "explanation": "刚才看到过报纸，慢慢回想就好。"
+        },
+        {
+          "target": "药盒",
+          "appeared": true,
+          "explanation": "刚才看到过药盒，慢慢回想就好。"
+        },
+        {
+          "target": "汽车",
+          "appeared": false,
+          "explanation": "刚才没有出现汽车，没记住也没关系。"
+        },
+        {
+          "target": "空调",
+          "appeared": false,
+          "explanation": "刚才没有出现空调，没记住也没关系。"
+        },
+        {
+          "target": "洗衣机",
+          "appeared": false,
+          "explanation": "刚才没有出现洗衣机，没记住也没关系。"
+        },
+        {
+          "target": "电梯",
+          "appeared": false,
+          "explanation": "刚才没有出现电梯，没记住也没关系。"
+        }
+      ]
+    },
+    {
+      "id": "mb_h_03",
+      "show_items": [
+        "帽子",
+        "围巾",
+        "手套",
+        "棉袄",
+        "毛毯",
+        "暖水袋",
+        "棉鞋",
+        "护膝"
+      ],
+      "quizzes": [
+        {
+          "target": "护膝",
+          "appeared": true,
+          "explanation": "刚才看到过护膝，慢慢回想就好。"
+        },
+        {
+          "target": "毛毯",
+          "appeared": true,
+          "explanation": "刚才看到过毛毯，慢慢回想就好。"
+        },
+        {
+          "target": "围巾",
+          "appeared": true,
+          "explanation": "刚才看到过围巾，慢慢回想就好。"
+        },
+        {
+          "target": "棉鞋",
+          "appeared": true,
+          "explanation": "刚才看到过棉鞋，慢慢回想就好。"
+        },
+        {
+          "target": "火车",
+          "appeared": false,
+          "explanation": "刚才没有出现火车，没记住也没关系。"
+        },
+        {
+          "target": "冰箱",
+          "appeared": false,
+          "explanation": "刚才没有出现冰箱，没记住也没关系。"
+        },
+        {
+          "target": "飞机",
+          "appeared": false,
+          "explanation": "刚才没有出现飞机，没记住也没关系。"
+        },
+        {
+          "target": "地铁",
+          "appeared": false,
+          "explanation": "刚才没有出现地铁，没记住也没关系。"
+        }
+      ]
+    },
+    {
+      "id": "mb_h_04",
+      "show_items": [
+        "镜子",
+        "牙刷",
+        "脸盆",
+        "香皂",
+        "牙膏",
+        "毛巾",
+        "漱口杯",
+        "剃须刀"
+      ],
+      "quizzes": [
+        {
+          "target": "剃须刀",
+          "appeared": true,
+          "explanation": "刚才看到过剃须刀，慢慢回想就好。"
+        },
+        {
+          "target": "牙膏",
+          "appeared": true,
+          "explanation": "刚才看到过牙膏，慢慢回想就好。"
+        },
+        {
+          "target": "漱口杯",
+          "appeared": true,
+          "explanation": "刚才看到过漱口杯，慢慢回想就好。"
+        },
+        {
+          "target": "香皂",
+          "appeared": true,
+          "explanation": "刚才看到过香皂，慢慢回想就好。"
+        },
+        {
+          "target": "手机",
+          "appeared": false,
+          "explanation": "刚才没有出现手机，没记住也没关系。"
+        },
+        {
+          "target": "电脑",
+          "appeared": false,
+          "explanation": "刚才没有出现电脑，没记住也没关系。"
+        },
+        {
+          "target": "电梯",
+          "appeared": false,
+          "explanation": "刚才没有出现电梯，没记住也没关系。"
+        },
+        {
+          "target": "洗衣机",
+          "appeared": false,
+          "explanation": "刚才没有出现洗衣机，没记住也没关系。"
+        }
+      ]
+    },
+    {
+      "id": "mb_h_05",
+      "show_items": [
+        "茶壶",
+        "茶杯",
+        "水杯",
+        "保温杯",
+        "暖水瓶",
+        "果盘",
+        "砧板",
+        "菜刀"
+      ],
+      "quizzes": [
+        {
+          "target": "砧板",
+          "appeared": true,
+          "explanation": "刚才看到过砧板，慢慢回想就好。"
+        },
+        {
+          "target": "菜刀",
+          "appeared": true,
+          "explanation": "刚才看到过菜刀，慢慢回想就好。"
+        },
+        {
+          "target": "保温杯",
+          "appeared": true,
+          "explanation": "刚才看到过保温杯，慢慢回想就好。"
+        },
+        {
+          "target": "果盘",
+          "appeared": true,
+          "explanation": "刚才看到过果盘，慢慢回想就好。"
+        },
+        {
+          "target": "汽车",
+          "appeared": false,
+          "explanation": "刚才没有出现汽车，没记住也没关系。"
+        },
+        {
+          "target": "空调",
+          "appeared": false,
+          "explanation": "刚才没有出现空调，没记住也没关系。"
+        },
+        {
+          "target": "地铁",
+          "appeared": false,
+          "explanation": "刚才没有出现地铁，没记住也没关系。"
+        },
+        {
+          "target": "飞机",
+          "appeared": false,
+          "explanation": "刚才没有出现飞机，没记住也没关系。"
+        }
+      ]
+    },
+    {
+      "id": "mb_h_06",
+      "show_items": [
+        "蒲扇",
+        "算盘",
+        "毛笔",
+        "砚台",
+        "棋盘",
+        "象棋",
+        "相册",
+        "花瓶"
+      ],
+      "quizzes": [
+        {
+          "target": "算盘",
+          "appeared": true,
+          "explanation": "刚才看到过算盘，慢慢回想就好。"
+        },
+        {
+          "target": "毛笔",
+          "appeared": true,
+          "explanation": "刚才看到过毛笔，慢慢回想就好。"
+        },
+        {
+          "target": "棋盘",
+          "appeared": true,
+          "explanation": "刚才看到过棋盘，慢慢回想就好。"
+        },
+        {
+          "target": "相册",
+          "appeared": true,
+          "explanation": "刚才看到过相册，慢慢回想就好。"
+        },
+        {
+          "target": "电视",
+          "appeared": false,
+          "explanation": "刚才没有出现电视，没记住也没关系。"
+        },
+        {
+          "target": "手机",
+          "appeared": false,
+          "explanation": "刚才没有出现手机，没记住也没关系。"
+        },
+        {
+          "target": "电脑",
+          "appeared": false,
+          "explanation": "刚才没有出现电脑，没记住也没关系。"
+        },
+        {
+          "target": "冰箱",
+          "appeared": false,
+          "explanation": "刚才没有出现冰箱，没记住也没关系。"
+        }
+      ]
+    }
   ]
 }

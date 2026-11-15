@@ -344,3 +344,18 @@ def test_category_sort_bank_counts():
     for groups in bank.values():
         for g in groups:
             assert g["answer"] in g["options"]
+
+
+def test_start_honors_hint_difficulty(factory):
+    """智能体在 plan 节点算好的档位带过来就用，不再按历史重算。"""
+    with factory() as db:
+        result = game_engine.start("u_hint", "memory_box", db, difficulty=3)
+    assert result["difficulty"] == 3
+    assert result["time_limit_sec"] == 5
+
+
+def test_start_without_hint_uses_history(factory):
+    """不传档位时行为不变：没有历史记录默认中档。"""
+    with factory() as db:
+        result = game_engine.start("u_hint_none", "memory_box", db)
+    assert result["difficulty"] == 2

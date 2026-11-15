@@ -1,4 +1,6 @@
 """训练记录查询接口。"""
+from datetime import datetime, timedelta
+
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy import case, func, select
@@ -16,6 +18,7 @@ class RecordItem(BaseModel):
     correct_count: int
     total_count: int
     duration_sec: int
+    abandoned: int
     created_at: str
 
 
@@ -24,11 +27,29 @@ class Summary(BaseModel):
     avg_accuracy: int
     total_duration: int
     by_type: list[dict]
+    streak_days: int = 0
 
 
 class RecordsResponse(BaseModel):
     records: list[RecordItem]
     summary: Summary
+
+
+def completed_rows(rows):
+    return [row for row in rows if row.abandoned != 1 and row.total_count > 0]
+
+
+def streak_days(rows, today=None) -> int:
+    dates = {row.created_at.date() for row in rows if row.total_count > 0}
+    if not dates:
+        return 0
+    today = today or datetime.now().date()
+    cursor = today if today in dates else today - timedelta(days=1)
+    count = 0
+    while cursor in dates:
+        count += 1
+        cursor -= timedelta(days=1)
+    return count
 
 
 def _query_records(user_id: str, limit: int) -> RecordsResponse:
@@ -37,10 +58,10 @@ def _query_records(user_id: str, limit: int) -> RecordsResponse:
         all_rows = db.execute(
             select(TrainingRecord).where(TrainingRecord.user_id == user_id)
         ).scalars().all()
-        valid = [r for r in all_rows if r.total_count > 0]
+        completed = completed_rows(all_rows)
         avg_accuracy = (
-            round(sum(r.correct_count / r.total_count for r in valid) / len(valid) * 100)
-            if valid
+            round(sum(r.correct_count / r.total_count for r in completed) / len(completed) * 100)
+            if completed
             else 0
         )
         by_type_rows = db.execute(
@@ -54,7 +75,11 @@ def _query_records(user_id: str, limit: int) -> RecordsResponse:
                     )
                 ),
             )
-            .where(TrainingRecord.user_id == user_id)
+            .where(
+                TrainingRecord.user_id == user_id,
+                TrainingRecord.abandoned != 1,
+                TrainingRecord.total_count > 0,
+            )
             .group_by(TrainingRecord.game_type)
         ).all()
         by_type = [
@@ -74,6 +99,7 @@ def _query_records(user_id: str, limit: int) -> RecordsResponse:
                 correct_count=r.correct_count,
                 total_count=r.total_count,
                 duration_sec=r.duration_sec,
+                abandoned=r.abandoned,
                 created_at=r.created_at.strftime("%Y-%m-%d %H:%M:%S"),
             )
             for r in recent
@@ -81,10 +107,11 @@ def _query_records(user_id: str, limit: int) -> RecordsResponse:
     return RecordsResponse(
         records=records,
         summary=Summary(
-            total=len(all_rows),
+            total=len(completed),
             avg_accuracy=avg_accuracy,
-            total_duration=sum(r.duration_sec for r in all_rows),
+            total_duration=sum(r.duration_sec for r in completed),
             by_type=by_type,
+            streak_days=streak_days(all_rows),
         ),
     )
 

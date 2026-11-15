@@ -1,0 +1,53 @@
+{
+  "low": [
+    {"id": "ns_l_01", "digits": "384", "explanation": "先看完整数字，再按顺序慢慢回想。"},
+    {"id": "ns_l_02", "digits": "729", "explanation": "数字一闪就过去了，没看清也没关系。"},
+    {"id": "ns_l_03", "digits": "516", "explanation": "把开头和结尾连起来，会更容易记住。"},
+    {"id": "ns_l_04", "digits": "842", "explanation": "一次没记住很正常，咱们下回再看一遍。"},
+    {"id": "ns_l_05", "digits": "193", "explanation": "可以先在心里读一遍，再选答案。"},
+    {"id": "ns_l_06", "digits": "607", "explanation": "数字顺序容易混，慢一点看就好。"},
+    {"id": "ns_l_07", "digits": "275", "explanation": "看清每个数字的位置，再作选择。"},
+    {"id": "ns_l_08", "digits": "918", "explanation": "这一串有点绕，下回咱们再练一遍。"},
+    {"id": "ns_l_09", "digits": "436", "explanation": "不要着急，先抓住最熟悉的数字。"},
+    {"id": "ns_l_10", "digits": "581", "explanation": "看漏一个数字也常见，慢慢来就好。"},
+    {"id": "ns_l_11", "digits": "246", "explanation": "按从左到右的顺序记，会更稳一些。"},
+    {"id": "ns_l_12", "digits": "763", "explanation": "相近的数字容易混淆，再仔细看一遍。"},
+    {"id": "ns_l_13", "digits": "805", "explanation": "记住开头的数字，再往后接下去。"},
+    {"id": "ns_l_14", "digits": "392", "explanation": "一次选错不要紧，下一题继续看。"},
+    {"id": "ns_l_15", "digits": "674", "explanation": "慢慢读一遍数字，再选也不迟。"}
+  ],
+  "mid": [
+    {"id": "ns_m_01", "digits": "3847", "explanation": "先看完整数字，再按顺序慢慢回想。"},
+    {"id": "ns_m_02", "digits": "7291", "explanation": "数字一闪就过去了，没看清也没关系。"},
+    {"id": "ns_m_03", "digits": "5164", "explanation": "把开头和结尾连起来，会更容易记住。"},
+    {"id": "ns_m_04", "digits": "8423", "explanation": "一次没记住很正常，咱们下回再看一遍。"},
+    {"id": "ns_m_05", "digits": "1936", "explanation": "可以先在心里读一遍，再选答案。"},
+    {"id": "ns_m_06", "digits": "6075", "explanation": "数字顺序容易混，慢一点看就好。"},
+    {"id": "ns_m_07", "digits": "2759", "explanation": "看清每个数字的位置，再作选择。"},
+    {"id": "ns_m_08", "digits": "9184", "explanation": "这一串有点绕，下回咱们再练一遍。"},
+    {"id": "ns_m_09", "digits": "4362", "explanation": "不要着急，先抓住最熟悉的数字。"},
+    {"id": "ns_m_10", "digits": "5817", "explanation": "看漏一个数字也常见，慢慢来就好。"},
+    {"id": "ns_m_11", "digits": "2468", "explanation": "按从左到右的顺序记，会更稳一些。"},
+    {"id": "ns_m_12", "digits": "7635", "explanation": "相近的数字容易混淆，再仔细看一遍。"},
+    {"id": "ns_m_13", "digits": "8059", "explanation": "记住开头的数字，再往后接下去。"},
+    {"id": "ns_m_14", "digits": "3926", "explanation": "一次选错不要紧，下一题继续看。"},
+    {"id": "ns_m_15", "digits": "6741", "explanation": "慢慢读一遍数字，再选也不迟。"}
+  ],
+  "high": [
+    {"id": "ns_h_01", "digits": "38472", "explanation": "先看完整数字，再按顺序慢慢回想。"},
+    {"id": "ns_h_02", "digits": "72915", "explanation": "数字一闪就过去了，没看清也没关系。"},
+    {"id": "ns_h_03", "digits": "51648", "explanation": "把开头和结尾连起来，会更容易记住。"},
+    {"id": "ns_h_04", "digits": "84236", "explanation": "一次没记住很正常，咱们下回再看一遍。"},
+    {"id": "ns_h_05", "digits": "19367", "explanation": "可以先在心里读一遍，再选答案。"},
+    {"id": "ns_h_06", "digits": "60754", "explanation": "数字顺序容易混，慢一点看就好。"},
+    {"id": "ns_h_07", "digits": "27591", "explanation": "看清每个数字的位置，再作选择。"},
+    {"id": "ns_h_08", "digits": "91843", "explanation": "这一串有点绕，下回咱们再练一遍。"},
+    {"id": "ns_h_09", "digits": "43625", "explanation": "不要着急，先抓住最熟悉的数字。"},
+    {"id": "ns_h_10", "digits": "58179", "explanation": "看漏一个数字也常见，慢慢来就好。"},
+    {"id": "ns_h_11", "digits": "24680", "explanation": "按从左到右的顺序记，会更稳一些。"},
+    {"id": "ns_h_12", "digits": "76351", "explanation": "相近的数字容易混淆，再仔细看一遍。"},
+    {"id": "ns_h_13", "digits": "80594", "explanation": "记住开头的数字，再往后接下去。"},
+    {"id": "ns_h_14", "digits": "39267", "explanation": "一次选错不要紧，下一题继续看。"},
+    {"id": "ns_h_15", "digits": "67418", "explanation": "慢慢读一遍数字，再选也不迟。"}
+  ]
+}

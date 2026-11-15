@@ -32,6 +32,9 @@ def test_mysql_schema_and_demo_user():
         "memories",
         "training_records",
         "interaction_events",
+        "family_bind",
+        "family_notes",
+        "bind_attempt",
     }
     tables = set(inspect(engine).get_table_names())
     assert required <= tables
@@ -41,4 +44,4 @@ def test_mysql_schema_and_demo_user():
             {"uid": "demo_user_1"},
         ).mappings().first()
         assert row is not None
-        assert row["nickname"] == "张阿姨"
+        assert row["nickname"] == "老人家"

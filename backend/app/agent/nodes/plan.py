@@ -13,6 +13,10 @@ logger = logging.getLogger("elder_care")
 
 
 def _resolve_game_type(raw: str, user_id: str, session) -> str:
+    if any(k in raw for k in ("数字", "顺序")):
+        return "number_seq"
+    if any(k in raw for k in ("常识", "生活判断")):
+        return "common_sense"
     if any(k in raw for k in ("记东西", "记忆", "记住")):
         return "memory_box"
     if any(k in raw for k in ("分一分", "分类", "归类")):
@@ -23,9 +27,10 @@ def _resolve_game_type(raw: str, user_id: str, session) -> str:
         .order_by(TrainingRecord.created_at.desc())
         .limit(1)
     ).scalars().first()
-    if last and last.game_type == "memory_box":
-        return "category_sort"
-    return "memory_box"
+    game_types = ["memory_box", "category_sort", "number_seq", "common_sense"]
+    if last and last.game_type in game_types:
+        return game_types[(game_types.index(last.game_type) + 1) % len(game_types)]
+    return game_types[0]
 
 
 def _game_params(state: dict, session_factory) -> dict:

@@ -6,7 +6,16 @@ from sqlalchemy import select
 
 from app.db.models import Memory, Profile
 from app.db.session import SessionLocal
-from app.memory.scoring import overlap_score, score_memory, sort_scored, time_prefilter
+from app.memory.bm25 import build_index, score_all, strip_time_words
+from app.memory.scoring import (
+    WEIGHTS,
+    importance_score,
+    overlap_score,
+    score_memory,
+    sort_scored,
+    time_prefilter,
+    type_score,
+)
 
 logger = logging.getLogger("elder_care")
 
@@ -154,7 +163,96 @@ def score_candidate(query: str, content: str, importance: int, occurred_at, laye
     return score, eff_importance
 
 
-def recall(user_id: str, query: str, top_k: int = 3, session_factory=None, weights=None) -> list[dict]:
+def _value(item, key):
+    return item.get(key) if isinstance(item, dict) else getattr(item, key)
+
+
+def score_candidates(
+    query: str,
+    memories: list,
+    weights=None,
+    filter_time: bool = False,
+    mode: str = "legacy",
+    tie_break: bool = True,
+):
+    """统一候选打分入口；tie_break=False 时按纯分数排序，供复现旧实验。"""
+    if mode not in ("legacy", "bm25", "hybrid", "bm25_v2", "hybrid_v2", "hybrid_v3", "hybrid_v4"):
+        raise ValueError("未知召回模式")
+    w = dict(WEIGHTS)
+    if weights:
+        w.update(weights)
+
+    eligible = []
+    legacy_scores = []
+    for memory in memories:
+        result = score_candidate(
+            query or "",
+            _value(memory, "content"),
+            _value(memory, "importance"),
+            _value(memory, "occurred_at"),
+            _value(memory, "layer"),
+            weights=weights,
+            filter_time=filter_time,
+        )
+        if result is None:
+            continue
+        legacy_score, effective_importance = result
+        eligible.append((memory, effective_importance))
+        legacy_scores.append(legacy_score)
+
+    scored = []
+    if mode == "legacy":
+        for position, (memory, effective_importance) in enumerate(eligible):
+            scored.append((memory, legacy_scores[position], effective_importance))
+    else:
+        bm25_query = (
+            strip_time_words(query or "")
+            if mode in ("bm25_v2", "hybrid_v2", "hybrid_v3", "hybrid_v4")
+            else (query or "")
+        )
+        bm25_scores = score_all(
+            bm25_query,
+            build_index([_value(memory, "content") for memory, _ in eligible]),
+        )
+        max_bm25 = max(bm25_scores) if bm25_scores else 0.0
+        jaccard_query = bm25_query if mode == "hybrid_v4" else (query or "")
+        jaccard_scores = [
+            overlap_score(jaccard_query, _value(memory, "content"))
+            for memory, _ in eligible
+        ]
+        max_jaccard = max(jaccard_scores) if jaccard_scores else 0.0
+        for position, (memory, effective_importance) in enumerate(eligible):
+            bm25 = bm25_scores[position]
+            jaccard = jaccard_scores[position]
+            extras = (
+                w["importance"] * importance_score(effective_importance)
+                + w["type"] * type_score(_value(memory, "layer"))
+            )
+            if mode in ("bm25", "bm25_v2"):
+                score = bm25 + extras
+            else:
+                # BM25_norm 在每个 query 的合格候选内除以最大 BM25 分数；最大值为 0 时统一取 0。
+                bm25_norm = bm25 / max_bm25 if max_bm25 > 0 else 0.0
+                if mode in ("hybrid_v3", "hybrid_v4"):
+                    # Jaccard 同样在本 query 内按最大值归一到 [0,1]，使 0.55/0.25 可比。
+                    jaccard_value = jaccard / max_jaccard if max_jaccard > 0 else 0.0
+                else:
+                    jaccard_value = jaccard
+                score = w["overlap"] * jaccard_value + 0.25 * bm25_norm + extras
+            scored.append((memory, score, effective_importance))
+    if tie_break:
+        return sort_scored(scored)
+    return sorted(scored, key=lambda item: item[1], reverse=True)
+
+
+def recall(
+    user_id: str,
+    query: str,
+    top_k: int = 3,
+    session_factory=None,
+    weights=None,
+    mode: str = "legacy",
+) -> list[dict]:
     """召回事件与 session 记忆，按可解释打分排序；不满足候选条件的不进。"""
     factory = session_factory or SessionLocal
     with factory() as session:
@@ -165,14 +263,13 @@ def recall(user_id: str, query: str, top_k: int = 3, session_factory=None, weigh
                 Memory.is_deleted == 0,
             )
         ).scalars().all()
-        scored = []
-        for m in rows:
-            res = score_candidate(query or "", m.content, m.importance, m.occurred_at, m.layer, weights=weights, filter_time=True)
-            if res is None:
-                continue
-            s, imp = res
-            scored.append((m, s, imp))
-        ranked = sort_scored(scored)
+        ranked = score_candidates(
+            query or "",
+            rows,
+            weights=weights,
+            filter_time=True,
+            mode=mode,
+        )
         return [
             {
                 "memory_id": m.id,

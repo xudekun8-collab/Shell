@@ -15,9 +15,9 @@ def init_db(engine: Engine) -> None:
             session.add(
                 Profile(
                     user_id="demo_user_1",
-                    nickname="张阿姨",
-                    interests=["黄梅戏", "养花"],
-                    taboos=["不要提去世的老伴"],
+                    nickname="老人家",
+                    interests=[],
+                    taboos=[],
                 )
             )
         session.commit()

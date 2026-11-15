@@ -3,7 +3,8 @@ import logging
 
 import httpx
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+from sqlalchemy.exc import IntegrityError
 
 from app import config
 from app.db.models import Profile, User
@@ -15,11 +16,11 @@ router = APIRouter()
 
 
 class WxLoginRequest(BaseModel):
-    code: str
+    code: str = Field(min_length=1, max_length=256)
 
 
 class DemoLoginRequest(BaseModel):
-    user_id: str
+    user_id: str = Field(min_length=1, max_length=64)
 
 
 class AuthResponse(BaseModel):
@@ -37,15 +38,15 @@ def _ensure_user(db, user_id: str) -> Profile:
     if profile is None:
         profile = Profile(user_id=user_id, nickname="您好", interests=[], taboos=[])
         db.add(profile)
-    db.commit()
-    return profile
-
-
-def _issue(user_id: str, role: str) -> AuthResponse:
-    if not config.AUTH_SECRET:
-        raise HTTPException(status_code=500, detail="AUTH_SECRET 未配置")
-    token = create_token(user_id, role, config.AUTH_SECRET)
-    return AuthResponse(token=token, user_id=user_id, nickname=user_id, role=role)
+    try:
+        db.commit()
+        return profile
+    except IntegrityError:
+        db.rollback()
+        profile = db.get(Profile, user_id)
+        if profile is None:
+            raise
+        return profile
 
 
 @router.post("/api/auth/wx", response_model=AuthResponse)
@@ -62,11 +63,11 @@ def wx_login(request: WxLoginRequest) -> AuthResponse:
     try:
         data = httpx.get(url, params=params, timeout=10).json()
     except Exception as exc:
-        logger.warning("微信 jscode2session 调用失败：%s", exc)
+        logger.warning("微信 jscode2session 调用失败：%s", type(exc).__name__)
         raise HTTPException(status_code=502, detail="微信登录服务不可用")
     if "openid" not in data:
         raise HTTPException(status_code=401, detail="微信登录失败")
-    user_id = "wx_" + data["openid"][:20]
+    user_id = "wx_" + data["openid"]
     with SessionLocal() as db:
         profile = _ensure_user(db, user_id)
         nickname = profile.nickname
@@ -84,7 +85,9 @@ def _issue_with_nickname(user_id: str, nickname: str) -> AuthResponse:
 def demo_login(request: DemoLoginRequest) -> AuthResponse:
     if config.DEMO_MODE != "1":
         raise HTTPException(status_code=401, detail="演示登录未开启")
-    user_id = request.user_id or "demo_user_1"
+    if request.user_id not in config.DEMO_USERS:
+        raise HTTPException(status_code=401, detail="演示账号未授权")
+    user_id = request.user_id
     with SessionLocal() as db:
         profile = _ensure_user(db, user_id)
         nickname = profile.nickname

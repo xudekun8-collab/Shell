@@ -37,10 +37,7 @@ def _parse_sse(body: str) -> list[dict]:
 @pytest.fixture()
 def stream_client(monkeypatch):
     import app.api.chat as chat_mod
-    from app.agent.nodes.act import make_act
-    from app.agent.nodes.perceive import make_perceive
-    from app.agent.nodes.plan import make_plan
-    from app.agent.nodes.retrieve import make_retrieve
+    from app.agent.graph import build_graph
     from app.llm.client import FakeClient
 
     monkeypatch.setattr(config, "AUTH_SECRET", SECRET)
@@ -56,10 +53,7 @@ def stream_client(monkeypatch):
     fake = FakeClient()
     monkeypatch.setattr(chat_mod, "SessionLocal", factory)
     monkeypatch.setattr(chat_mod, "_llm_client", fake)
-    monkeypatch.setattr(chat_mod, "_perceive", make_perceive(factory))
-    monkeypatch.setattr(chat_mod, "_retrieve", make_retrieve(factory))
-    monkeypatch.setattr(chat_mod, "_plan", make_plan(fake, factory))
-    monkeypatch.setattr(chat_mod, "_act", make_act(fake, factory))
+    monkeypatch.setattr(chat_mod, "_graph", build_graph(fake, factory))
 
     from app.main import app
 
@@ -82,9 +76,33 @@ def test_stream_meta_delta_done(stream_client):
     types = [e["event"] for e in events]
     assert types[0] == "meta"
     assert types[-1] == "done"
+    assert all(event_type == "delta" for event_type in types[1:-1])
+    assert len(types[1:-1]) > 1
     deltas = "".join(e["data"]["text"] for e in events if e["event"] == "delta")
     assert deltas == "我听着呢，您接着说。"
     assert "latency_first_token_ms" in events[-1]["data"]
+
+
+def test_invoke_and_stream_reply_text_match(stream_client):
+    client, _ = stream_client
+    non_stream = client.post(
+        "/api/chat",
+        json={"thread_id": "same-invoke", "text": "今天天气不错"},
+        headers=_headers(),
+    )
+    stream = client.post(
+        "/api/chat/stream",
+        json={"thread_id": "same-stream", "text": "今天天气不错"},
+        headers=_headers(),
+    )
+    assert non_stream.status_code == 200
+    assert stream.status_code == 200
+    streamed_text = "".join(
+        event["data"]["text"]
+        for event in _parse_sse(stream.text)
+        if event["event"] == "delta"
+    )
+    assert streamed_text == non_stream.json()["reply_text"]
 
 
 def test_medical_single_delta(stream_client):
@@ -131,3 +149,18 @@ def test_stream_persists_conversation_and_memory(stream_client):
             select(Memory).where(Memory.user_id == "demo_user_1", Memory.layer == "event")
         ).scalars().all()
         assert len(events) >= 1
+
+
+def test_end_stream_keeps_meta_delta_done_order(stream_client):
+    client, _ = stream_client
+    resp = client.post(
+        "/api/chat/stream",
+        json={"thread_id": "end-order", "text": "不聊了"},
+        headers=_headers(),
+    )
+    events = _parse_sse(resp.text)
+    types = [event["event"] for event in events]
+    assert types[0] == "meta"
+    assert types[-1] == "done"
+    assert all(event_type == "delta" for event_type in types[1:-1])
+    assert events[0]["data"]["action"] == "end"

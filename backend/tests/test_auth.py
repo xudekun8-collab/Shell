@@ -159,14 +159,14 @@ def test_wx_login_creates_profile_once(client, monkeypatch):
 
     class FakeResp:
         def json(self):
-            return {"openid": "abc1234567890xyz"}
+            return {"openid": "abc1234567890xyz123456789abc"}
 
     monkeypatch.setattr(auth_mod.httpx, "get", lambda url, params=None, timeout=None: FakeResp())
 
     r1 = client.post("/api/auth/wx", json={"code": "c1"})
     assert r1.status_code == 200
     user_id = r1.json()["user_id"]
-    assert user_id.startswith("wx_")
+    assert user_id == "wx_abc1234567890xyz123456789abc"
     r2 = client.post("/api/auth/wx", json={"code": "c2"})
     assert r2.status_code == 200
     assert r2.json()["user_id"] == user_id
@@ -175,6 +175,53 @@ def test_wx_login_creates_profile_once(client, monkeypatch):
         profile = db.get(Profile, user_id)
         assert profile is not None
         assert profile.nickname == "您好"
+    assert not hasattr(auth_mod, "_issue")
+
+
+def test_wx_login_failure_does_not_log_credentials(client, monkeypatch, caplog):
+    import app.api.auth as auth_mod
+
+    monkeypatch.setattr(config, "WX_APPID", "appid")
+    monkeypatch.setattr(config, "WX_SECRET", "do-not-log-this-secret")
+
+    def fail_get(*_args, **_kwargs):
+        raise RuntimeError("request failed secret=do-not-log-this-secret")
+
+    monkeypatch.setattr(auth_mod.httpx, "get", fail_get)
+    response = client.post("/api/auth/wx", json={"code": "c1"})
+    assert response.status_code == 502
+    assert "do-not-log-this-secret" not in caplog.text
+
+
+def test_wx_openids_sharing_first_20_chars_do_not_collide(client, monkeypatch):
+    import app.api.auth as auth_mod
+
+    monkeypatch.setattr(config, "WX_APPID", "appid")
+    monkeypatch.setattr(config, "WX_SECRET", "secret")
+    factory = _memory_factory()
+    monkeypatch.setattr(auth_mod, "SessionLocal", factory)
+    openids = {
+        "c1": "abcdefghijklmnopqrst11111111",
+        "c2": "abcdefghijklmnopqrst22222222",
+    }
+
+    class FakeResp:
+        def __init__(self, openid):
+            self.openid = openid
+
+        def json(self):
+            return {"openid": self.openid}
+
+    monkeypatch.setattr(
+        auth_mod.httpx,
+        "get",
+        lambda url, params=None, timeout=None: FakeResp(openids[params["js_code"]]),
+    )
+    first = client.post("/api/auth/wx", json={"code": "c1"}).json()["user_id"]
+    second = client.post("/api/auth/wx", json={"code": "c2"}).json()["user_id"]
+    assert first == "wx_" + openids["c1"]
+    assert second == "wx_" + openids["c2"]
+    assert first != second
 
 
 def test_demo_login_works_when_enabled(client, monkeypatch):
@@ -189,3 +236,14 @@ def test_demo_login_works_when_enabled(client, monkeypatch):
     assert body["token"]
     assert body["role"] == "elder"
     assert body["user_id"] == "demo_user_1"
+
+
+def test_demo_login_rejects_user_outside_allowlist(client, monkeypatch):
+    import app.api.auth as auth_mod
+
+    monkeypatch.setattr(config, "DEMO_MODE", "1")
+    monkeypatch.setattr(config, "DEMO_USERS", {"demo_user_1"})
+    monkeypatch.setattr(auth_mod, "SessionLocal", _memory_factory())
+    response = client.post("/api/auth/demo", json={"user_id": "someone_else"})
+    assert response.status_code == 401
+    assert response.json()["detail"] == "演示账号未授权"

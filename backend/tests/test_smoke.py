@@ -17,9 +17,9 @@ def test_smoke():
         assert user is not None
         profile = session.get(Profile, "demo_user_1")
         assert profile is not None
-        assert profile.nickname == "张阿姨"
-        assert profile.interests == ["黄梅戏", "养花"]
-        assert profile.taboos == ["不要提去世的老伴"]
+        assert profile.nickname == "老人家"
+        assert profile.interests == []
+        assert profile.taboos == []
         # SQLite 下 TIME 取出来是字符串，必须能通过 to_time 还原
         assert to_time(profile.wake_time) == time(7, 0)
         assert to_time(profile.sleep_time) == time(22, 0)

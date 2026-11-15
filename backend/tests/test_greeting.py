@@ -3,7 +3,7 @@ from datetime import datetime
 
 from sqlalchemy import func, select
 
-from app.db.models import Conversation, InteractionEvent, Profile
+from app.db.models import Conversation, FamilyNote, InteractionEvent, Profile
 from app.services.greeting import build_greeting, period_of
 
 
@@ -75,14 +75,26 @@ def test_evening_appends_interest_only_when_present(factory):
     assert r2["greeting"] == "孙姨，今天有啥高兴的事儿？"
 
 
-def _call_greeting(factory, thread_id=None):
+def test_interest_is_appended_in_every_period(factory):
+    session = factory()
+    with session as db:
+        profile = Profile(user_id="u7", nickname="周叔", interests=["下棋"], taboos=[])
+        db.add(profile)
+        db.commit()
+        morning = build_greeting(profile, _now(7))
+        night = build_greeting(profile, _now(23))
+    assert morning["greeting"].endswith("您上次说喜欢下棋，还惦记着吗？")
+    assert night["greeting"].endswith("您上次说喜欢下棋，还惦记着吗？")
+
+
+def _call_greeting(factory, thread_id=None, user_id="demo_user_1"):
     """直接调用路由处理函数，用内存 SQLite 会话工厂替换 SessionLocal。"""
     import app.api.greeting as greeting_api
 
     original = greeting_api.SessionLocal
     greeting_api.SessionLocal = factory
     try:
-        return greeting_api.get_greeting({"user_id": "demo_user_1"}, thread_id=thread_id)
+        return greeting_api.get_greeting({"user_id": user_id}, thread_id=thread_id)
     finally:
         greeting_api.SessionLocal = original
 
@@ -112,13 +124,47 @@ def test_greeting_without_thread_id_writes_nothing(factory):
         assert ev_count == 0
 
 
-def test_greeting_twice_records_exactly_two_turns(factory):
+def test_greeting_twice_records_only_one_turn_per_day(factory):
     _call_greeting(factory, thread_id="t1")
     _call_greeting(factory, thread_id="t1")
     with factory() as db:
         events = db.execute(
             select(InteractionEvent).where(InteractionEvent.thread_id == "t1")
         ).scalars().all()
-        assert len(events) == 2
+        assert len(events) == 1
         conv = db.get(Conversation, "t1")
         assert conv.msg_count == 0
+
+
+def test_greeting_does_not_take_over_another_users_thread(factory):
+    with factory() as db:
+        db.add(Conversation(id="shared", user_id="elder_a"))
+        db.commit()
+
+    resp = _call_greeting(factory, thread_id="shared", user_id="elder_b")
+    assert resp.greeting
+
+    with factory() as db:
+        assert db.get(Conversation, "shared").user_id == "elder_a"
+        events = db.execute(
+            select(InteractionEvent).where(InteractionEvent.thread_id == "shared")
+        ).scalars().all()
+        assert events == []
+
+
+def test_greeting_leaves_unread_family_note_to_the_card(factory):
+    with factory() as db:
+        db.add(
+            FamilyNote(
+                elder_id="demo_user_1",
+                family_user_id="family_1",
+                text="记得穿厚点",
+            )
+        )
+        db.commit()
+
+    resp = _call_greeting(factory, thread_id="note-thread")
+    assert not resp.greeting.startswith("您家里人给您留了句话。")
+    with factory() as db:
+        note = db.execute(select(FamilyNote)).scalars().one()
+        assert note.read_at is None

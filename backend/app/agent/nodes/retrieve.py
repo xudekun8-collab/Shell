@@ -24,7 +24,7 @@ def make_retrieve(session_factory):
                     }
             if thread_id:
                 conv = session.get(Conversation, thread_id)
-                if conv:
+                if conv and conv.user_id == user_id:
                     conversation_summary = conv.summary
                     open_items = conv.open_items or []
         memories = recall(user_id, state.get("raw_input") or "", top_k=3, session_factory=session_factory)

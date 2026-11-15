@@ -1,5 +1,7 @@
 """按时间主动问候：纯规则拼装，不调大模型。"""
-from datetime import datetime, time
+from datetime import datetime, time, timedelta
+
+from sqlalchemy import select
 
 from app.db.models import Conversation, InteractionEvent
 
@@ -38,7 +40,7 @@ def build_greeting(profile, now: datetime | None = None) -> dict:
     else:
         text = f"{name}，夜深了，早点歇着，明天我再来陪您。"
 
-    if period == "evening" and profile is not None and profile.interests:
+    if profile is not None and profile.interests:
         text += f"您上次说喜欢{profile.interests[0]}，还惦记着吗？"
 
     return {"greeting": text, "period": period}
@@ -58,8 +60,23 @@ def record_greeting(db, user_id: str, thread_id: str, greeting_text: str) -> Non
     if conv is None:
         conv = Conversation(id=thread_id, user_id=user_id)
         db.add(conv)
-    else:
-        conv.user_id = user_id
+    elif conv.user_id != user_id:
+        return
+    now = datetime.now()
+    day_start = datetime(now.year, now.month, now.day)
+    day_end = day_start + timedelta(days=1)
+    existing = db.execute(
+        select(InteractionEvent.id)
+        .where(
+            InteractionEvent.thread_id == thread_id,
+            InteractionEvent.input_type == "greeting",
+            InteractionEvent.created_at >= day_start,
+            InteractionEvent.created_at < day_end,
+        )
+        .limit(1)
+    ).scalar_one_or_none()
+    if existing is not None:
+        return
     db.add(
         InteractionEvent(
             user_id=user_id,

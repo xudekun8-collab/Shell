@@ -154,3 +154,26 @@ class FamilyBind(Base):
     created_at: Mapped[datetime] = mapped_column(
         DateTime, nullable=False, default=datetime.now, server_default=func.now()
     )
+
+
+class FamilyNote(Base):
+    """家属给老人留的短话，老人读取后记录 read_at。"""
+    __tablename__ = "family_notes"
+
+    id: Mapped[int] = mapped_column(BigIntPK, primary_key=True, autoincrement=True)
+    elder_id: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
+    family_user_id: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
+    text: Mapped[str] = mapped_column(String(120), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, nullable=False, default=datetime.now, server_default=func.now()
+    )
+    read_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+
+
+class BindAttempt(Base):
+    """按账号和自然日记录邀请码绑定失败次数。"""
+    __tablename__ = "bind_attempt"
+
+    user_id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    day: Mapped[date] = mapped_column(Date, primary_key=True)
+    fail_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)

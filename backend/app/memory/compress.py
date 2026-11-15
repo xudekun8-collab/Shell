@@ -13,19 +13,22 @@ COMPRESS_THRESHOLD = 8
 _compress_count = 0
 
 
-def maybe_compress(thread_id: str, llm_client, session_factory=None) -> bool:
+def maybe_compress(thread_id: str, user_id: str, llm_client, session_factory=None) -> bool:
     """msg_count 达到阈值时做累积压缩；失败回滚并返回 False。"""
     global _compress_count
     factory = session_factory or SessionLocal
     with factory() as session:
         conv = session.get(Conversation, thread_id)
-        if conv is None or conv.msg_count < COMPRESS_THRESHOLD:
+        if conv is None or conv.user_id != user_id or conv.msg_count < COMPRESS_THRESHOLD:
             return False
         rows = session.execute(
             select(InteractionEvent)
-            .where(InteractionEvent.thread_id == thread_id)
+            .where(
+                InteractionEvent.thread_id == thread_id,
+                InteractionEvent.user_id == user_id,
+            )
             .order_by(InteractionEvent.id.desc())
-            .limit(COMPRESS_THRESHOLD)
+            .limit(conv.msg_count)
         ).scalars().all()
         events = list(rows)[::-1]
         dialogue = [f"{e.raw_input}｜{e.reply_text}" for e in events]

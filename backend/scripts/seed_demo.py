@@ -160,15 +160,15 @@ def reset_demo(session_factory) -> tuple[dict, dict]:
         if profile is None:
             profile = Profile(
                 user_id=user_id,
-                nickname="张阿姨",
-                interests=["黄梅戏", "养花"],
-                taboos=["不要提去世的老伴"],
+                nickname="老人家",
+                interests=[],
+                taboos=[],
             )
             session.add(profile)
         else:
-            profile.nickname = "张阿姨"
-            profile.interests = ["黄梅戏", "养花"]
-            profile.taboos = ["不要提去世的老伴"]
+            profile.nickname = "老人家"
+            profile.interests = []
+            profile.taboos = []
         _insert_seeds(session, user_id, date.today())
         session.commit()
         after = {

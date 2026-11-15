@@ -31,6 +31,42 @@
       "total": 36
     }
   },
+  "results_bm25": {
+    "recall_at_3": 0.8333,
+    "mrr": 0.7785,
+    "hits": 30,
+    "total": 36
+  },
+  "results_hybrid": {
+    "recall_at_3": 0.8333,
+    "mrr": 0.778,
+    "hits": 30,
+    "total": 36
+  },
+  "results_bm25_v2": {
+    "recall_at_3": 0.7778,
+    "mrr": 0.6987,
+    "hits": 28,
+    "total": 36
+  },
+  "results_hybrid_v2": {
+    "recall_at_3": 0.8333,
+    "mrr": 0.7737,
+    "hits": 30,
+    "total": 36
+  },
+  "results_hybrid_v3": {
+    "recall_at_3": 0.8333,
+    "mrr": 0.8142,
+    "hits": 30,
+    "total": 36
+  },
+  "results_hybrid_v4": {
+    "recall_at_3": 0.7778,
+    "mrr": 0.6987,
+    "hits": 28,
+    "total": 36
+  },
   "results_hard": {
     "默认": {
       "recall_at_3": 0.8824,
@@ -57,6 +93,42 @@
       "total": 17
     }
   },
+  "results_bm25_hard": {
+    "recall_at_3": 0.8824,
+    "mrr": 0.7986,
+    "hits": 15,
+    "total": 17
+  },
+  "results_hybrid_hard": {
+    "recall_at_3": 0.8824,
+    "mrr": 0.7975,
+    "hits": 15,
+    "total": 17
+  },
+  "results_bm25_v2_hard": {
+    "recall_at_3": 0.8235,
+    "mrr": 0.626,
+    "hits": 14,
+    "total": 17
+  },
+  "results_hybrid_v2_hard": {
+    "recall_at_3": 0.8824,
+    "mrr": 0.759,
+    "hits": 15,
+    "total": 17
+  },
+  "results_hybrid_v3_hard": {
+    "recall_at_3": 0.8235,
+    "mrr": 0.8271,
+    "hits": 14,
+    "total": 17
+  },
+  "results_hybrid_v4_hard": {
+    "recall_at_3": 0.8235,
+    "mrr": 0.626,
+    "hits": 14,
+    "total": 17
+  },
   "results_time": {
     "默认": {
       "recall_at_3": 0.5,
@@ -82,5 +154,41 @@
       "hits": 3,
       "total": 6
     }
+  },
+  "results_bm25_time": {
+    "recall_at_3": 0.6667,
+    "mrr": 0.5,
+    "hits": 4,
+    "total": 6
+  },
+  "results_hybrid_time": {
+    "recall_at_3": 0.6667,
+    "mrr": 0.5,
+    "hits": 4,
+    "total": 6
+  },
+  "results_bm25_v2_time": {
+    "recall_at_3": 0.6667,
+    "mrr": 0.6667,
+    "hits": 4,
+    "total": 6
+  },
+  "results_hybrid_v2_time": {
+    "recall_at_3": 0.6667,
+    "mrr": 0.5833,
+    "hits": 4,
+    "total": 6
+  },
+  "results_hybrid_v3_time": {
+    "recall_at_3": 0.6667,
+    "mrr": 0.5833,
+    "hits": 4,
+    "total": 6
+  },
+  "results_hybrid_v4_time": {
+    "recall_at_3": 0.6667,
+    "mrr": 0.6667,
+    "hits": 4,
+    "total": 6
   }
 }
