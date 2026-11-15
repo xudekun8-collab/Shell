@@ -1,0 +1,19 @@
+page {
+  --c-bg: #f4efe7;
+  --c-surface: #fffdfa;
+  --c-surface-strong: #ffffff;
+  --c-brand: #17395c;
+  --c-brand-soft: #e6edf3;
+  --c-accent: #a9552c;
+  --c-accent-soft: #f5e4d8;
+  --c-success: #2f6b4f;
+  --c-danger: #a63b32;
+  --c-text: #28231e;
+  --c-muted: #625b53;
+  --c-line: #dfd6c9;
+  --sp-1: 8rpx;
+  --sp-2: 16rpx;
+  --sp-3: 24rpx;
+  --sp-4: 32rpx;
+  --sp-5: 48rpx;
+}

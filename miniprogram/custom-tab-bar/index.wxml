@@ -1,0 +1,16 @@
+<view class="bar">
+  <view
+    class="item {{selected === index ? 'active' : ''}}"
+    wx:for="{{list}}"
+    wx:key="pagePath"
+    data-index="{{index}}"
+    hover-class="press"
+    aria-role="tab"
+    aria-selected="{{selected === index}}"
+    bindtap="onTab"
+  >
+    <view class="label">{{item.text}}</view>
+    <view class="line" wx:if="{{selected === index}}"></view>
+  </view>
+</view>
+

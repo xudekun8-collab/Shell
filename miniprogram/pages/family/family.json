@@ -1,3 +1,5 @@
 {
-  "navigationBarTitleText": "家属查看"
+  "navigationBarTitleText": "家属查看",
+  "enablePullDownRefresh": true,
+  "backgroundTextStyle": "dark"
 }

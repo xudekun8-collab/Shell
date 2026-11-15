@@ -1,62 +1,111 @@
-<view class="page">
+<view class="page pad">
   <view wx:if="{{phase === 'loading'}}" class="center">
     <view class="tip">正在准备</view>
   </view>
 
   <view wx:if="{{phase === 'error'}}" class="center">
     <view class="tip">{{error_kind === 'expired' ? '这局等太久了，咱们重新开始' : '网络不太顺畅，对不住'}}</view>
-    <button class="primary-btn" bindtap="retry">{{error_kind === 'expired' ? '重新开始' : '再试一次'}}</button>
-    <button class="secondary-btn" wx:if="{{error_kind !== 'expired'}}" bindtap="backToChat">回去聊天</button>
+    <button class="primary-btn btn-main" bindtap="retry">{{error_kind === 'expired' ? '重新开始' : '再试一次'}}</button>
+    <button class="secondary-btn btn-ghost" wx:if="{{error_kind !== 'expired'}}" bindtap="backToChat">回去聊天</button>
+  </view>
+
+  <scroll-view wx:if="{{phase === 'intro'}}" class="intro-stage" scroll-y>
+    <view class="t-hero">{{intro_title}}</view>
+    <view class="card intro-card">
+      <view class="t-body">{{intro_text}}</view>
+      <view class="intro-example">{{intro_example}}</view>
+    </view>
+    <view class="practice-safety">{{practice_notice}}</view>
+    <view class="mode-row">
+      <view class="mode-btn {{practice_mode === 'relaxed' ? 'active' : ''}}" hover-class="press" data-mode="relaxed" bindtap="setPracticeMode">慢慢做</view>
+      <view class="mode-btn {{practice_mode === 'timed' ? 'active' : ''}}" hover-class="press" data-mode="timed" bindtap="setPracticeMode">限时练习</view>
+    </view>
+    <button class="primary-btn btn-main" bindtap="startFromIntro">开始练习</button>
+    <button class="secondary-btn btn-ghost" bindtap="showGameMenu">换一个</button>
+  </scroll-view>
+
+  <view wx:if="{{phase === 'menu'}}" class="stage menu-stage">
+    <view class="menu-hero">
+      <view class="menu-kicker">每天练一点</view>
+      <view class="t-hero">认知练习</view>
+      <view class="streak-line">{{streak_text}}</view>
+    </view>
+    <view class="menu-note">{{practice_notice}}</view>
+    <view class="menu-list">
+      <view class="card menu-card {{item.game_type}}" hover-class="menu-card-active" wx:for="{{menuGames}}" wx:key="game_type" data-game-type="{{item.game_type}}" bindtap="chooseGame">
+        <view class="menu-mark">{{item.mark}}</view>
+        <view class="menu-copy">
+          <view class="menu-title">{{item.title}}</view>
+          <view class="menu-desc">{{item.desc}}</view>
+        </view>
+        <view class="menu-arrow">›</view>
+      </view>
+    </view>
   </view>
 
   <view wx:if="{{phase === 'remember'}}" class="stage">
     <view class="topbar">
+      <view class="giveup" hover-class="press" bindtap="tooHard">结束这局</view>
       <view class="top-left">
-        <view class="progress">记住第 {{remember_index + 1}}/{{remember_total}}</view>
-        <view class="level-tag">这局：{{level_text}}</view>
+        <view class="progress" wx:if="{{!is_sequence}}">记住第 {{remember_index + 1}} 样，共 {{remember_total}} 样</view>
+        <view class="progress" wx:else>第 {{remember_index + 1}} 串，共 {{remember_total}} 串</view>
+        <view class="level-tag" wx:if="{{timed_mode}}">这局：{{level_text}}</view>
       </view>
-      <view class="giveup" bindtap="tooHard">太难了</view>
     </view>
+    <view class="remember-label">{{remember_label}}</view>
     <view class="show-item">{{remember_text}}</view>
+    <button class="remember-next btn-main" wx:if="{{!is_sequence}}" bindtap="nextRememberItem">看好了，下一个</button>
   </view>
 
   <view wx:if="{{phase === 'quiz'}}" class="stage">
     <view class="topbar">
+      <view class="giveup" hover-class="press" bindtap="tooHard">结束这局</view>
       <view class="top-left">
-        <view class="progress">第 {{quiz_index + 1}}/{{quiz_total}}</view>
-        <view class="level-tag">这局：{{level_text}}</view>
+        <view class="progress">第 {{quiz_index + 1}} 题，共 {{quiz_total}} 题</view>
+        <view class="level-tag" wx:if="{{timed_mode}}">这局：{{level_text}}</view>
       </view>
-      <view class="giveup" bindtap="tooHard">太难了</view>
     </view>
 
-    <view class="countdown-text {{countdown <= 3 ? 'urgent' : ''}}">剩余 {{countdown}} 秒</view>
-    <view class="countdown-bar">
-      <view class="countdown-fill {{countdown <= 3 ? 'urgent' : ''}}" style="width: {{countdown / time_limit_sec * 100}}%"></view>
+    <block wx:if="{{timed_mode}}">
+      <view class="countdown-text {{countdown <= 3 ? 'urgent' : ''}}">思考时间 {{countdown}} 秒</view>
+      <view class="countdown-bar">
+        <view class="countdown-fill {{countdown <= 3 ? 'urgent' : ''}}" style="width: {{countdown / time_limit_sec * 100}}%"></view>
+      </view>
+    </block>
+
+    <button class="replay-btn btn-ghost" hover-class="press" wx:if="{{is_sequence && !replay_used && !timeoutTip && !answering}}" bindtap="replaySequence">重新看一次</button>
+    <view class="question">{{quiz_question}}</view>
+    <view class="btn-col">
+      <button class="big-btn {{selectedValue === item.value ? 'selected' : ''}} {{item.feedbackClass}} {{answering || timeoutTip ? 'disabled' : ''}}" hover-class="press" aria-role="button" wx:for="{{options}}" wx:key="label" data-value="{{item.value}}" bindtap="answer">
+        <text>{{item.label}}</text>
+        <text class="option-mark" wx:if="{{item.feedbackText}}">{{item.feedbackText}}</text>
+      </button>
     </view>
 
-    <block wx:if="{{game_type === 'memory_box'}}">
-      <view class="question">刚才有「{{quiz_target}}」吗</view>
-      <view class="btn-col">
-        <button class="big-btn {{selectedValue === '1' ? 'selected' : ''}} {{answering || timeoutTip ? 'disabled' : ''}}" data-value="1" bindtap="answerMemory">有</button>
-        <button class="big-btn {{selectedValue === '0' ? 'selected' : ''}} {{answering || timeoutTip ? 'disabled' : ''}}" data-value="0" bindtap="answerMemory">没有</button>
-      </view>
-    </block>
-    <block wx:if="{{game_type === 'category_sort'}}">
-      <view class="question">「{{word}}」属于哪一类</view>
-      <view class="btn-col">
-        <button class="big-btn {{selectedValue === item ? 'selected' : ''}} {{answering || timeoutTip ? 'disabled' : ''}}" wx:for="{{options}}" wx:key="*this" data-value="{{item}}" bindtap="answerCategory">{{item}}</button>
-      </view>
-    </block>
+    <view class="answer-feedback {{feedback.result}}" wx:if="{{feedback_text}}">{{feedback_text}}</view>
+    <button class="skip-btn btn-ghost {{answering || timeoutTip ? 'disabled' : ''}}" hover-class="press" bindtap="skipQuestion">跳过这题</button>
 
     <view class="timeout-tip" wx:if="{{timeoutTip}}">时间到，下一题</view>
   </view>
 
-  <view wx:if="{{phase === 'result'}}" class="stage">
-    <view class="main-result">{{main_text}}</view>
-    <view class="sub-result" wx:if="{{sub_text}}">{{sub_text}}</view>
-    <view class="result-note" wx:if="{{result_note}}">{{result_note}}</view>
-    <view class="next-diff">下一局：{{next_difficulty_text}}</view>
-    <button class="primary-btn" bindtap="retry">再玩一次</button>
-    <button class="secondary-btn" bindtap="backToChat">回去聊天</button>
+  <view wx:if="{{phase === 'result'}}" class="stage result-stage">
+    <view class="result-card card">
+      <view class="result-kicker">练习记录</view>
+      <view class="main-result">{{main_text}}</view>
+      <view class="sub-result" wx:if="{{sub_text}}">{{sub_text}}</view>
+      <view class="result-note" wx:if="{{result_note}}">{{result_note}}</view>
+      <view class="next-diff">下一局：{{next_difficulty_text}}</view>
+    </view>
+    <view class="wrong-list" wx:if="{{wrong_details.length}}">
+      <view class="wrong-title">这几题再看看吧</view>
+      <view class="wrong-item" wx:for="{{wrong_details}}" wx:key="index">
+        <view class="wrong-answer">第 {{item.index + 1}} 题：{{item.correct_text}}</view>
+        <view class="wrong-choice">{{item.answer_text}}</view>
+        <view class="wrong-explanation">{{item.explanation}}</view>
+      </view>
+    </view>
+    <button class="primary-btn btn-main" bindtap="showGameMenu">换个练习</button>
+    <button class="secondary-btn btn-ghost" bindtap="retry">再练一次</button>
+    <button class="secondary-btn btn-ghost" bindtap="backToChat">回去聊天</button>
   </view>
 </view>

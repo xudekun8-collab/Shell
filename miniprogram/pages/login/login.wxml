@@ -1,5 +1,20 @@
-<view class="page" wx:if="{{showContent}}">
-  <view class="title">您好，我在这儿</view>
-  <view class="privacy">只看您的聊天和练习记录，给家里人看的也只是摘要，不会发给别人。</view>
-  <view class="start-btn" hover-class="start-btn-hover" bindtap="onStart">开始使用</view>
+<view class="page pad" wx:if="{{showContent}}">
+  <view class="welcome-shell">
+    <view class="voice-mark" bindlongpress="onLongPressMark">
+      <view class="voice-ring ring-outer"></view>
+      <view class="voice-ring ring-inner"></view>
+      <view class="voice-core"></view>
+    </view>
+    <view class="title t-hero">您好，我在这儿</view>
+    <view class="lead">想说话的时候，慢慢说就好。</view>
+
+    <view class="welcome-card card">
+      <view class="welcome-label">这里可以做什么</view>
+      <view class="privacy">陪您聊天、做几道轻松的小练习，也帮您记下愿意留下的话。</view>
+      <view class="privacy-note">给家里人看的只有摘要和练习记录，不会展示原始对话。</view>
+      <view class="start-btn btn-main {{connecting ? 'disabled' : ''}}" hover-class="start-btn-hover" bindtap="onStart">{{connecting ? '正在连…' : '开始使用'}}</view>
+      <view class="entry-divider"><text>家属入口</text></view>
+      <view class="family-entry" hover-class="press" bindtap="goFamilyEntry">我是家属，用邀请码查看</view>
+    </view>
+  </view>
 </view>

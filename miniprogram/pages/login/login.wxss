@@ -1,36 +1,125 @@
 .page {
   min-height: 100vh;
-  padding: 160rpx 56rpx;
+  padding-top: 96rpx;
+  padding-bottom: 72rpx;
   box-sizing: border-box;
   background-color: var(--c-bg);
 }
 
+.welcome-shell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.voice-mark {
+  position: relative;
+  width: 176rpx;
+  height: 176rpx;
+  margin-bottom: var(--sp-4);
+}
+
+.voice-ring,
+.voice-core {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.ring-outer {
+  width: 176rpx;
+  height: 176rpx;
+  background-color: var(--c-brand-soft);
+}
+
+.ring-inner {
+  width: 116rpx;
+  height: 116rpx;
+  background-color: var(--c-accent-soft);
+}
+
+.voice-core {
+  width: 52rpx;
+  height: 52rpx;
+  background-color: var(--c-accent);
+}
+
 .title {
-  font-size: 48rpx;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--c-primary);
   text-align: center;
 }
 
-.privacy {
-  margin-top: 40rpx;
-  font-size: 32rpx;
-  line-height: 1.7;
+.lead {
+  margin-top: var(--sp-1);
+  font-size: var(--fs-body);
+  line-height: 1.6;
   color: var(--c-text-weak);
   text-align: center;
 }
 
+.welcome-card {
+  width: 100%;
+  margin-top: var(--sp-5);
+}
+
+.welcome-label {
+  font-size: var(--fs-note);
+  font-weight: 600;
+  color: var(--c-accent);
+}
+
+.privacy {
+  margin-top: var(--sp-1);
+  font-size: var(--fs-body);
+  line-height: 1.65;
+  color: var(--c-text);
+}
+
+.privacy-note {
+  margin-top: var(--sp-2);
+  padding-top: var(--sp-2);
+  font-size: var(--fs-note);
+  line-height: 1.6;
+  color: var(--c-text-weak);
+  border-top: 1rpx solid var(--c-line);
+}
+
 .start-btn {
-  margin-top: 96rpx;
-  height: 88rpx;
-  line-height: 88rpx;
-  text-align: center;
-  font-size: 34rpx;
-  color: #ffffff;
-  background-color: var(--c-primary);
-  border-radius: var(--r-btn);
+  width: 100%;
+  margin-top: var(--sp-4);
+  font-size: var(--fs-body);
 }
 
 .start-btn-hover {
   opacity: 0.85;
+}
+
+.family-entry {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 96rpx;
+  margin-top: var(--sp-1);
+  font-size: var(--fs-body);
+  color: var(--c-primary);
+}
+
+.entry-divider {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  margin-top: var(--sp-3);
+  font-size: var(--fs-note);
+  color: var(--c-text-weak);
+}
+
+.entry-divider::before,
+.entry-divider::after {
+  content: '';
+  flex: 1;
+  height: 1rpx;
+  background-color: var(--c-line);
 }

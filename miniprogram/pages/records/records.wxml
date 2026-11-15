@@ -1,18 +1,23 @@
-<view class="page">
+<view class="page pad">
+  <view class="page-head">
+    <view class="page-kicker">一步一步，都算数</view>
+    <view class="t-hero">练习记录</view>
+  </view>
+
   <view class="status" wx:if="{{loading}}">正在读…</view>
 
-  <view class="status clickable" wx:if="{{load_error}}" bindtap="retry">没读到，点这里再试一次</view>
+  <view class="status clickable btn-ghost" wx:if="{{load_error}}" bindtap="retry">没读到，点这里再试一次</view>
 
   <block wx:if="{{!loading && !load_error}}">
-    <view class="summary" wx:if="{{summary.total > 0}}">
+    <view class="summary" wx:if="{{summary.total > 0 || records.length > 0}}">
       <view class="summary-row">
         <view class="sum-item">
           <view class="num">{{summary.total}}</view>
-          <view class="label">总次数</view>
+          <view class="label">完成次数</view>
         </view>
         <view class="sum-item">
-          <view class="num">{{summary.avg_accuracy}}%</view>
-          <view class="label">平均正确率</view>
+          <view class="num">{{summary.streak_days}}</view>
+          <view class="label">连续天数</view>
         </view>
         <view class="sum-item">
           <view class="num">{{summary.total_duration_text}}</view>
@@ -20,19 +25,32 @@
         </view>
       </view>
       <view class="by-type" wx:if="{{summary.by_type.length > 0}}">
-        <view class="by-type-line" wx:for="{{summary.by_type}}" wx:key="game_type_text">{{item.game_type_text}} {{item.total}} 次，正确率 {{item.avg_accuracy}}%</view>
+        <view class="by-type-chip" wx:for="{{summary.by_type}}" wx:key="game_type_text">{{item.game_type_text}} {{item.total}} 次</view>
       </view>
     </view>
 
-    <view class="empty" wx:if="{{loaded && records.length === 0}}">还没有训练记录，去聊聊天吧</view>
+    <view class="empty" wx:if="{{loaded && records.length === 0}}">还没有训练记录，先聊两句也行</view>
+    <view class="empty-btn btn-main" wx:if="{{loaded && records.length === 0}}" hover-class="press" bindtap="goGame">去练一次</view>
 
     <view class="list" wx:if="{{records.length > 0}}">
-      <view class="item" wx:for="{{records}}" wx:key="index">
-        <view class="name">{{item.game_type_text}}</view>
-        <view class="meta">{{item.difficulty_text}} · 正确率{{item.accuracy}}% · 用时{{item.duration}}秒 · {{item.date}}</view>
+      <view class="item card {{item.game_type}}" wx:for="{{records}}" wx:key="key" hover-class="press">
+        <view class="name-row">
+          <view class="name">{{item.game_type_text}}</view>
+          <view class="abandoned-badge" wx:if="{{item.abandoned === 1}}">未完成</view>
+        </view>
+        <view class="meta-row" wx:if="{{item.total_count > 0}}">
+          <view class="meta">{{item.difficulty_text}} · 用了 {{item.duration_text}}</view>
+          <view class="item-date">{{item.date_label}}</view>
+        </view>
+        <view class="meta-row" wx:else>
+          <view class="meta">只开了个头 · 用时 {{item.duration_text}}</view>
+          <view class="item-date">{{item.date_label}}</view>
+        </view>
       </view>
     </view>
 
     <view class="disclaimer">本结果只用于调整练习难度，不作为任何健康判断。</view>
   </block>
+
+  <view class="settings-link btn-ghost" hover-class="press" bindtap="goSettings">我的设置</view>
 </view>

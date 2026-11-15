@@ -1,4 +1,4 @@
-// 家属填的忌讳常常是整句（demo 数据就是"不要提去世的老伴"），
+// 家属填的忌讳常常是整句（例如“不要提去世的老伴”），
 // 所以匹配前先剥掉这些噪声词和"的/了"，剩下的才是真正的关键词。
 const TABOO_NOISE = [
   '不要提', '别提', '不想提', '不要说', '别说', '不能提', '不要', '不想',
@@ -17,9 +17,12 @@ function shouldHidePhrase(phrase, taboos) {
   const np = normalizeTaboo(phrase);
   return (taboos || []).some((t) => {
     if (!t) return false;
-    if (phrase.indexOf(t) >= 0) return true;
+    // 单字忌讳（例如家属只写了“不”）不做子串匹配，否则会把整面短语墙清空；
+    // 两个汉字以上才认为是有效关键词。
+    if (t.length >= 2 && phrase.indexOf(t) >= 0) return true;
     const nt = normalizeTaboo(t);
     if (!nt) return false;
+    if (nt.length < 2) return nt === np;
     if (np.indexOf(nt) >= 0 || nt.indexOf(np) >= 0) return true;
     return nt.split(/[^\u4e00-\u9fa5a-zA-Z0-9]+/).some((k) => k.length >= 2 && np.indexOf(k) >= 0);
   });

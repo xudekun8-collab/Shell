@@ -8,27 +8,34 @@
     "pages/game/game"
   ],
   "lazyCodeLoading": "requiredComponents",
+  "__usePrivacyCheck__": true,
+  "permission": {
+    "scope.record": {
+      "desc": "用麦克风把您说的话转成文字，录音转完即删、不保存"
+    }
+  },
   "window": {
     "navigationBarTitleText": "陪伴助手",
-    "navigationBarBackgroundColor": "#1f3a5f",
+    "navigationBarBackgroundColor": "#17395c",
     "navigationBarTextStyle": "white"
   },
   "sitemapLocation": "sitemap.json",
   "tabBar": {
-    "color": "#7a7a7a",
-    "selectedColor": "#1f3a5f",
+    "custom": true,
+    "color": "#625b53",
+    "selectedColor": "#17395c",
     "list": [
       {
         "pagePath": "pages/chat/chat",
-        "text": "聊天",
-        "iconPath": "assets/tabbar/chat.png",
-        "selectedIconPath": "assets/tabbar/chat-active.png"
+        "text": "说话"
+      },
+      {
+        "pagePath": "pages/game/game",
+        "text": "练习"
       },
       {
         "pagePath": "pages/records/records",
-        "text": "记录",
-        "iconPath": "assets/tabbar/records.png",
-        "selectedIconPath": "assets/tabbar/records-active.png"
+        "text": "记录"
       }
     ]
   }

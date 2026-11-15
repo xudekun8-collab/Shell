@@ -1,4 +1,9 @@
-<view class="page">
+<view class="page pad">
+  <view class="page-head">
+    <view class="page-kicker">只属于您</view>
+    <view class="t-hero">我的</view>
+  </view>
+
   <view class="status" wx:if="{{loading}}">正在读…</view>
 
   <view class="status clickable" wx:if="{{load_error}}" bindtap="retry">没读到，点这里再试一次</view>
@@ -6,31 +11,44 @@
   <block wx:if="{{!loading && !load_error}}">
     <view class="group" wx:if="{{profile}}">
       <view class="group-title">您告诉我的</view>
-      <view class="profile-card">
+      <view class="profile-card card">
         <view class="line">喜欢：{{profile.interests_text}}</view>
         <view class="line">不想提：{{profile.taboos_text}}</view>
+        <view class="profile-edit btn-ghost" hover-class="press" bindtap="toggleProfileEdit">{{editProfileOpen ? '收起修改' : '修改称呼和习惯'}}</view>
+      </view>
+      <view class="profile-editor card" wx:if="{{editProfileOpen}}">
+        <view class="field-label">怎么称呼您</view>
+        <input class="field-input" value="{{nicknameInput}}" maxlength="32" bindinput="onNicknameInput" placeholder="例如：周先生、王老师" />
+        <view class="field-label">兴趣和生活习惯</view>
+        <input class="field-input" value="{{interestsInput}}" maxlength="120" bindinput="onInterestsInput" placeholder="用顿号分开，例如：下棋、早上散步" />
+        <view class="field-label">不想提起的事</view>
+        <input class="field-input" value="{{taboosInput}}" maxlength="120" bindinput="onTaboosInput" placeholder="用顿号分开，没有可以留空" />
+        <view class="profile-editor-actions">
+          <view class="editor-cancel btn-ghost" hover-class="press" bindtap="toggleProfileEdit">取消</view>
+          <view class="editor-save btn-main" hover-class="press" bindtap="saveProfile">{{profileSaving ? '保存中' : '保存'}}</view>
+        </view>
       </view>
     </view>
 
     <view class="group">
       <view class="group-title">我们聊过的事</view>
       <view class="empty" wx:if="{{events.length === 0}}">我们还没聊过什么呢</view>
-      <view class="item" wx:for="{{eventsShown}}" wx:key="memory_id">
+      <view class="item card" wx:for="{{eventsShown}}" wx:key="memory_id">
         <view class="item-body">
           <view class="content">{{item.content}}</view>
           <view class="meta">{{item.date_text}}</view>
         </view>
-        <view class="delete" data-id="{{item.memory_id}}" bindtap="onDelete">删除</view>
+        <view class="delete btn-ghost" hover-class="press" data-id="{{item.memory_id}}" bindtap="onDelete">删除</view>
       </view>
-      <view class="more" wx:if="{{eventsRemainder > 0}}" bindtap="toggleEvents">{{eventsExpanded ? '收起' : '还有 ' + eventsRemainder + ' 条，点这里看全部'}}</view>
+      <view class="more" wx:if="{{eventsRemainder > 0}}" hover-class="press" bindtap="toggleEvents">{{eventsExpanded ? '收起' : '还有 ' + eventsRemainder + ' 条，点这里看全部'}}</view>
     </view>
 
     <view class="detail">
-      <view class="detail-toggle" bindtap="toggleDetail">详细记忆（给您家里人看）<text class="toggle-mark">{{showDetail ? '收起' : '展开'}}</text></view>
+      <view class="detail-toggle btn-ghost" hover-class="press" bindtap="toggleDetail">详细记忆（给您家里人看）<text class="toggle-mark">{{showDetail ? '收起' : '展开'}}</text></view>
       <view class="detail-body" wx:if="{{showDetail}}">
         <view class="group" wx:for="{{eventGroupsShown}}" wx:key="month_label" wx:for-item="grp">
           <view class="month-title">{{grp.month_label}}</view>
-          <view class="item" wx:for="{{grp.items}}" wx:key="memory_id">
+          <view class="item card" wx:for="{{grp.items}}" wx:key="memory_id">
             <view class="item-body">
               <view class="content">{{item.content}}</view>
               <view class="meta">{{item.date_text}}</view>
@@ -38,12 +56,12 @@
           </view>
         </view>
         <view class="empty" wx:if="{{events.length === 0}}">还没有</view>
-        <view class="more" wx:if="{{detailRemainder > 0}}" bindtap="toggleDetailEvents">{{detailExpanded ? '收起' : '还有 ' + detailRemainder + ' 条，点这里看全部'}}</view>
+        <view class="more" wx:if="{{detailRemainder > 0}}" hover-class="press" bindtap="toggleDetailEvents">{{detailExpanded ? '收起' : '还有 ' + detailRemainder + ' 条，点这里看全部'}}</view>
 
         <view class="group">
           <view class="group-title">这几天的聊天摘要</view>
           <view class="empty" wx:if="{{sessions.length === 0}}">还没有</view>
-          <view class="item" wx:for="{{sessions}}" wx:key="index">
+          <view class="item card" wx:for="{{sessions}}" wx:key="key">
             <view class="item-body">
               <view class="content">{{item.content}}</view>
             </view>
@@ -52,12 +70,41 @@
       </view>
     </view>
 
-    <view class="group">
+    <view class="group family-group">
       <view class="group-title">家属</view>
-      <view class="family-btns">
-        <view class="family-btn" bindtap="onInvite">生成邀请码</view>
-        <view class="family-btn" bindtap="goFamily">家属查看</view>
+      <view class="family-card card">
+        <view class="family-btn btn-main" hover-class="press" bindtap="onInvite">生成邀请码</view>
+        <view class="family-note">把码发给家人，让他在自己的手机上打开小程序，选『我是家属』后输入。</view>
       </view>
     </view>
   </block>
+
+  <view class="group voice-settings">
+    <view class="group-title">说话设置</view>
+    <view class="setting-row card">
+      <view class="setting-copy">
+        <view class="setting-name">自动发送</view>
+        <view class="setting-note">说完等三秒，自动发出去</view>
+      </view>
+      <view class="setting-toggle {{autoSendVoice ? 'active' : ''}}" hover-class="press" bindtap="toggleAutoSend">{{autoSendVoice ? '开' : '关'}}</view>
+    </view>
+    <view class="setting-row card">
+      <view class="setting-copy">
+        <view class="setting-name">自动播报</view>
+        <view class="setting-note">回复到了，直接念给您听</view>
+      </view>
+      <view class="setting-toggle {{autoSpeak ? 'active' : ''}}" hover-class="press" bindtap="toggleAutoSpeak">{{autoSpeak ? '开' : '关'}}</view>
+    </view>
+    <view class="speed-setting card">
+      <view class="setting-name">说话快慢</view>
+      <view class="speed-options">
+        <view class="speed-option {{speakSpeed === item.value ? 'active' : ''}}" hover-class="press" wx:for="{{speakSpeeds}}" wx:key="label" data-speed="{{item.value}}" bindtap="setSpeakSpeed">{{item.label}}</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="group account-actions">
+    <view class="account-btn btn-ghost" hover-class="press" bindtap="clearConversation">清空对话</view>
+    <view class="account-btn account-danger btn-ghost" hover-class="press" bindtap="logout">退出登录</view>
+  </view>
 </view>

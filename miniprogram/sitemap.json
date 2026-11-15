@@ -1,1 +1,9 @@
-{"rules":[{"action":"allow","page":"*"}]}
+{
+  "desc": "隐私页面不参与微信索引；规则自上而下匹配，先命中的生效",
+  "rules": [
+    { "action": "disallow", "page": "pages/memory/memory" },
+    { "action": "disallow", "page": "pages/family/family" },
+    { "action": "disallow", "page": "pages/login/login" },
+    { "action": "allow", "page": "*" }
+  ]
+}

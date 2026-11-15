@@ -1,27 +1,64 @@
-<view class="page">
-  <view class="title">家属查看</view>
+<view class="page pad">
+  <view class="page-head">
+    <view>
+      <view class="page-kicker">放心看看近况</view>
+      <view class="t-hero">家属查看</view>
+    </view>
+    <view class="exit btn-ghost" wx:if="{{bound}}" hover-class="press" bindtap="onExit">退出</view>
+  </view>
   <view class="tip">只能看摘要、训练记录和告警，看不到原始对话。</view>
 
-  <view class="bind" wx:if="{{!bound}}">
-    <input class="code-input" placeholder="输入老人给的 6 位邀请码" bindinput="onCode" maxlength="6" />
-    <view class="btn" bindtap="onBind">绑定</view>
+  <view class="bind card" wx:if="{{!bound}}">
+    <view class="bind-title">用老人给您的邀请码</view>
+    <input class="code-input" value="{{code}}" placeholder="输入老人给的 8 位邀请码" maxlength="8" bindinput="onCode" />
+    <view class="btn btn-main {{binding ? 'disabled' : ''}}" hover-class="press" aria-role="button" bindtap="onBind">{{binding ? '正在绑定' : '绑定'}}</view>
   </view>
 
   <block wx:else>
-    <view class="section">
-      <view class="section-title">概览</view>
-      <view class="line">今天聊了 {{overview.today_chat_count || 0}} 轮</view>
-      <view class="line" wx:if="{{overview.last_summary}}">最近摘要：{{overview.last_summary}}</view>
-    </view>
-    <view class="section">
-      <view class="section-title">最近训练</view>
-      <view class="empty" wx:if="{{records.length === 0}}">还没有训练记录</view>
-      <view class="item" wx:for="{{records}}" wx:key="index">{{item.game_type}} · 正确率{{item.accuracy}}% · {{item.date}}</view>
-    </view>
-    <view class="section">
-      <view class="section-title">告警</view>
-      <view class="empty" wx:if="{{alerts.length === 0}}">暂无告警</view>
-      <view class="item" wx:for="{{alerts}}" wx:key="index">{{item.detail}}</view>
-    </view>
+    <view class="status" wx:if="{{loading}}">正在读…</view>
+
+    <view class="status clickable btn-ghost" wx:if="{{load_error}}" hover-class="press" bindtap="retry">没读到，点这里再试一次</view>
+
+    <block wx:if="{{!loading && !load_error}}">
+      <view class="section note-section">
+        <view class="section-title">给老人留句话</view>
+        <textarea class="note-input card" value="{{noteText}}" maxlength="60" bindinput="onNoteInput" placeholder="写一句不超过 60 字的话" />
+        <view class="note-send btn-main {{noteSending ? 'disabled' : ''}}" hover-class="press" bindtap="onSendNote">{{noteSending ? '正在留话' : '发送留言'}}</view>
+      </view>
+      <view class="section">
+        <view class="section-title">补充兴趣和习惯</view>
+        <view class="interest-card card">
+          <input class="interest-input" value="{{interestText}}" maxlength="20" bindinput="onInterestInput" placeholder="例如：喜欢下棋、早上散步" />
+          <view class="interest-add btn-ghost {{interestSaving ? 'disabled' : ''}}" hover-class="press" bindtap="onAddInterest">{{interestSaving ? '正在记' : '添加'}}</view>
+        </view>
+      </view>
+      <view class="section">
+        <view class="section-title">概览</view>
+        <view class="overview-card card">
+          <view class="overview-count">{{overview.today_chat_count || 0}}<text class="overview-unit"> 轮</text></view>
+          <view class="overview-label">今天已经聊了</view>
+          <view class="summary-line" wx:if="{{overview.last_summary}}">最近摘要：{{overview.last_summary}}</view>
+        </view>
+      </view>
+      <view class="section">
+        <view class="section-title">最近训练</view>
+        <view class="empty" wx:if="{{records.length === 0}}">还没有训练记录</view>
+        <view class="item card" wx:for="{{records}}" wx:key="key">
+          <view class="record-head">
+            <view class="record-type">{{item.game_type}}</view>
+            <view class="record-accuracy">正确率 {{item.accuracy}}%</view>
+          </view>
+          <view class="record-foot">
+            <view class="record-date">{{item.date}}</view>
+            <text class="unfinished" wx:if="{{item.abandoned === 1}}">未完成</text>
+          </view>
+        </view>
+      </view>
+      <view class="section">
+        <view class="section-title">告警</view>
+        <view class="empty" wx:if="{{alerts.length === 0}}">暂无告警</view>
+        <view class="item card" wx:for="{{alerts}}" wx:key="key">{{item.detail}}</view>
+      </view>
+    </block>
   </block>
 </view>

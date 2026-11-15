@@ -1,24 +1,107 @@
+@import './theme.wxss';
+
 page {
-  --c-bg: #fbf7f2;
-  --c-surface: #ffffff;
-  --c-primary: #1f3a5f;
-  --c-accent: #c98b5e;
-  --c-soft: #efe6da;
-  --c-text: #2b2b2b;
-  --c-text-weak: #6b6257;
-  --c-danger: #c0392b;
-  --r-card: 16rpx;
+  --c-primary: var(--c-brand);
+  --c-soft: var(--c-accent-soft);
+  --c-text-weak: var(--c-muted);
+  --fs-hero: 52rpx;
+  --fs-title: 44rpx;
+  --fs-body: 40rpx;
+  --fs-note: 34rpx;
+  --r-sm: 12rpx;
+  --r-md: 18rpx;
+  --r-lg: 24rpx;
+  --r-pill: 999rpx;
+  --r-card: 24rpx;
   --r-btn: 44rpx;
-  font-size: 34rpx;
-  color: #333333;
-  background-color: #fbf7f2;
+  font-size: var(--fs-body);
+  line-height: 1.6;
+  color: var(--c-text);
+  background-color: var(--c-bg);
 }
 
 button {
-  font-size: 36rpx;
-  border-radius: 12rpx;
+  font-size: var(--fs-body);
+  border-radius: var(--r-sm);
 }
 
 button::after {
   border: none;
+}
+
+.pad {
+  padding-left: var(--sp-4);
+  padding-right: var(--sp-4);
+  box-sizing: border-box;
+}
+
+.card {
+  padding: var(--sp-3);
+  background-color: var(--c-surface);
+  border-radius: var(--r-lg);
+  border: 0;
+  box-shadow: 0 4rpx 16rpx rgba(23, 57, 92, 0.05);
+  box-sizing: border-box;
+}
+
+.t-hero {
+  font-size: var(--fs-hero);
+}
+
+.t-title {
+  font-size: var(--fs-title);
+}
+
+.t-body {
+  font-size: var(--fs-body);
+}
+
+.t-note {
+  font-size: var(--fs-note);
+}
+
+.btn-main,
+.btn-ghost {
+  min-width: 96rpx;
+  min-height: 96rpx;
+  padding: 0 var(--sp-3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--fs-title);
+  border-radius: var(--r-pill);
+  box-sizing: border-box;
+}
+
+.btn-main {
+  color: var(--c-surface-strong);
+  background-color: var(--c-primary);
+  box-shadow: 0 8rpx 20rpx rgba(23, 57, 92, 0.16);
+}
+
+.btn-ghost {
+  color: var(--c-primary);
+  background-color: var(--c-brand-soft);
+  border: 0;
+}
+
+.chip {
+  min-width: 96rpx;
+  min-height: 96rpx;
+  padding: 0 var(--sp-3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--fs-note);
+  border-radius: var(--r-pill);
+  box-sizing: border-box;
+}
+
+/* 统一点击反馈：只改透明度，避免缩放引起布局抖动 */
+.press {
+  opacity: 0.86;
+}
+
+.disabled {
+  opacity: 0.5;
 }
