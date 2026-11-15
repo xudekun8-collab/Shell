@@ -179,47 +179,43 @@
   font-size: var(--fs-body);
 }
 
-/* ---------- 日期筛选 ---------- */
+/* ---------- 日期筛选（点组标题进入，顶部一条返回） ---------- */
 
-.date-bar {
-  width: 100%;
-  margin-bottom: var(--sp-2);
-  white-space: nowrap;
-}
-
-.date-list {
-  display: inline-flex;
-  gap: 12rpx;
-  padding: 2rpx 2rpx 8rpx;
-}
-
-.date-chip {
-  display: inline-flex;
+.filter-bar {
+  display: flex;
   align-items: center;
-  gap: 10rpx;
+  justify-content: space-between;
+  gap: var(--sp-2);
+  margin-bottom: var(--sp-2);
+}
+
+.filter-back {
+  flex: none;
+  min-width: 168rpx;
   min-height: 88rpx;
   padding: 0 var(--sp-3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6rpx;
   font-size: var(--fs-body);
   color: var(--c-primary);
-  background-color: var(--c-surface);
-  border: 1rpx solid var(--c-line);
+  background-color: var(--c-brand-soft);
   border-radius: var(--r-pill);
   box-sizing: border-box;
 }
 
-.date-chip.active {
-  color: #ffffff;
-  background-color: var(--c-primary);
-  border-color: var(--c-primary);
+.back-mark {
+  font-size: var(--fs-title);
+  color: var(--c-accent);
 }
 
-.date-count {
+.filter-current {
+  flex: 1 1 auto;
+  min-width: 0;
+  text-align: right;
   font-size: var(--fs-note);
   color: var(--c-text-weak);
-}
-
-.date-chip.active .date-count {
-  color: #ffd9a8;
 }
 
 .group-empty {
@@ -235,11 +231,22 @@
   margin-bottom: var(--sp-1);
 }
 
+.list-hint {
+  margin: var(--sp-2) 0 0;
+  font-size: var(--fs-note);
+  color: var(--c-text-weak);
+}
+
 .group-head {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
-  padding: var(--sp-3) var(--sp-1) var(--sp-2);
+  gap: var(--sp-2);
+  margin-bottom: var(--sp-1);
+  padding: var(--sp-2) var(--sp-1);
+  min-height: 88rpx;
+  border-radius: var(--r-sm);
+  box-sizing: border-box;
 }
 
 .group-label {
@@ -248,9 +255,21 @@
   color: var(--c-text);
 }
 
+.group-tail {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-1);
+}
+
 .group-count {
   font-size: var(--fs-note);
   color: var(--c-muted);
+}
+
+.group-arrow {
+  font-size: var(--fs-title);
+  color: var(--c-accent);
 }
 
 /* ---------- 单条记录 ---------- */

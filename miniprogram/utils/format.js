@@ -63,40 +63,21 @@ function dayKey(date) {
   return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate());
 }
 
-// 记录按天分组：入参已按时间倒序，同一天一定相邻，顺序扫一遍即可
+// 记录按天分组：入参已按时间倒序，同一天一定相邻，顺序扫一遍即可。
+// 组里带上日期键，点组标题就能按这天筛选。
 function groupByDay(records) {
   const groups = [];
   (records || []).forEach((item) => {
     const label = (item && item.date_label) || '更早';
     let group = groups[groups.length - 1];
     if (!group || group.label !== label) {
-      group = { label: label, count: 0, items: [] };
+      group = { label: label, date: (item && item.date) || '', count: 0, items: [] };
       groups.push(group);
     }
     group.count += 1;
     group.items.push(item);
   });
   return groups;
-}
-
-// 日期筛选项：只在有练习记录的日期出现，次数按当天的实际条数算。
-// 第一项固定「全部」，其余按时间倒序（入参本来就是倒序，用 Map 保序）。
-function buildDateFilters(records) {
-  const list = records || [];
-  const seen = new Map();
-  list.forEach((item) => {
-    const key = (item && item.date) || '';
-    if (!key) return;
-    const hit = seen.get(key);
-    if (hit) {
-      hit.count += 1;
-      return;
-    }
-    seen.set(key, { key: key, label: (item && item.date_label) || key, count: 1 });
-  });
-  const filters = [{ key: 'all', label: '全部', count: list.length }];
-  seen.forEach((value) => filters.push(value));
-  return filters;
 }
 
 module.exports = {
@@ -106,5 +87,4 @@ module.exports = {
   listKey,
   dayKey,
   groupByDay,
-  buildDateFilters,
 };

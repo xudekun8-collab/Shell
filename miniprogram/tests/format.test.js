@@ -10,7 +10,6 @@ const {
   listKey,
   dayKey,
   groupByDay,
-  buildDateFilters,
 } = require('../utils/format.js');
 
 test('normalizeReply：空回复给固定话术', () => {
@@ -96,6 +95,7 @@ test('groupByDay：同一天归一组，组内保持倒序', () => {
   assert.deepEqual(groups.map((g) => g.label), ['今天', '昨天', '11-08']);
   assert.deepEqual(groups.map((g) => g.count), [2, 1, 1]);
   assert.deepEqual(groups[0].items.map((i) => i.id), [1, 2]);
+  assert.equal(groups[0].date, ''); // 用例没给 date 时留空，不硬造
 });
 
 test('groupByDay：空列表与缺字段不抛错', () => {
@@ -105,34 +105,12 @@ test('groupByDay：空列表与缺字段不抛错', () => {
   assert.equal(groups[0].label, '更早');
 });
 
-test('buildDateFilters：第一项是全部，按出现顺序列出有记录的日期', () => {
-  const records = [
-    { date: '2026-11-15', date_label: '今天' },
-    { date: '2026-11-15', date_label: '今天' },
-    { date: '2026-11-14', date_label: '昨天' },
-    { date: '2026-11-13', date_label: '3 天前' },
-  ];
-  const filters = buildDateFilters(records);
-  assert.deepEqual(filters.map((f) => f.key), ['all', '2026-11-15', '2026-11-14', '2026-11-13']);
-  assert.deepEqual(filters.map((f) => f.count), [4, 2, 1, 1]);
-  assert.equal(filters[0].label, '全部');
-  assert.equal(filters[1].label, '今天');
-});
-
-test('buildDateFilters：没练过的日期不出现，空数据只剩「全部」', () => {
-  const filters = buildDateFilters([
-    { date: '2026-11-15', date_label: '今天' },
-    { date: '2026-11-08', date_label: '11-08' },
+test('groupByDay：组里带上日期键，点标题即可按这天筛选', () => {
+  const groups = groupByDay([
+    { id: 1, date: '2026-11-15', date_label: '今天' },
+    { id: 2, date: '2026-11-15', date_label: '今天' },
+    { id: 3, date: '2026-11-14', date_label: '昨天' },
   ]);
-  assert.equal(filters.length, 3);
-  assert.ok(!filters.some((f) => f.key === '2026-11-14'));
-
-  assert.deepEqual(buildDateFilters([]), [{ key: 'all', label: '全部', count: 0 }]);
-  assert.deepEqual(buildDateFilters(null), [{ key: 'all', label: '全部', count: 0 }]);
-});
-
-test('buildDateFilters：缺日期的记录不单独成项，但计入全部', () => {
-  const filters = buildDateFilters([{ date: '' }, { date: '2026-11-15', date_label: '今天' }]);
-  assert.equal(filters[0].count, 2);
-  assert.equal(filters.length, 2);
+  assert.deepEqual(groups.map((g) => g.date), ['2026-11-15', '2026-11-14']);
+  assert.deepEqual(groups.map((g) => g.count), [2, 1]);
 });

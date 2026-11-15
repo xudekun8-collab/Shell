@@ -40,16 +40,6 @@
       <view class="by-type" wx:if="{{summary.by_type.length > 0}}">
         <view class="by-type-chip" wx:for="{{summary.by_type}}" wx:key="game_type_text">{{item.game_type_text}} {{item.total}} 次</view>
       </view>
-
-      <!-- 日期筛选：只列出练过的日期，次数是当天实际条数 -->
-      <scroll-view class="date-bar" scroll-x wx:if="{{showDateBar}}">
-        <view class="date-list">
-          <view class="date-chip {{activeDate === item.key ? 'active' : ''}}" hover-class="press" wx:for="{{dateFilters}}" wx:key="key" data-key="{{item.key}}" bindtap="onFilterDate">
-            <text>{{item.label}}</text>
-            <text class="date-count">{{item.count}}</text>
-          </view>
-        </view>
-      </scroll-view>
     </block>
 
     <view class="empty card" wx:if="{{loaded && summary.total === 0}}">
@@ -58,11 +48,25 @@
       <view class="empty-btn btn-main" hover-class="press" bindtap="goGame">去练一次</view>
     </view>
 
-    <!-- 按天分组：今天 / 昨天 / 3 天前 / 11-08；筛选到某一天时不再重复组标题 -->
+    <!-- 筛选态：顶部一条返回，标题在右，列表不再重复组标题 -->
+    <view class="filter-bar" wx:if="{{isFiltered}}">
+      <view class="filter-back" hover-class="press" bindtap="onFilterAll">
+        <text class="back-mark">‹</text>
+        <text>全部</text>
+      </view>
+      <view class="filter-current">{{activeLabel}} · {{activeCount}} 次</view>
+    </view>
+
+    <!-- 按天分组：今天 / 昨天 / 3 天前 / 11-08；点标题就看这一天的记录 -->
+    <view class="list-hint" wx:if="{{!isFiltered && groups.length > 1}}">点日期，只看那一天的记录</view>
+
     <view class="group" wx:for="{{groups}}" wx:key="label" wx:for-item="group">
-      <view class="group-head" wx:if="{{group.label}}">
+      <view class="group-head" wx:if="{{group.label}}" hover-class="press" data-date="{{group.date}}" bindtap="onGroupTap">
         <view class="group-label">{{group.label}}</view>
-        <view class="group-count">{{group.count}} 次</view>
+        <view class="group-tail">
+          <text class="group-count">{{group.count}} 次</text>
+          <text class="group-arrow">›</text>
+        </view>
       </view>
       <view class="item card" wx:for="{{group.items}}" wx:key="key" hover-class="press">
         <view class="type-mark {{item.game_type}}">{{item.type_mark}}</view>

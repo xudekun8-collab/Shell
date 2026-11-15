@@ -1,7 +1,7 @@
 const { request } = require('../../utils/request.js');
 const { GAME_TYPE_TEXT, DIFFICULTY_TEXT } = require('../../utils/constants.js');
 const { getUserId } = require('../../utils/user.js');
-const { formatDuration, dateLabel, listKey, dayKey, groupByDay, buildDateFilters } = require('../../utils/format.js');
+const { formatDuration, dateLabel, listKey, dayKey, groupByDay } = require('../../utils/format.js');
 
 // v1 的缓存里没有 correct_count，字段形状变了，换键避免读到旧数据
 const CACHE_KEY = 'records_cache_v2';
@@ -91,9 +91,9 @@ Page({
   data: {
     user_id: '',
     groups: [],
-    dateFilters: [],
-    showDateBar: false,
     activeDate: 'all',
+    activeLabel: '',
+    activeCount: 0,
     isFiltered: false,
     summary: {
       total: 0,
@@ -157,22 +157,23 @@ Page({
   },
 
   // 筛选只在本地做：切日期不打接口，下拉刷新后仍停在同一日期
-  _applyRecords(records, summary, patch, dateKey) {
-    const dateFilters = buildDateFilters(records);
-    const wanted = dateKey || this.data.activeDate;
-    const activeDate = dateFilters.some((item) => item.key === wanted) ? wanted : 'all';
+  _applyRecords(records, summary, patch, filterKey) {
+    const allGroups = groupByDay(records);
+    const wanted = filterKey === undefined ? this.data.activeDate : filterKey;
+    const hit = allGroups.filter((group) => group.date === wanted)[0];
+    const activeDate = hit ? wanted : 'all';
     const isFiltered = activeDate !== 'all';
     const groups = isFiltered
-      ? [{ label: '', count: 0, items: records.filter((item) => item.date === activeDate) }]
-      : groupByDay(records);
+      ? [{ label: '', date: activeDate, count: 0, items: records.filter((item) => item.date === activeDate) }]
+      : allGroups;
     this.setData(
       Object.assign(
         {
-          dateFilters: dateFilters,
-          // 只有「今天」这一种日期时，筛选条没有意义，藏起来
-          showDateBar: dateFilters.length > 2,
           activeDate: activeDate,
           isFiltered: isFiltered,
+          // 筛选态顶部那条「‹ 全部 / 昨天 · 4 次」用的
+          activeLabel: isFiltered ? hit.label : '',
+          activeCount: isFiltered ? hit.count : 0,
           groups: groups,
           summary: summary,
         },
@@ -181,10 +182,17 @@ Page({
     );
   },
 
-  onFilterDate(e) {
-    const key = e.currentTarget.dataset.key;
+  // 点日期标题：只看这一天的记录
+  onGroupTap(e) {
+    const key = e.currentTarget.dataset.date;
     if (!key || key === this.data.activeDate) return;
     this._applyRecords(this._records || [], this.data.summary, null, key);
+  },
+
+  // 返回全部
+  onFilterAll() {
+    if (!this.data.isFiltered) return;
+    this._applyRecords(this._records || [], this.data.summary, null, 'all');
   },
 
   async fetch() {
