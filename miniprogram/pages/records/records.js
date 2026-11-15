@@ -1,7 +1,7 @@
 const { request } = require('../../utils/request.js');
 const { GAME_TYPE_TEXT, DIFFICULTY_TEXT } = require('../../utils/constants.js');
 const { getUserId } = require('../../utils/user.js');
-const { formatDuration, dateLabel, listKey, dayKey, groupByDay } = require('../../utils/format.js');
+const { formatDuration, dateLabel, listKey, dayKey, groupByDay, buildDateFilters } = require('../../utils/format.js');
 
 // v1 的缓存里没有 correct_count，字段形状变了，换键避免读到旧数据
 const CACHE_KEY = 'records_cache_v2';
@@ -91,6 +91,10 @@ Page({
   data: {
     user_id: '',
     groups: [],
+    dateFilters: [],
+    showDateBar: false,
+    activeDate: 'all',
+    isFiltered: false,
     summary: {
       total: 0,
       total_duration: 0,
@@ -148,12 +152,39 @@ Page({
       today_duration: todayDuration,
       today_duration_text: formatDuration(todayDuration),
     });
-    this.setData({
-      groups: groupByDay(records),
-      summary: summary,
-      loaded: true,
-      loading: false,
-    });
+    this._records = records;
+    this._applyRecords(records, summary, { loaded: true, loading: false });
+  },
+
+  // 筛选只在本地做：切日期不打接口，下拉刷新后仍停在同一日期
+  _applyRecords(records, summary, patch, dateKey) {
+    const dateFilters = buildDateFilters(records);
+    const wanted = dateKey || this.data.activeDate;
+    const activeDate = dateFilters.some((item) => item.key === wanted) ? wanted : 'all';
+    const isFiltered = activeDate !== 'all';
+    const groups = isFiltered
+      ? [{ label: '', count: 0, items: records.filter((item) => item.date === activeDate) }]
+      : groupByDay(records);
+    this.setData(
+      Object.assign(
+        {
+          dateFilters: dateFilters,
+          // 只有「今天」这一种日期时，筛选条没有意义，藏起来
+          showDateBar: dateFilters.length > 2,
+          activeDate: activeDate,
+          isFiltered: isFiltered,
+          groups: groups,
+          summary: summary,
+        },
+        patch || {}
+      )
+    );
+  },
+
+  onFilterDate(e) {
+    const key = e.currentTarget.dataset.key;
+    if (!key || key === this.data.activeDate) return;
+    this._applyRecords(this._records || [], this.data.summary, null, key);
   },
 
   async fetch() {
@@ -164,9 +195,8 @@ Page({
       const res = await request({ url: '/api/records?limit=20' });
       if (res.ok && res.data) {
         const mapped = mapRecords(res.data);
-        this.setData({
-          groups: mapped.groups,
-          summary: mapped.summary,
+        this._records = mapped.records;
+        this._applyRecords(mapped.records, mapped.summary, {
           loaded: true,
           loading: false,
           load_error: false,

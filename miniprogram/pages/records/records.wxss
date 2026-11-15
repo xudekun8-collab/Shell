@@ -179,6 +179,56 @@
   font-size: var(--fs-body);
 }
 
+/* ---------- 日期筛选 ---------- */
+
+.date-bar {
+  width: 100%;
+  margin-bottom: var(--sp-2);
+  white-space: nowrap;
+}
+
+.date-list {
+  display: inline-flex;
+  gap: 12rpx;
+  padding: 2rpx 2rpx 8rpx;
+}
+
+.date-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 10rpx;
+  min-height: 88rpx;
+  padding: 0 var(--sp-3);
+  font-size: var(--fs-body);
+  color: var(--c-primary);
+  background-color: var(--c-surface);
+  border: 1rpx solid var(--c-line);
+  border-radius: var(--r-pill);
+  box-sizing: border-box;
+}
+
+.date-chip.active {
+  color: #ffffff;
+  background-color: var(--c-primary);
+  border-color: var(--c-primary);
+}
+
+.date-count {
+  font-size: var(--fs-note);
+  color: var(--c-text-weak);
+}
+
+.date-chip.active .date-count {
+  color: #ffd9a8;
+}
+
+.group-empty {
+  padding: 80rpx 0;
+  text-align: center;
+  font-size: var(--fs-note);
+  color: var(--c-text-weak);
+}
+
 /* ---------- 按天分组 ---------- */
 
 .group {

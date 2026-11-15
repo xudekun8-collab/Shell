@@ -79,6 +79,26 @@ function groupByDay(records) {
   return groups;
 }
 
+// 日期筛选项：只在有练习记录的日期出现，次数按当天的实际条数算。
+// 第一项固定「全部」，其余按时间倒序（入参本来就是倒序，用 Map 保序）。
+function buildDateFilters(records) {
+  const list = records || [];
+  const seen = new Map();
+  list.forEach((item) => {
+    const key = (item && item.date) || '';
+    if (!key) return;
+    const hit = seen.get(key);
+    if (hit) {
+      hit.count += 1;
+      return;
+    }
+    seen.set(key, { key: key, label: (item && item.date_label) || key, count: 1 });
+  });
+  const filters = [{ key: 'all', label: '全部', count: list.length }];
+  seen.forEach((value) => filters.push(value));
+  return filters;
+}
+
 module.exports = {
   normalizeReply,
   formatDuration,
@@ -86,4 +106,5 @@ module.exports = {
   listKey,
   dayKey,
   groupByDay,
+  buildDateFilters,
 };
