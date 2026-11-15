@@ -17,8 +17,9 @@
 4. 记忆分三层：画像（profile 表）、事件记忆（memories.layer='event'）、会话摘要（conversations.summary）。任何记忆必须可查看、可删除，删除后不得再被召回。
 5. **不做疾病诊断，不给医疗结论**。命中药物、剂量、病情、诊断、治疗、检查结果类提问时，返回固定转介话术模板（模板写在 `backend/app/agent/rules.py` 常量里，不由模型生成）。
 6. 语音、微信登录、家属账号已纳入范围（2026-11-08 修订，实现顺序见 `Codex提示词-24天倒排.md` 的 M1/M2）：
-   - 语音：ASR 用微信同声传译插件，TTS 用云服务；网络或插件不可用时回退纯文字；**音频不落库**。
+   - 语音：ASR 通过后端中转腾讯云一句话识别，TTS 用云服务（当前为未开通骨架）；识别不可用时回退纯文字；**音频不落库**。
    - 登录：小程序 `wx.login` 取 code，服务端 `jscode2session` 换 openid 并签发 token；演示期 `DEMO_MODE=1` 保留 `demo_user_1` 后门。
+   - 鉴权守卫：业务接口使用 `require_role`；`require_demo_token` 是已废弃的遗留分支，当前无路由使用。
    - 家属：`role=family` 只读角色，邀请码绑定；只能看摘要、训练记录与危机告警，**不得看原始对话全文**。
    - 仍不实现：支付、订阅消息/定时推送、任何医疗诊断结论。
 
@@ -45,11 +46,15 @@ backend/
     api/
       auth.py               # 登录签发 token（wx / demo）
       chat.py               # POST /api/chat 与 /api/chat/stream
-      games.py              # 游戏开始/提交
+      games.py              # 游戏开始/提交（start 可带 difficulty 提示）
       records.py            # 训练记录查询
       memory.py             # 记忆查询/删除
-      family.py             # 家属端只读视图（overview / records / alerts）
+      profile.py            # 画像读写（老人端改称呼与习惯）
+      notes.py              # 老人端读家属留言、标记已读
+      family.py             # 家属端只读视图（overview / records / alerts / note / interest）
       deps.py               # current_user / require_role
+      tts.py  asr.py        # 语音合成 / 语音识别中转
+      greeting.py           # 每日问候语
     agent/
       state.py              # State TypedDict
       graph.py              # StateGraph 组装
@@ -68,26 +73,37 @@ backend/
       store.py              # 记忆读写
       compress.py           # 会话摘要压缩
       scoring.py            # 召回打分（字符二元组）
-      embedding.py          # 本地向量索引，字符+向量混合召回
+      bm25.py               # BM25 召回（切词后打分，与 scoring 一起做混合召回）
     db/
-      models.py             # 6 张表
+      models.py             # 数据表（用户/画像/记忆/会话/记录/家属绑定/留言等）
       session.py            # engine / SessionLocal / to_time
       init_db.py
     services/
-      game_engine.py        # 游戏引擎
+      game_engine.py        # 游戏引擎（start 支持外部传入档位）
+      game_session.py       # 局内会话（内存，单进程）
       difficulty.py         # 难度三级 + 自适应
-      records.py            # 训练记录汇总
+      games/                # 四个题型的注册表与出题实现
+        __init__.py  memory_box.py  category_sort.py  number_seq.py  common_sense.py
+      greeting.py           # 每日问候语生成
+      asr.py  tts_tencent.py  # 腾讯云一句话识别 / 语音合成
+      token.py              # HS256 签发与校验
   scripts/
     seed_demo.py
-    switch_to_mysql.py      # 从 SQLite 迁数据（如需要）
+    eval_recall.py          # 召回评估
+    game_selftest.py        # 题库自检
   tests/
   data/game_items/          # 题库 JSON
   requirements.txt
   .env.example
 miniprogram/
-  app.js  app.json  app.wxss
-  utils/request.js  config.js  user.js  constants.js
-  pages/chat/  pages/game/  pages/records/  pages/memory/  pages/family/
+  app.js  app.json  app.wxss  theme.wxss
+  custom-tab-bar/           # 自定义底栏（说话 / 练习 / 记录）
+  utils/request.js  config.js  user.js  constants.js  taboo.js  format.js
+  pages/chat/  pages/game/  pages/records/  pages/memory/  pages/family/  pages/login/
+  tests/                    # 纯函数单测（node --test，不依赖 wx）
+scripts/
+  check.bat                 # 一键检查（6 步）
+  redline_check.py          # 静态红线（字号/break-all/演示账号/索引规则）
 ```
 
 ## 四、代码规范
@@ -97,6 +113,8 @@ miniprogram/
 - 所有接口请求体和响应体用 Pydantic 模型定义在 `app/api/` 对应文件里，不要裸 dict 进出。
 - 关键分支必须打日志（`logging`，中文消息），记录 `user_id`、动作、耗时。
 - 数据库访问统一走 SQLAlchemy 2.0 风格（`select()`），不写裸 SQL 字符串拼接。
+- 小程序端可测逻辑（文案、格式化、匹配）一律放 `utils/` 的纯函数里，不依赖 `wx`，并在 `miniprogram/tests/` 用 `node --test` 覆盖；页面只调用。
+- 接口地址、超时、鉴权头只在 `utils/config.js` 与 `utils/request.js` 定义一次，页面不得自己拼 `wx.request`。
 
 ## 五、数据库方言兼容要求（关键，别踩）
 
@@ -113,7 +131,9 @@ miniprogram/
 | 数据库 | MySQL 8.0，`127.0.0.1:3306/elder_care`；pytest 用内存 SQLite；两者都必须能用 |
 | 连接串来源 | 只从 `.env` 的 `DATABASE_URL` 读，不在代码里拼账号密码 |
 | 用户 ID 怎么来 | 服务端签发 token 绑定 openid；客户端不得自报 `user_id`；演示期 `DEMO_MODE=1` 可走 `demo_user_1` 后门 |
-| 语音 | ASR 用微信同声传译插件，TTS 用云服务；网络或插件不可用时回退纯文字；音频不落库 |
+| 语音 | ASR 走后端中转腾讯云一句话识别，TTS 用腾讯云；识别或合成不可用时回退纯文字/静默；音频不落库 |
+| 接口地址 | `miniprogram/utils/config.js` 按 `envVersion` 选地址，develop 用局域网 http，trial/release 用正式 HTTPS 域名；登录页长按图标可临时覆盖（仅非 release） |
+| 隐私授权 | 麦克风属隐私接口，`app.json` 声明 `scope.record` 用途，`app.js` 实现 `wx.onNeedPrivacyAuthorization` 弹窗，聊天页录音前先 `wx.requirePrivacyAuthorize` |
 | 提醒 | 只在动作层面支持 `remind`，不实现真实订阅消息推送（如需推送单独立项） |
 | 家属端 | `role=family` 只读账号，邀请码绑定；只看摘要、记录、告警，不看原始对话全文 |
 | 测评 | `start_assessment` 返回一句话说明 + 3 道固定题；不建独立测评模块（题目待补） |
@@ -136,3 +156,4 @@ miniprogram/
 - 不允许为了让测试通过而修改测试预期值。
 - 新增依赖、改接口字段、改表结构，必须先说明理由、影响范围和回滚方式，等我确认后再动。
 - 验收里要求"实际执行并贴出输出"的，必须真跑。环境确实不具备时要如实说明，不得用"编译通过""等价校验"替代运行时结果。
+- 交付前跑 `scripts/check.bat`，六步全过才提交；过程文档（`.requirements/`、`*提示词*.md`、`skill.txt`）不入库、不推远程。

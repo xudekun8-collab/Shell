@@ -20,10 +20,11 @@ HTTP 的 `backend/start_server.bat`（8000 端口）保留不动，两条路并�
 
 ## 小程序要改哪
 
-- `miniprogram/utils/config.js` 的 `base_url` 当前是 `https://127.0.0.1:8443`。
+- `miniprogram/utils/config.js` 按环境给地址：`develop` 用 `LAN_HOST`（局域网 http），`trial` / `release` 用 `API_HOST`（已备案域名 + 正式证书）。交付前把 `API_HOST` 改成实际域名。
+- 临时换地址不用改代码：登录页长按顶部圆形图标可覆盖（存本地 storage，清缓存恢复；release 不开放）。
 - 开发者工具里必须勾选「不校验合法域名」，否则自签证书会被拦。
 - 真机预览不能使用自签证书，必须换成已备案域名 + 正式证书（自签证书在真机微信里会被拦）。
-- 想切回 HTTP 本地调试，把 `base_url` 改成 `http://127.0.0.1:8000` 即可。
+- 语音功能还要在小程序后台「设置-服务内容声明-用户隐私保护指引」声明麦克风，否则真机上录音接口会失败。
 
 ## 备份 / 恢复
 
@@ -61,10 +62,12 @@ curl -k https://127.0.0.1:8443/api/health
 - compose 读取的是 `deploy/.env`，不是 `backend/.env`；`deploy/.env` 从 `deploy/.env.example` 复制并填 `MYSQL_ROOT_PASSWORD`。
 - MySQL 用命名卷 `mysql_data` 持久化，字符集 `utf8mb4`。
 - `api` 通过 `depends_on: mysql: condition: service_healthy` 等 MySQL 就绪。
+- `api` 设置了 `TRUST_PROXY_HEADERS=1`，只信任 Nginx 注入的来源 IP；直连启动保持默认 `0`，避免客户端伪造 `X-Forwarded-For` 绕过绑定限流。
 - nginx 对 `/api/chat/stream` 设了 `proxy_http_version 1.1` + `proxy_buffering off` + `proxy_read_timeout 300s`，否则 SSE 会被缓冲成一次性返回。
 
 ## 常见故障
 
+- **ASR 日志出现 `ConnectError`**：这是后端到腾讯云的 TCP/TLS 连接失败，不是密钥错误。先确认运行后端的机器和进程能直接访问 `https://asr.tencentcloudapi.com`。
 - **8443 被占用**：先 `netstat -ano | findstr :8443` 找到 PID，再 `taskkill /PID <pid> /F`；或改 `start_https.bat` 里的端口。
 - **证书 CN 不匹配**：确认 `gen_cert.bat` 里 `-addext "subjectAltName=IP:127.0.0.1,DNS:localhost"` 生效，访问用 `https://127.0.0.1` 或 `https://localhost`。
 - **SSE 被 nginx 缓冲**：确认 `proxy_buffering off` 与 `proxy_http_version 1.1` 在 location 里，否则流式退化成一次性返回。
